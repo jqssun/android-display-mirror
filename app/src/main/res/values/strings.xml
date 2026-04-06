@@ -1,0 +1,131 @@
+<resources>
+    <string name="app_name">Mirror</string>
+    <string name="accessibility_service_description">Accessibility service for simulating touch events on the secondary screen</string>
+    <string name="go_dark_button">Toggle dark mode</string>
+    <string name="back_button">Back button</string>
+    <string name="home_button">Home button</string>
+
+    <!-- Common -->
+    <string name="exit">Exit</string>
+    <string name="authorize">Authorize</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+    <string name="connect">Connect</string>
+    <string name="settings">Settings</string>
+    <string name="about">About</string>
+    <string name="disable">Disable</string>
+    <string name="bind">Bind</string>
+    <string name="screen_off">Screen off</string>
+    <string name="touchscreen">Touchscreen</string>
+    <string name="touchpad">Touchpad</string>
+    <string name="screen">Screens</string>
+    <string name="width">Width</string>
+    <string name="height">Height</string>
+    <string name="width_label">Width:</string>
+    <string name="height_label">Height:</string>
+    <string name="refresh_rate_label">Refresh rate:</string>
+    <string name="switch_mode">Switch mode</string>
+
+    <!-- Permission status -->
+    <string name="status_not_started">Not started</string>
+    <string name="status_started_not_authorized">Unauthorized, started</string>
+    <string name="status_authorized">Authorized</string>
+    <string name="status_not_authorized">Unauthorized</string>
+    <string name="status_disabled">Disabled</string>
+
+    <!-- activity_touchpad -->
+    <string name="mode_normal">Normal mode</string>
+    <string name="mode_cursor_locked">Cursor locked</string>
+    <string name="touchpad_help_cursor_locked">Cursor is not moved, perform single finger gestures</string>
+    <string name="touchpad_help_move_cursor">Move cursor</string>
+    <string name="touchpad_help_text">Touch in this area:\n- Single finger swipe - %s\n- Single finger tap - click\n- Multi-finger gestures - perform multi-finger gestures\n- Back button - press back on the target screen\n- Home button - open the selected application again\n- Moon button - black display to save power\n- If a Bluetooth controller cannot control the display, try using the moon button to turn off the main screen, which forces the cursor to the secondary display</string>
+
+    <!-- activity_touchscreen -->
+    <string name="exit_vertical">Ex\nit</string>
+    <string name="back_vertical">Ba\nck</string>
+
+    <!-- activity_about -->
+    <string name="about_usage_instructions">About</string>
+    <string name="version_label">Version:</string>
+    <string name="version_format">Version: %1$s (Android %2$s)</string>
+    <string name="version_unknown">Version: Unknown</string>
+    <string name="about_legal_notice">This app uses Sunshine (https://github.com/LizardByte/Sunshine).\n\nThis app uses DisplayLink\u00ae driver to support DisplayLink\u00ae devices. The driver is only used to add compatibility with DisplayLink\u00ae devices and contains no modifications.\n\n- Users should comply with the relevant licensing terms of Synaptics when using DisplayLink\u00ae related features\n- This app has no official association with Synaptics.</string>
+    <string name="export_log_needs_shizuku">Exporting log files requires Shizuku permission</string>
+    <string name="website_label">Website: github.com/jqssun/android-screen-mirror</string>
+
+    <!-- fragment_home -->
+    <string name="shizuku_permission_status">Shizuku:</string>
+
+    <!-- dialog_resolution_settings -->
+    <string name="resolution_explanation">This only controls the output resolution of the DisplayLink chip in the docking station. For USB-C DisplayPort connections, the resolution is determined by Android automatically. For Moonlight wireless projection, resolution and bitrate can be changed in Moonlight\'s settings.</string>
+    <string name="preset_resolution">Preset resolution</string>
+
+    <!-- dialog_manual_client_input -->
+    <string name="ip_address">IP address</string>
+    <string name="ip_hint">The auto-start client will show its IP</string>
+    <string name="port">Port</string>
+    <string name="port_hint">e.g. 42515</string>
+
+    <!-- activity_mirror_settings -->
+    <string name="accessibility_status">Accessibility:</string>
+    <string name="overlay_status">Overlay:</string>
+    <string name="single_app_projection">Single-app projection (can project launcher apps like Microsoft Launcher)</string>
+    <string name="single_app_projection_with_name">Single-app projection: %s</string>
+    <string name="select_projected_app">Select application to project</string>
+    <string name="auto_move_mouse">Automatically move mouse to external display (mouse only works on Android 15 with Shizuku; Bluetooth gamepads and keyboards follow system focus \u2014 use the screen off button to transfer focus)</string>
+    <string name="auto_move_ime">Automatically move keyboard to external display</string>
+    <string name="enable_touchscreen_control">Enable main screen touch control for extended display</string>
+    <string name="dpi_text_size">DPI text size:</string>
+    <string name="auto_rotate">Auto rotate</string>
+    <string name="auto_scale_remove_bars">Auto scale to remove black bars</string>
+    <string name="auto_screen_off">Auto screen off</string>
+    <string name="auto_screen_off_with_warning">Auto screen off (requires using volume keys to wake up)</string>
+    <string name="use_black_image_screen_off">Use black image to simulate screen off</string>
+    <string name="disable_usb_audio">Disable USB audio output</string>
+    <string name="auto_match_aspect_ratio">Automatically adjust main screen aspect ratio to match external display</string>
+    <string name="show_floating_in_mirror_mode">Show floating back button in mirror mode</string>
+    <string name="prevent_auto_lock">Prevent auto-lock (modifies the system screen timeout setting)</string>
+    <string name="no_audio_try_no_remote_submix">Disable REMOTE_SUBMIX to fix audio issues in Moonlight</string>
+    <string name="auto_hide_floating_back">Auto-hide floating back button (single tap to go back; double tap to return to projected app)</string>
+    <string name="auto_connect_moonlight">Auto-connect to Moonlight autostart edition (not compatible with standard Moonlight)</string>
+    <string name="displaylink_resolution_label">DisplayLink output resolution:</string>
+    <string name="change_displaylink_resolution">Change DisplayLink output resolution</string>
+    <string name="note_wireless_display_single_app">- Note: Android\'s built-in wireless display can be used with Shizuku for single-app projection.</string>
+    <string name="note_usb3_no_shizuku">- Note: USB-C DisplayPort displays do not require Shizuku for single-app projection.</string>
+    <string name="settings_apply_next_launch">Changes take effect on next app launch</string>
+    <string name="select_app_title">Select a launcher app such as Microsoft Launcher for the best experience</string>
+    <string name="displaylink_resolution_title">DisplayLink Output Settings</string>
+    <string name="displaylink_output_format">DisplayLink output: %1$dx%2$d@%3$dHz</string>
+    <string name="quick_presets">Quick presets</string>
+    <string name="manual_input">Manual input</string>
+    <string name="manual_input_client_title">Manual input client</string>
+
+    <!-- MirrorMainActivity status -->
+    <string name="status_no_projection_permission">Projection permission not granted. Tap Exit to close.</string>
+    <string name="status_projecting">Projecting. Please disable battery optimization for this app in system settings, and lock the task in the recent apps list to prevent it from being killed. Touch may not work without Shizuku permission.</string>
+    <string name="status_connect_display">Please connect a display. Devices with USB 2.0 should use Moonlight wireless projection or a DisplayLink\u00ae compatible dock.</string>
+
+    <!-- SunshineService notification -->
+    <string name="mirror_app_name">Mirror</string>
+    <string name="sunshine_service_running">Sunshine service is running</string>
+
+    <!-- SunshineServer PIN dialog -->
+    <string name="enter_pin_title">Enter PIN code</string>
+    <string name="enter_pin_message">Enter 4-digit PIN code</string>
+    <string name="encoder_error_title">Failed to configure encoder</string>
+
+    <!-- FetchLogAndShare -->
+    <string name="cannot_start_user_service">Failed to start user service to get logs</string>
+    <string name="grant_file_permission">File permissions required</string>
+    <string name="log_file_not_generated">Log file not generated</string>
+    <string name="share_log_file">Share log file</string>
+    <string name="check_log_file_export">Check if the \'Mirror.log\' file has been exported in the download directory</string>
+
+    <!-- InputRouting Toast -->
+    <string name="need_screen_off_for_touchscreen">Due to Android version limitiation, you need to tap the \'Simulate screen off\' button to use the touchscreen</string>
+
+    <!-- TouchpadActivity Toast -->
+    <string name="show_cursor_failed">Failed to show mouse cursor</string>
+
+</resources>

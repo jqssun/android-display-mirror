@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+    
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:orientation="vertical">
+            
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/shizukuStatusPrefix"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"
+                    android:textSize="16sp"
+                    android:text="@string/shizuku_permission_status" />
+
+                <TextView
+                    android:id="@+id/shizukuStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp" />
+
+                <Button
+                    android:id="@+id/shizukuPermissionBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="@string/authorize"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"
+                    android:textSize="16sp"
+                    android:text="@string/accessibility_status" />
+
+                <TextView
+                    android:id="@+id/accessibilityStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp" />
+
+                <Button
+                    android:id="@+id/accessibilityPermissionBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="@string/authorize"
+                    android:visibility="gone" />
+                
+                <CheckBox
+                    android:id="@+id/disableAccessibilityCheckbox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="@string/disable" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"
+                    android:textSize="16sp"
+                    android:text="@string/overlay_status" />
+
+                <TextView
+                    android:id="@+id/overlayStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp" />
+
+                <Button
+                    android:id="@+id/overlayPermissionBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="@string/authorize"
+                    android:visibility="gone" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <CheckBox
+            android:id="@+id/singleAppModeCheckbox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/single_app_projection"
+            android:textSize="16sp"
+            android:padding="8dp"/>
+
+        <LinearLayout
+            android:id="@+id/singleAppContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <Button
+                android:id="@+id/selectAppButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/select_projected_app"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="16dp"/>
+
+            <CheckBox
+                android:id="@+id/autoBindInputCheckbox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/auto_move_mouse"
+                android:textSize="16sp"
+                android:padding="8dp"/>
+
+            <CheckBox
+                android:id="@+id/autoMoveImeCheckbox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/auto_move_ime"
+                android:textSize="16sp"
+                android:padding="8dp"/>
+
+            <CheckBox
+                android:id="@+id/useTouchscreenCheckbox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/enable_touchscreen_control"
+                android:textSize="16sp"
+                android:padding="8dp"/>
+
+            <LinearLayout
+                android:id="@+id/dpiLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="16dp"
+                android:gravity="center_vertical">
+                
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/dpi_text_size"
+                    android:textSize="16sp"
+                    android:layout_marginEnd="4dp"/>
+                    
+                <EditText
+                    android:id="@+id/dpiEditText"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:hint="160"
+                    android:text="160"/>
+                    
+                <Button
+                    android:id="@+id/dpiConfirmButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="@string/confirm"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <CheckBox
+            android:id="@+id/autoRotateCheckbox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/auto_rotate"
+            android:textSize="16sp"
+            android:padding="8dp"/>
+
+        <CheckBox
+            android:id="@+id/autoScaleCheckbox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/auto_scale_remove_bars"
+            android:textSize="16sp"
+            android:padding="8dp"/>
+
+        <CheckBox
+            android:id="@+id/autoScreenOffCheckbox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/auto_screen_off"
+            android:textSize="16sp"
+            android:padding="8dp"/>
+
+        <CheckBox
+            android:id="@+id/useBlackImageCheckbox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/use_black_image_screen_off"
+            android:textSize="16sp"
+            android:padding="8dp"/>
+
+        <CheckBox
+            android:id="@+id/disableUsbAudioCheckbox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/disable_usb_audio"
+            android:textSize="16sp"
+            android:padding="8dp"/>
+
+        <CheckBox
+            android:id="@+id/autoMatchAspectRatioCheckbox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/auto_match_aspect_ratio"
+            android:textSize="16sp"
+            android:padding="8dp"/>
+
+        <CheckBox
+            android:id="@+id/showFloatingInMirrorModeCheckbox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/show_floating_in_mirror_mode"
+            android:textSize="16sp"
+            android:padding="8dp"/>
+
+        <CheckBox
+            android:id="@+id/preventAutoLockCheckbox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/prevent_auto_lock"
+            android:textSize="16sp"
+            android:padding="8dp"/>
+
+        <CheckBox
+            android:id="@+id/disableRemoteSubmixCheckbox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/no_audio_try_no_remote_submix"
+            android:textSize="16sp"
+            android:padding="8dp"/>
+
+        <CheckBox
+            android:id="@+id/autoHideFloatingCheckbox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/auto_hide_floating_back"
+            android:textSize="16sp"
+            android:padding="8dp"/>
+
+        <CheckBox
+            android:id="@+id/autoConnectClientCheckbox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/auto_connect_moonlight"
+            android:textSize="16sp"
+            android:padding="8dp"/>
+            
+        <LinearLayout
+            android:id="@+id/clientConnectionContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:visibility="gone"
+            android:gravity="center_vertical">
+                
+            <Spinner
+                android:id="@+id/clientSpinner"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"/>
+                
+            <Button
+                android:id="@+id/connectClientButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/connect"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="16dp">
+            
+            <TextView
+                android:id="@+id/currentResolutionText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/displaylink_resolution_label"
+                android:textSize="16sp"
+                android:padding="8dp"/>
+                
+            <Button
+                android:id="@+id/resolutionButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/change_displaylink_resolution"
+                android:textSize="16sp"/>
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/aboutButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/about"
+            android:textSize="16sp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/note_wireless_display_single_app"
+            android:textSize="14sp"
+            android:textColor="#666666"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/note_usb3_no_shizuku"
+            android:textSize="14sp"
+            android:textColor="#666666"/>
+
+    </LinearLayout>
+</ScrollView> 

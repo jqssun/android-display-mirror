@@ -1,0 +1,60 @@
+package android.app;
+
+import android.content.Intent;
+import android.content.IIntentSender;
+import android.content.IIntentReceiver;
+import android.os.Binder;
+import android.os.Bundle;
+import android.os.IBinder;
+import android.os.IInterface;
+
+import java.util.List;
+
+public interface IActivityManager extends IInterface {
+    abstract class Stub extends Binder implements IServiceConnection {
+        public static IActivityManager asInterface(IBinder obj)
+        {
+            throw new RuntimeException("Stub!");
+        }
+    }
+
+    void forceStopPackage(String packageName, int userId);
+    List<ActivityManager.RunningTaskInfo> getTasks(int maxNum);
+    Intent getIntentForIntentSender(IIntentSender sender);
+
+    int startActivityAsUserWithFeature(
+            IApplicationThread caller,
+            String callingPackage,
+            String callingFeatureId,
+            Intent intent,
+            String resolvedType,
+            IBinder resultTo,
+            String resultWho,
+            int requestCode,
+            int flags,
+            ProfilerInfo profilerInfo,
+            Bundle options,
+            int userId);
+
+    int startActivity(IApplicationThread caller, String callingPackage, Intent intent,
+                      String resolvedType, IBinder resultTo, String resultWho, int requestCode,
+                      int flags, ProfilerInfo profilerInfo, Bundle options);
+
+    int sendIntentSender(
+            IIntentSender target,
+            IBinder whitelistToken,
+            int code,
+            Intent intent,
+            String resolvedType,
+            IIntentReceiver finishedReceiver,
+            String requiredPermission,
+            Bundle options);
+
+    IIntentSender getIntentSender(int type, String packageName, IBinder token,
+                                  String resultWho, int requestCode, Intent[] intents, String[] resolvedTypes,
+                                  int flags, Bundle options, int userId);
+    IIntentSender getIntentSenderWithFeature(int type, String packageName, String featureId,
+                                             IBinder token, String resultWho, int requestCode, Intent[] intents,
+                                             String[] resolvedTypes, int flags, Bundle options, int userId);
+
+}

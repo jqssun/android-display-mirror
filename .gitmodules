@@ -1,0 +1,18 @@
+[submodule "app/src/main/cpp/dependencies/libwordexp"]
+	path = app/src/main/cpp/dependencies/libwordexp
+	url = https://github.com/leleliu008/libwordexp.git
+[submodule "app/src/main/cpp/dependencies/moonlight-common-c"]
+	path = app/src/main/cpp/dependencies/moonlight-common-c
+	url = https://github.com/moonlight-stream/moonlight-common-c.git
+[submodule "app/src/main/cpp/dependencies/openssl-cmake"]
+	path = app/src/main/cpp/dependencies/openssl-cmake
+	url = https://github.com/viaduck/openssl-cmake
+[submodule "app/src/main/cpp/dependencies/nanors"]
+	path = app/src/main/cpp/dependencies/nanors
+	url = https://github.com/sleepybishop/nanors.git
+[submodule "app/src/main/cpp/dependencies/Simple-Web-Server"]
+	path = app/src/main/cpp/dependencies/Simple-Web-Server
+	url = https://gitlab.com/eidheim/Simple-Web-Server.git
+[submodule "app/src/main/cpp/dependencies/opus"]
+	path = app/src/main/cpp/dependencies/opus
+	url = https://github.com/xiph/opus.git
