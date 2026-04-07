@@ -30,30 +30,28 @@ public class SunshineAudio {
             int framesPerPacket = (int) (48000 * packetDuration / 1000.0f);
             AudioRecordProxy audioRecordProxy = new AudioRecordProxy();
             if (!startRecording()) {
-                State.log("Failed to start audio recording");
-                return true;
-            }
-            SunshineServer.startAudioRecording(audioRecordProxy, framesPerPacket);
-        } else {
-            if (sendAudioUseNormalPermission(context, packetDuration)) {
-                return true;
-            }
-            // check audio settings permission
-            if (context.checkSelfPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS)
-                    != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                State.log("No audio control permission, cannot mute");
-            }
-            AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-            audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_MUTE, 0);
-            if (audioManager.isStreamMute(AudioManager.STREAM_MUSIC)) {
-                isMuted = true;
-                State.log("Muting phone audio at client's request");
-                // register volume change listener
-                registerVolumeChangeListener(context, audioManager);
+                State.log("Failed to start audio recording via Shizuku, falling back to normal audio");
             } else {
-                State.log("Failed to set mute");
+                SunshineServer.startAudioRecording(audioRecordProxy, framesPerPacket);
+                return false;
             }
-            return false;
+        }
+        if (sendAudioUseNormalPermission(context, packetDuration)) {
+            return true;
+        }
+        // check audio settings permission
+        if (context.checkSelfPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS)
+                != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            State.log("No audio control permission, cannot mute");
+        }
+        AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_MUTE, 0);
+        if (audioManager.isStreamMute(AudioManager.STREAM_MUSIC)) {
+            isMuted = true;
+            State.log("Muting phone audio at client's request");
+            registerVolumeChangeListener(context, audioManager);
+        } else {
+            State.log("Failed to set mute");
         }
         return false;
     }

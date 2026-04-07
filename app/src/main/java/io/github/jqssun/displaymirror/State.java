@@ -155,13 +155,14 @@ public class State {
         }
     }
 
+    private static int _logVersion = 0;
+    public static final MutableLiveData<Integer> logVersion = new MutableLiveData<>(0);
+
     public static void log(String message) {
         logs.add(message);
         Log.i("ConnectScreen", message);
-        if (currentActivity != null && currentActivity.get() != null) {
-            IMainActivity  mainActivity = (IMainActivity) currentActivity.get();
-            mainActivity.updateLogs();
-        }
+        _logVersion++;
+        logVersion.postValue(_logVersion);
     }
 
     public static MediaProjection getMediaProjection() {
@@ -227,7 +228,11 @@ public class State {
     }
 
     public static void bindUserService() {
-        Shizuku.peekUserService(State.userServiceArgs, State.userServiceConnection);
-        Shizuku.bindUserService(State.userServiceArgs, State.userServiceConnection);
+        try {
+            Shizuku.peekUserService(State.userServiceArgs, State.userServiceConnection);
+            Shizuku.bindUserService(State.userServiceArgs, State.userServiceConnection);
+        } catch (Exception e) {
+            State.log("bindUserService failed: " + e.getMessage());
+        }
     }
 }

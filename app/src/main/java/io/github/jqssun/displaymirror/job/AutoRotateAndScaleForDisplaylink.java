@@ -22,7 +22,6 @@ import io.github.jqssun.displaymirror.DisplaylinkState;
 import io.github.jqssun.displaymirror.FloatingButtonService;
 import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.State;
-import io.github.jqssun.displaymirror.MirrorSettingsActivity;
 
 import java.nio.ByteBuffer;
 

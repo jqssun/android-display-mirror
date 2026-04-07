@@ -12,7 +12,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.view.Surface;
 
-import io.github.jqssun.displaymirror.MirrorSettingsActivity;
 import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.SunshineService;
 import io.github.jqssun.displaymirror.shizuku.ServiceUtils;

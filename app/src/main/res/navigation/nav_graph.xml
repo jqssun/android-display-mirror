@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/overview_fragment">
+
+    <fragment
+        android:id="@+id/overview_fragment"
+        android:name="io.github.jqssun.displaymirror.OverviewFragment"
+        android:label="@string/tab_overview" />
+
+    <fragment
+        android:id="@+id/logs_fragment"
+        android:name="io.github.jqssun.displaymirror.LogsFragment"
+        android:label="@string/tab_logs" />
+
+    <fragment
+        android:id="@+id/displaylink_fragment"
+        android:name="io.github.jqssun.displaymirror.DisplayLinkFragment"
+        android:label="@string/tab_displaylink" />
+
+    <fragment
+        android:id="@+id/settings_fragment"
+        android:name="io.github.jqssun.displaymirror.SettingsFragment"
+        android:label="@string/tab_settings" />
+
+</navigation>

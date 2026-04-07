@@ -20,7 +20,6 @@ import android.opengl.EGLDisplay;
 import android.opengl.GLES20;
 
 import io.github.jqssun.displaymirror.FloatingButtonService;
-import io.github.jqssun.displaymirror.MirrorSettingsActivity;
 import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.State;
 import io.github.jqssun.displaymirror.SunshineService;

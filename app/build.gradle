@@ -18,8 +18,8 @@ android {
         applicationId "io.github.jqssun.displaymirror"
         minSdk 28
         targetSdk 34
-        versionCode 2
-        versionName "0.0.2"
+        versionCode 3
+        versionName "0.0.3"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -77,6 +77,9 @@ dependencies {
     implementation project(':hidden-api-stub')
 
     implementation "com.github.topjohnwu.libsu:core:6.0.0"
+    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'androidx.navigation:navigation-fragment:2.7.7'
+    implementation 'androidx.navigation:navigation-ui:2.7.7'
     implementation 'androidx.recyclerview:recyclerview:1.3.2'
     implementation 'androidx.fragment:fragment:1.6.2'
     implementation 'androidx.core:core-ktx:1.8.0'

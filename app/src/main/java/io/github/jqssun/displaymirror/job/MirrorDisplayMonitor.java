@@ -19,7 +19,6 @@ import android.view.Display;
 import android.view.Surface;
 
 import io.github.jqssun.displaymirror.MirrorMainActivity;
-import io.github.jqssun.displaymirror.MirrorSettingsActivity;
 import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.State;
 import io.github.jqssun.displaymirror.SunshineService;
