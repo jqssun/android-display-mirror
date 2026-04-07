@@ -1,4 +1,3 @@
-*.iml
 .gradle
 /local.properties
 /.idea
@@ -10,10 +9,3 @@ app/build
 local.properties
 /app/release
 /hidden-api-stub/bin
-
-.tmp
-app/src/main/jniLibs/*/libAndroidDLM.so
-app/src/main/jniLibs/*/libDisplayLinkManager.so
-app/src/main/jniLibs/*/libusb_android.so
-app/src/main/assets/*-dock-release.spkg
-app/src/main/assets/*-monitor-release.spkg

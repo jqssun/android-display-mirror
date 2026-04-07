@@ -72,6 +72,24 @@
                 android:layout_gravity="center_horizontal"
                 android:textSize="24sp"
                 android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/downloadApkBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/auto_import_displaylink_libs"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/importApkBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/manual_import_displaylink_libs"
+                android:visibility="gone" />
         </LinearLayout>
     </ScrollView>
 

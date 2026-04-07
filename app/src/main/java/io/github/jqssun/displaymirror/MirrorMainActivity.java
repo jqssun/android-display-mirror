@@ -10,11 +10,13 @@ import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionConfig;
 import android.media.projection.MediaProjectionManager;
 import android.os.Build;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -46,6 +48,7 @@ public class MirrorMainActivity extends AppCompatActivity implements IMainActivi
 
     public static final int REQUEST_CODE_MEDIA_PROJECTION = 1001;
     public static final int REQUEST_RECORD_AUDIO_PERMISSION = 1002;
+    public static final int REQUEST_IMPORT_APK = 1003;
     public static final String TAG = "MirrorMainActivity";
 
     private RecyclerView logRecyclerView;
@@ -58,6 +61,8 @@ public class MirrorMainActivity extends AppCompatActivity implements IMainActivi
     Button screenOffBtn;
     Button touchScreenBtn;
     Button exitBtn;
+    Button downloadApkBtn;
+    Button importApkBtn;
     TextView mirrorStatus;
 
     @Override
@@ -147,6 +152,8 @@ public class MirrorMainActivity extends AppCompatActivity implements IMainActivi
         screenOffBtn = findViewById(R.id.screenOffBtn);
         touchScreenBtn = findViewById(R.id.touchScreenBtn);
         exitBtn = findViewById(R.id.exitBtn);
+        downloadApkBtn = findViewById(R.id.downloadApkBtn);
+        importApkBtn = findViewById(R.id.importApkBtn);
         mirrorStatus = findViewById(R.id.mirrorStatus);
         
         refresh();
@@ -180,6 +187,43 @@ public class MirrorMainActivity extends AppCompatActivity implements IMainActivi
             }
         });
 
+        downloadApkBtn.setOnClickListener(v -> {
+            downloadApkBtn.setEnabled(false);
+            downloadApkBtn.setText(R.string.downloading_displaylink);
+            String url = Pref.getDisplaylinkApkUrl();
+            new Thread(() -> {
+                try {
+                    String err = ApkImporter.downloadAndImport(this, url);
+                    runOnUiThread(() -> {
+                        downloadApkBtn.setEnabled(true);
+                        downloadApkBtn.setText(R.string.auto_import_displaylink_libs);
+                        if (err == null) {
+                            Toast.makeText(this, R.string.import_success, Toast.LENGTH_SHORT).show();
+                            State.log("DisplayLink libraries downloaded and imported successfully");
+                        } else {
+                            Toast.makeText(this, getString(R.string.import_failed, err), Toast.LENGTH_LONG).show();
+                            State.log("Download import error: " + err);
+                        }
+                        refresh();
+                    });
+                } catch (Exception e) {
+                    runOnUiThread(() -> {
+                        downloadApkBtn.setEnabled(true);
+                        downloadApkBtn.setText(R.string.auto_import_displaylink_libs);
+                        Toast.makeText(this, getString(R.string.import_failed, e.getMessage()), Toast.LENGTH_LONG).show();
+                        State.log("Download exception: " + e.getMessage());
+                    });
+                }
+            }).start();
+        });
+
+        importApkBtn.setOnClickListener(v -> {
+            Intent pick = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            pick.setType("application/vnd.android.package-archive");
+            pick.addCategory(Intent.CATEGORY_OPENABLE);
+            startActivityForResult(pick, REQUEST_IMPORT_APK);
+        });
+
         exitBtn.setOnClickListener(v -> {
             if (AutoRotateAndScaleForDisplaylink.instance != null) {
                 AutoRotateAndScaleForDisplaylink.instance.release();
@@ -211,6 +255,28 @@ public class MirrorMainActivity extends AppCompatActivity implements IMainActivi
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
        
+        if (requestCode == REQUEST_IMPORT_APK) {
+            if (resultCode == RESULT_OK && data != null) {
+                Uri uri = data.getData();
+                if (uri != null) {
+                    try {
+                        String err = ApkImporter.importFromApk(this, uri);
+                        if (err == null) {
+                            Toast.makeText(this, R.string.import_success, Toast.LENGTH_SHORT).show();
+                            State.log("DisplayLink APK imported successfully");
+                        } else {
+                            Toast.makeText(this, getString(R.string.import_failed, err), Toast.LENGTH_LONG).show();
+                            State.log("APK import error: " + err);
+                        }
+                    } catch (Exception e) {
+                        Toast.makeText(this, getString(R.string.import_failed, e.getMessage()), Toast.LENGTH_LONG).show();
+                        State.log("APK import exception: " + e.getMessage());
+                    }
+                    refresh();
+                }
+            }
+            return;
+        }
         if (requestCode == REQUEST_CODE_MEDIA_PROJECTION) {
             if (resultCode == RESULT_OK && data != null) {
                 State.log("User granted screen projection permission");
@@ -289,16 +355,20 @@ public class MirrorMainActivity extends AppCompatActivity implements IMainActivi
             settingsBtn.setVisibility(View.VISIBLE);
             screenOffBtn.setVisibility(View.GONE);
             touchScreenBtn.setVisibility(View.GONE);
+            downloadApkBtn.setVisibility(View.GONE);
+            importApkBtn.setVisibility(View.GONE);
             return;
         }
         mirrorStatus.setText(state.mirrorStatusText);
         mirrorStatus.setVisibility(View.VISIBLE);
-        
+
         settingsBtn.setVisibility(state.settingsBtnVisibility ? View.VISIBLE : View.GONE);
         screenOffBtn.setText(R.string.screen_off);
         screenOffBtn.setVisibility(state.screenOffBtnVisibility ? View.VISIBLE : View.GONE);
         touchScreenBtn.setVisibility(state.touchScreenBtnVisibility ? View.VISIBLE : View.GONE);
-        
+        downloadApkBtn.setVisibility(state.downloadApkBtnVisibility ? View.VISIBLE : View.GONE);
+        importApkBtn.setVisibility(state.importApkBtnVisibility ? View.VISIBLE : View.GONE);
+
         if (state.touchScreenBtnVisibility) {
             touchScreenBtn.setText(state.touchScreenBtnText);
         }
@@ -344,6 +414,11 @@ public class MirrorMainActivity extends AppCompatActivity implements IMainActivi
             newUiState.settingsBtnVisibility = true;
             newUiState.screenOffBtnVisibility = false;
             newUiState.touchScreenBtnVisibility = false;
+            if (!ApkImporter.areLibsImported(this)) {
+                newUiState.downloadApkBtnVisibility = true;
+                newUiState.importApkBtnVisibility = true;
+                newUiState.mirrorStatusText += "\n\n" + getString(R.string.import_displaylink_libs_prompt);
+            }
         }
 
         State.uiState.setValue(newUiState);

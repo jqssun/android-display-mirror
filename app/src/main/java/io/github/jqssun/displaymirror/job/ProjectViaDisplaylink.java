@@ -24,6 +24,8 @@ import io.github.jqssun.displaymirror.State;
 import io.github.jqssun.displaymirror.DisplaylinkState;
 import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
 
+import io.github.jqssun.displaymirror.ApkImporter;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -60,6 +62,13 @@ public class ProjectViaDisplaylink implements Job {
             displaylinkState.destroy();
         }
 
+        if (!ApkImporter.areLibsImported(context)) {
+            State.showErrorStatus("DisplayLink libraries not imported. Please import the DisplayLink APK first.");
+            return;
+        }
+        NativeDriver.load(ApkImporter.jniLibDir(context));
+        copyFirmwares(context);
+
         if (!requestUsbPermission(context, usbManager, displaylinkState.device)) {
             return;
         }
@@ -67,7 +76,6 @@ public class ProjectViaDisplaylink implements Job {
             return;
         }
         openUsbConnection(context, usbManager, displaylinkState);
-        copyFirmwares(context);
         if (!initializeNativeDriver(context, displaylinkState)) {
             return;
         }
@@ -119,34 +127,31 @@ public class ProjectViaDisplaylink implements Job {
     }
 
     private void copyFirmwares(Context context) {
-        try {
-            String[] files = context.getAssets().list("");
-            if (files == null) {
-                return;
+        File srcDir = ApkImporter.assetsDir(context);
+        if (!srcDir.exists()) {
+            State.log("No imported firmware directory found");
+            return;
+        }
+        File[] files = srcDir.listFiles();
+        if (files == null) return;
+        for (File src : files) {
+            if (!src.getName().endsWith(".spkg")) continue;
+            File dst = new File(context.getFilesDir(), src.getName());
+            if (dst.exists() && dst.length() > 0) {
+                State.log("Firmware file already exists, skipping: " + src.getName());
+                continue;
             }
-            for (String file : files) {
-                if (!file.endsWith(".spkg")) {
-                    continue;
+            try (InputStream in = new java.io.FileInputStream(src);
+                 FileOutputStream out = new FileOutputStream(dst)) {
+                byte[] buf = new byte[4096];
+                int n;
+                while ((n = in.read(buf)) != -1) {
+                    out.write(buf, 0, n);
                 }
-                File targetFile = new File(context.getFilesDir(), file);
-                if (targetFile.exists() && targetFile.length() > 0) {
-                    State.log("Firmware file already exists, skipping: " + file);
-                    continue;
-                }
-                try (InputStream in = context.getAssets().open(file);
-                     FileOutputStream out = context.openFileOutput(file, Context.MODE_PRIVATE)) {
-                    byte[] buffer = new byte[4096];
-                    int read;
-                    while ((read = in.read(buffer)) != -1) {
-                        out.write(buffer, 0, read);
-                    }
-                    State.log("Successfully copied firmware file: " + file);
-                } catch (IOException e) {
-                    State.log("Failed to copy firmware file: " + file + ", error: " + e.getMessage());
-                }
+                State.log("Successfully copied firmware file: " + src.getName());
+            } catch (IOException e) {
+                State.log("Failed to copy firmware file: " + src.getName() + ", error: " + e.getMessage());
             }
-        } catch (IOException e) {
-            State.log("Failed to copy firmware: " + e.getMessage());
         }
     }
 

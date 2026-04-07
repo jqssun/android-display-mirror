@@ -306,6 +306,19 @@ public class MirrorSettingsActivity extends AppCompatActivity {
         disableRemoteSubmixCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
             preferences.edit().putBoolean(Pref.KEY_DISABLE_REMOTE_SUBMIX, isChecked).apply();
         });
+
+        EditText apkUrlEditText = findViewById(R.id.apkUrlEditText);
+        apkUrlEditText.setText(Pref.getDisplaylinkApkUrl());
+        apkUrlEditText.setOnFocusChangeListener((v, hasFocus) -> {
+            if (!hasFocus) {
+                String url = apkUrlEditText.getText().toString().trim();
+                if (url.isEmpty()) {
+                    url = Pref.DEFAULT_DISPLAYLINK_APK_URL;
+                    apkUrlEditText.setText(url);
+                }
+                preferences.edit().putString(Pref.KEY_DISPLAYLINK_APK_URL, url).apply();
+            }
+        });
     }
 
     @Override

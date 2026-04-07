@@ -3,12 +3,20 @@ package com.displaylink.manager;
 import android.util.Log;
 import android.view.Surface;
 import com.displaylink.manager.display.DisplayMode;
+import java.io.File;
 import java.nio.ByteBuffer;
 
 public class NativeDriver {
-    static {
-        System.loadLibrary("DisplayLinkManager");
-        Log.i("displaylink", "loaded DisplayLinkManager");
+    private static boolean loaded = false;
+
+    public static void load(File libDir) {
+        if (loaded) return;
+        // load dependencies first, then the main lib
+        System.load(new File(libDir, "libusb_android.so").getAbsolutePath());
+        System.load(new File(libDir, "libAndroidDLM.so").getAbsolutePath());
+        System.load(new File(libDir, "libDisplayLinkManager.so").getAbsolutePath());
+        loaded = true;
+        Log.i("displaylink", "loaded DisplayLinkManager from " + libDir);
     }
 
     public native int create(NativeDriverListener nativeDriverListener, String str, boolean z);

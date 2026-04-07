@@ -90,7 +90,7 @@
     <string name="auto_hide_floating_back">Auto-hide floating back button (single tap to go back; double tap to return to projected app)</string>
     <string name="auto_connect_moonlight">Auto-connect to Moonlight autostart edition (not compatible with standard Moonlight)</string>
     <string name="displaylink_resolution_label">DisplayLink output resolution:</string>
-    <string name="change_displaylink_resolution">Change DisplayLink output resolution</string>
+    <string name="change_displaylink_resolution">Change DisplayLink output settings</string>
     <string name="note_wireless_display_single_app">- Note: Android\'s built-in wireless display can be used with Shizuku for single-app projection.</string>
     <string name="note_usb3_no_shizuku">- Note: USB-C DisplayPort displays do not require Shizuku for single-app projection.</string>
     <string name="settings_apply_next_launch">Changes take effect on next app launch</string>
@@ -104,7 +104,7 @@
     <!-- MirrorMainActivity status -->
     <string name="status_no_projection_permission">Projection permission not granted. Tap Exit to close.</string>
     <string name="status_projecting">Projecting. Please disable battery optimization for this app in system settings, and lock the task in the recent apps list to prevent it from being killed. Touch may not work without Shizuku permission.</string>
-    <string name="status_connect_display">Please connect a display. Devices with USB 2.0 should use Moonlight wireless projection or a DisplayLink\u00ae compatible dock.</string>
+    <string name="status_connect_display">Please connect a display. Devices with USB 2.0 should use Moonlight wireless projection or a DisplayLink compatible dock.</string>
 
     <!-- SunshineService notification -->
     <string name="mirror_app_name">Mirror</string>
@@ -127,5 +127,15 @@
 
     <!-- TouchpadActivity Toast -->
     <string name="show_cursor_failed">Failed to show mouse cursor</string>
+
+    <!-- APK Import -->
+    <string name="auto_import_displaylink_libs">Automatically download and import DisplayLink libraries</string>
+    <string name="manual_import_displaylink_libs">Manually import DisplayLink libraries from APK</string>
+    <string name="import_displaylink_libs_prompt">DisplayLink libraries not found. Import the DisplayLink Presenter Android application package (APK) to enable USB display support.</string>
+    <string name="import_success">DisplayLink libraries imported successfully</string>
+    <string name="import_failed">Import failed: %s</string>
+    <string name="downloading_displaylink">Downloading DisplayLink libraries...</string>
+    <string name="displaylink_apk_url_label">Custom DisplayLink Presenter app download URL:</string>
+    <string name="displaylink_apk_url_hint">Enter custom download URL</string>
 
 </resources>

@@ -7,4 +7,6 @@ public class MirrorUiState {
     public boolean touchScreenBtnVisibility;
     public String touchScreenBtnText;
     public String errorStatusText;
+    public boolean downloadApkBtnVisibility;
+    public boolean importApkBtnVisibility;
 } 
