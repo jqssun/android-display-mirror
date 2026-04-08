@@ -1,6 +1,5 @@
 package io.github.jqssun.displaymirror.job;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -10,7 +9,6 @@ import android.hardware.usb.UsbManager;
 
 import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.State;
-import io.github.jqssun.displaymirror.SunshineService;
 
 public class MirrorDisplaylinkMonitor {
 

@@ -334,16 +334,13 @@ public class SunshineService extends Service {
             kpg.initialize(2048);
             java.security.KeyPair kp = kpg.generateKeyPair();
 
-            org.bouncycastle.x509.X509V3CertificateGenerator certGen = new org.bouncycastle.x509.X509V3CertificateGenerator();
             javax.security.auth.x500.X500Principal dn = new javax.security.auth.x500.X500Principal("CN=Mirror");
-            certGen.setSerialNumber(java.math.BigInteger.valueOf(System.currentTimeMillis()));
-            certGen.setSubjectDN(dn);
-            certGen.setIssuerDN(dn);
-            certGen.setNotBefore(new java.util.Date(System.currentTimeMillis() - 86400000L));
-            certGen.setNotAfter(new java.util.Date(System.currentTimeMillis() + 20L * 365 * 86400000L));
-            certGen.setPublicKey(kp.getPublic());
-            certGen.setSignatureAlgorithm("SHA256WithRSAEncryption");
-            java.security.cert.X509Certificate cert = certGen.generate(kp.getPrivate());
+            java.util.Date notBefore = new java.util.Date(System.currentTimeMillis() - 86400000L);
+            java.util.Date notAfter = new java.util.Date(System.currentTimeMillis() + 20L * 365 * 86400000L);
+            org.bouncycastle.cert.X509v3CertificateBuilder certBuilder = new org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder(
+                    dn, java.math.BigInteger.valueOf(System.currentTimeMillis()), notBefore, notAfter, dn, kp.getPublic());
+            org.bouncycastle.operator.ContentSigner signer = new org.bouncycastle.operator.jcajce.JcaContentSignerBuilder("SHA256WithRSAEncryption").build(kp.getPrivate());
+            java.security.cert.X509Certificate cert = new org.bouncycastle.cert.jcajce.JcaX509CertificateConverter().getCertificate(certBuilder.build(signer));
 
             String certPem = "-----BEGIN CERTIFICATE-----\n"
                     + android.util.Base64.encodeToString(cert.getEncoded(), android.util.Base64.DEFAULT)

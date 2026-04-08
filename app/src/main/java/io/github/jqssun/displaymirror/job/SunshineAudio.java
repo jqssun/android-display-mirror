@@ -26,17 +26,17 @@ public class SunshineAudio {
     private static boolean isMuted = false;
     private static AudioManager.OnAudioFocusChangeListener volumeChangeListener;
     public static boolean sendAudio(Context context, int packetDuration) throws YieldException {
-        if (shouldUseShizukuAudio()) {
+        if (_shouldUseShizukuAudio()) {
             int framesPerPacket = (int) (48000 * packetDuration / 1000.0f);
             AudioRecordProxy audioRecordProxy = new AudioRecordProxy();
-            if (!startRecording()) {
+            if (!_startRecording()) {
                 State.log("Failed to start audio recording via Shizuku, falling back to normal audio");
             } else {
                 SunshineServer.startAudioRecording(audioRecordProxy, framesPerPacket);
                 return false;
             }
         }
-        if (sendAudioUseNormalPermission(context, packetDuration)) {
+        if (_sendAudioUseNormalPermission(context, packetDuration)) {
             return true;
         }
         // check audio settings permission
@@ -49,7 +49,7 @@ public class SunshineAudio {
         if (audioManager.isStreamMute(AudioManager.STREAM_MUSIC)) {
             isMuted = true;
             State.log("Muting phone audio at client's request");
-            registerVolumeChangeListener(context, audioManager);
+            _registerVolumeChangeListener(context, audioManager);
         } else {
             State.log("Failed to set mute");
         }
@@ -57,13 +57,13 @@ public class SunshineAudio {
     }
 
     // register volume change listener method
-    private static void registerVolumeChangeListener(Context context, AudioManager audioManager) {
+    private static void _registerVolumeChangeListener(Context context, AudioManager audioManager) {
 
         // create audio focus change listener
         volumeChangeListener = focusChange -> {
             // if still projecting and should stay muted, check and re-mute
             if (State.mirrorVirtualDisplay != null && isMuted) {
-                checkAndRestoreMute();
+                _checkAndRestoreMute();
             }
         };
 
@@ -82,7 +82,7 @@ public class SunshineAudio {
                         super.onChange(selfChange);
                         // if still projecting and should stay muted, check and re-mute
                         if (State.mirrorVirtualDisplay != null && isMuted) {
-                            checkAndRestoreMute();
+                            _checkAndRestoreMute();
                         }
                     }
                 }
@@ -90,7 +90,7 @@ public class SunshineAudio {
     }
 
     // check and restore mute state
-    private static void checkAndRestoreMute() {
+    private static void _checkAndRestoreMute() {
         Context context = State.getContext();
         if (context == null) {
             return;
@@ -102,14 +102,14 @@ public class SunshineAudio {
         }
     }
 
-    private static boolean shouldUseShizukuAudio() {
+    private static boolean _shouldUseShizukuAudio() {
         if (Pref.getDisableRemoteSubmix()) {
             return false;
         }
         return State.userService != null && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S;
     }
 
-    private static boolean startRecording() {
+    private static boolean _startRecording() {
         try {
             return State.userService.startRecordingAudio();
         } catch (RemoteException e) {
@@ -117,7 +117,7 @@ public class SunshineAudio {
         }
     }
 
-    private static boolean sendAudioUseNormalPermission(Context context, int packetDuration) throws YieldException {
+    private static boolean _sendAudioUseNormalPermission(Context context, int packetDuration) throws YieldException {
         if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.Q) {
             State.log("Android version too low for audio recording");
             return false;

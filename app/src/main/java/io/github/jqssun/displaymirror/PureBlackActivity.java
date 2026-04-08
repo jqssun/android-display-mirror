@@ -1,5 +1,6 @@
 package io.github.jqssun.displaymirror;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -9,7 +10,6 @@ import android.hardware.input.IInputManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.RemoteException;
 import android.view.Display;
 import android.view.InputDevice;
 import android.view.MotionEvent;
@@ -18,15 +18,12 @@ import android.view.Surface;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.KeyEvent;
-import android.content.BroadcastReceiver;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import io.github.jqssun.displaymirror.job.CreateVirtualDisplay;
 import io.github.jqssun.displaymirror.shizuku.ServiceUtils;
 import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
-import io.github.jqssun.displaymirror.shizuku.SurfaceControl;
 
 import dev.rikka.tools.refine.Refine;
 
@@ -66,7 +63,6 @@ public class PureBlackActivity extends AppCompatActivity {
             window.setDecorFitsSystemWindows(false);
         }
 
-        // support display cutout
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             WindowManager.LayoutParams layoutParams = window.getAttributes();
             layoutParams.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
@@ -93,7 +89,7 @@ public class PureBlackActivity extends AppCompatActivity {
         DisplayManager displayManager = (DisplayManager) getSystemService(DISPLAY_SERVICE);
 
         view.setOnTouchListener((v, event) -> {
-            if (isExternalDevice(event)) {
+            if (_isExternalDevice(event)) {
                 Display targetDisplay = displayManager.getDisplay(State.lastSingleAppDisplay);
                 if (targetDisplay == null)
                     return true;
@@ -164,7 +160,7 @@ public class PureBlackActivity extends AppCompatActivity {
         State.isInPureBlackActivity = null;
     }
 
-    private boolean isExternalDevice(MotionEvent event) {
+    private boolean _isExternalDevice(MotionEvent event) {
         if (!hasShizukuPermission) {
             return false;
         }

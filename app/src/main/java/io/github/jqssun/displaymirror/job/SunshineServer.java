@@ -6,12 +6,13 @@ import android.hardware.display.DisplayManager;
 import android.hardware.input.IInputManager;
 import android.os.Handler;
 import android.os.Looper;
-import android.app.AlertDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import android.content.Context;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.text.InputFilter;
 import android.text.InputType;
+import android.widget.FrameLayout;
 import android.util.Log;
 import android.view.Display;
 import android.view.DisplayCutout;
@@ -20,7 +21,7 @@ import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.MotionEventHidden;
 import android.view.Surface;
-import android.widget.EditText;
+
 import android.widget.Toast;
 import android.media.AudioRecord;
 import android.media.AudioManager;
@@ -68,20 +69,24 @@ public class SunshineServer {
                 return;
             }
             
-            final EditText input = new EditText(context);
+            com.google.android.material.textfield.TextInputLayout inputLayout = new com.google.android.material.textfield.TextInputLayout(context, null, com.google.android.material.R.attr.textInputOutlinedStyle);
+            com.google.android.material.textfield.TextInputEditText input = new com.google.android.material.textfield.TextInputEditText(inputLayout.getContext());
             input.setInputType(InputType.TYPE_CLASS_NUMBER);
             input.setText(pinCandidate);
-            InputFilter[] filters = new InputFilter[1];
-            filters[0] = new InputFilter.LengthFilter(4);
-            input.setFilters(filters);
-            
+            input.setFilters(new InputFilter[]{ new InputFilter.LengthFilter(4) });
+            inputLayout.addView(input);
+            int pad = (int)(16 * context.getResources().getDisplayMetrics().density);
+            FrameLayout container = new FrameLayout(context);
+            container.setPadding(pad, 0, pad, 0);
+            container.addView(inputLayout);
+
             if (suppressPin != null) {
                 submitPin(suppressPin);
             } else {
-                AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                builder.setTitle(R.string.enter_pin_title)
+                new MaterialAlertDialogBuilder(context)
+                        .setTitle(R.string.enter_pin_title)
                         .setMessage(context.getString(R.string.enter_pin_message))
-                        .setView(input)
+                        .setView(container)
                         .setPositiveButton(R.string.ok, (dialog, which) -> {
                             String pin = input.getText().toString();
                             if (pin.length() == 4) {
@@ -146,7 +151,7 @@ public class SunshineServer {
                 return;
             }
             
-            new AlertDialog.Builder(context)
+            new MaterialAlertDialogBuilder(context)
                 .setTitle(R.string.encoder_error_title)
                 .setMessage(errorMessage)
                 .setPositiveButton(R.string.ok, (dialog, which) -> {

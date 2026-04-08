@@ -4,14 +4,12 @@ import android.content.Context;
 import android.hardware.display.DisplayManager;
 import android.view.Surface;
 
-
 import io.github.jqssun.displaymirror.FloatingButtonService;
 import io.github.jqssun.displaymirror.MirrorMainActivity;
 import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.State;
 import io.github.jqssun.displaymirror.shizuku.ServiceUtils;
 import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
-
 
 public class ProjectViaMoonlight implements Job {
     private final int width;
@@ -33,7 +31,7 @@ public class ProjectViaMoonlight implements Job {
 
     @Override
     public void start() throws YieldException {
-        if (!requestMediaProjectionPermission()) {
+        if (!_requestMediaProjectionPermission()) {
             return;
         }
         Context context = State.getContext();
@@ -81,7 +79,7 @@ public class ProjectViaMoonlight implements Job {
     }
 
 
-    private boolean requestMediaProjectionPermission() throws YieldException {
+    private boolean _requestMediaProjectionPermission() throws YieldException {
         if (State.mirrorVirtualDisplay != null) {
             return true;
         }

@@ -65,7 +65,7 @@ public class ApkImporter {
                 return "Download failed: HTTP " + conn.getResponseCode();
             }
             long downloaded = 0;
-            int lastMb = -1;
+            int lastHundredths = -1;
             try (InputStream is = conn.getInputStream();
                  FileOutputStream fos = new FileOutputStream(tmp)) {
                 byte[] buf = new byte[8192];
@@ -74,10 +74,10 @@ public class ApkImporter {
                     fos.write(buf, 0, n);
                     downloaded += n;
                     if (onProgress != null) {
-                        int mb = (int)(downloaded / (1024 * 1024));
-                        if (mb != lastMb) {
-                            lastMb = mb;
-                            onProgress.accept(mb);
+                        int hundredths = (int)(downloaded * 100 / (1024 * 1024));
+                        if (hundredths != lastHundredths) {
+                            lastHundredths = hundredths;
+                            onProgress.accept(hundredths);
                         }
                     }
                 }

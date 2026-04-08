@@ -3,14 +3,16 @@ package io.github.jqssun.displaymirror;
 import static android.opengl.GLES11Ext.GL_TEXTURE_EXTERNAL_OES;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.SurfaceTexture;
 import android.hardware.display.DisplayManager;
 import android.hardware.input.IInputManager;
+import android.opengl.EGL14;
 import android.opengl.EGLConfig;
+import android.opengl.EGLDisplay;
 import android.opengl.EGLSurface;
+import android.opengl.GLES20;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -22,23 +24,15 @@ import android.view.MotionEventHidden;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.opengl.EGL14;
-import android.opengl.EGLDisplay;
-import android.opengl.GLES20;
 import android.view.Window;
 import android.view.WindowManager;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import io.github.jqssun.displaymirror.job.CreateVirtualDisplay;
-import io.github.jqssun.displaymirror.job.ExitAll;
 import io.github.jqssun.displaymirror.job.ExternalTextureRenderer;
-import io.github.jqssun.displaymirror.job.InputRouting;
 import io.github.jqssun.displaymirror.job.LandscapeAutoScaler;
-import io.github.jqssun.displaymirror.job.VirtualDisplayArgs;
 import io.github.jqssun.displaymirror.shizuku.ServiceUtils;
-import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
 
 import dev.rikka.tools.refine.Refine;
 

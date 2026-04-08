@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.graphics.PixelFormat;
+import android.hardware.display.DisplayManager;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.Display;
@@ -15,7 +16,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
-import android.hardware.display.DisplayManager;
 
 import io.github.jqssun.displaymirror.shizuku.ServiceUtils;
 
@@ -61,7 +61,7 @@ public class FloatingButtonService extends Service {
                     this.onDestroy();
                 }
                 autoHide = Pref.getAutoHideFloatingBackButton();
-                createFloatingButton();
+                _createFloatingButton();
             }
         }
         return START_STICKY;
@@ -77,14 +77,9 @@ public class FloatingButtonService extends Service {
         resetButtonVisibility();
     }
 
-    private void createFloatingButton() {
+    private void _createFloatingButton() {
         handler = new android.os.Handler();
-        fadeOutRunnable = new Runnable() {
-            @Override
-            public void run() {
-                fadeOutButton();
-            }
-        };
+        fadeOutRunnable = () -> _fadeOutButton();
 
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         floatingView = LayoutInflater.from(this).inflate(R.layout.floating_back_button, null);
@@ -172,25 +167,20 @@ public class FloatingButtonService extends Service {
         });
 
         if (autoHide) {
-            startFadeOutTimer();
+            _startFadeOutTimer();
         }
     }
 
-    private void startFadeOutTimer() {
+    private void _startFadeOutTimer() {
         handler.removeCallbacks(fadeOutRunnable);
         handler.postDelayed(fadeOutRunnable, FADE_DELAY);
     }
 
-    private void fadeOutButton() {
+    private void _fadeOutButton() {
         floatingView.animate()
                 .alpha(0.0f)
                 .setDuration(500)
-                .withEndAction(new Runnable() {
-                    @Override
-                    public void run() {
-                        isReady = false;
-                    }
-                })
+                .withEndAction(() -> isReady = false)
                 .start();
     }
 
@@ -198,7 +188,7 @@ public class FloatingButtonService extends Service {
         if (autoHide) {
             floatingView.setAlpha(1.0f);
             isReady = true;
-            startFadeOutTimer();
+            _startFadeOutTimer();
         }
     }
 

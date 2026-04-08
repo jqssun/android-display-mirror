@@ -13,8 +13,8 @@ import android.view.IWindowManager;
 import android.view.InputDevice;
 import android.widget.Toast;
 
-import io.github.jqssun.displaymirror.R;
 import io.github.jqssun.displaymirror.Pref;
+import io.github.jqssun.displaymirror.R;
 import io.github.jqssun.displaymirror.State;
 import io.github.jqssun.displaymirror.shizuku.ServiceUtils;
 import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
@@ -96,7 +96,7 @@ public class InputRouting {
     }
 
     public static void bindAllExternalInputToDisplay(int displayId) {
-        if (!shouldBind()) {
+        if (!_shouldBind()) {
             State.log("Skipping input device binding to display: " + displayId);
             return;
         }
@@ -109,7 +109,7 @@ public class InputRouting {
         }
     }
 
-    private static boolean shouldBind() {
+    private static boolean _shouldBind() {
         try {
             return Pref.getAutoBindInput();
         } catch(Exception e) {
@@ -119,7 +119,7 @@ public class InputRouting {
     }
 
     public static void moveImeToExternal(int displayId) {
-        if(!shouldMoveIme()) {
+        if(!_shouldMoveIme()) {
             State.log("Skipping input method transfer");
             return;
         }
@@ -137,7 +137,7 @@ public class InputRouting {
         }
     }
 
-    private static boolean shouldMoveIme() {
+    private static boolean _shouldMoveIme() {
         try {
             return Pref.getAutoMoveIme();
         } catch(Exception e) {

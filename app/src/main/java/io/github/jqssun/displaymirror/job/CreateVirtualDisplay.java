@@ -13,7 +13,6 @@ import android.hardware.display.VirtualDisplayConfig;
 import android.media.projection.IMediaProjection;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionHidden;
-import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -24,7 +23,6 @@ import android.view.IWindowManager;
 import android.view.Surface;
 
 import androidx.annotation.NonNull;
-
 
 import io.github.jqssun.displaymirror.FloatingButtonService;
 import io.github.jqssun.displaymirror.Pref;
@@ -61,12 +59,12 @@ public class CreateVirtualDisplay {
         try {
             if (ShizukuUtils.hasPermission()) {
                 try {
-                    VirtualDisplay virtualDisplay = createByShizuku(virtualDisplayArgs, surface, true, null);
+                    VirtualDisplay virtualDisplay = _createByShizuku(virtualDisplayArgs, surface, true, null);
                     android.util.Log.i("CreateVirtualDisplay", "created virtual display: " + virtualDisplay.getDisplay().getDisplayId());
                     powerOffScreen();
                     return virtualDisplay;
                 } catch(Exception e) {
-                    VirtualDisplay virtualDisplay = createByShizuku(virtualDisplayArgs, surface, true, State.getMediaProjection());
+                    VirtualDisplay virtualDisplay = _createByShizuku(virtualDisplayArgs, surface, true, State.getMediaProjection());
                     android.util.Log.i("CreateVirtualDisplay", "created virtual display: " + virtualDisplay.getDisplay().getDisplayId());
                     powerOffScreen();
                     return virtualDisplay;
@@ -136,7 +134,7 @@ public class CreateVirtualDisplay {
         }
     }
 
-    private static VirtualDisplay createByMediaProjection(VirtualDisplayArgs virtualDisplayArgs, Surface surface) {
+    private static VirtualDisplay _createByMediaProjection(VirtualDisplayArgs virtualDisplayArgs, Surface surface) {
         VirtualDisplay virtualDisplay = State.getMediaProjection().createVirtualDisplay(virtualDisplayArgs.virtualDisplayName,
                 virtualDisplayArgs.width, virtualDisplayArgs.height, virtualDisplayArgs.dpi,
                 DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC,
@@ -145,7 +143,7 @@ public class CreateVirtualDisplay {
         return virtualDisplay;
     }
 
-    private static @NonNull VirtualDisplay createByShizuku(VirtualDisplayArgs virtualDisplayArgs, Surface surface, boolean ownContentOnly, MediaProjection mediaProjection) {
+    private static @NonNull VirtualDisplay _createByShizuku(VirtualDisplayArgs virtualDisplayArgs, Surface surface, boolean ownContentOnly, MediaProjection mediaProjection) {
         int virtualDisplayWidth = virtualDisplayArgs.width;
         IDisplayManager displayManager = ServiceUtils.getDisplayManager();
         int flags = getFlags(ownContentOnly, virtualDisplayArgs.rotatesWithContent);
@@ -265,19 +263,12 @@ public class CreateVirtualDisplay {
         }
     }
 
-    private static boolean shouldChangeAspectRatio() {
-        if (!ShizukuUtils.hasPermission()) {
-            return false;
-        }
-        boolean autoMatchAspectRatio = Pref.getAutoMatchAspectRatio();
-        if (!autoMatchAspectRatio) {
-            return false;
-        }
-        return true;
+    private static boolean _shouldChangeAspectRatio() {
+        return ShizukuUtils.hasPermission() && Pref.getAutoMatchAspectRatio();
     }
 
     public static void changeAspectRatio(int width, int height) {
-        if(!shouldChangeAspectRatio()) {
+        if(!_shouldChangeAspectRatio()) {
             return;
         }
         IWindowManager wm = ServiceUtils.getWindowManager();
@@ -298,7 +289,7 @@ public class CreateVirtualDisplay {
         if(!ShizukuUtils.hasPermission()) {
             return;
         }
-        if(!shouldChangeAspectRatio()) {
+        if(!_shouldChangeAspectRatio()) {
             return;
         }
         IWindowManager wm = ServiceUtils.getWindowManager();

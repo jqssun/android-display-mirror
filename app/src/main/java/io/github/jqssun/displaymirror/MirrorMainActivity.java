@@ -6,8 +6,8 @@ import android.content.pm.PackageManager;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionConfig;
 import android.media.projection.MediaProjectionManager;
-import android.os.Build;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -25,8 +25,9 @@ import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
 
 import org.lsposed.hiddenapibypass.HiddenApiBypass;
 
-import rikka.shizuku.Shizuku;
 import com.topjohnwu.superuser.Shell;
+
+import rikka.shizuku.Shizuku;
 
 public class MirrorMainActivity extends AppCompatActivity {
 
@@ -271,8 +272,8 @@ public class MirrorMainActivity extends AppCompatActivity {
         String url = Pref.getDisplaylinkApkUrl();
         new Thread(() -> {
             try {
-                String err = ApkImporter.downloadAndImport(this, url, mb ->
-                    runOnUiThread(() -> downloadBtn.setText(mb + " MB")));
+                String err = ApkImporter.downloadAndImport(this, url, hundredths ->
+                    runOnUiThread(() -> downloadBtn.setText(String.format("%.2f MB", hundredths / 100.0))));
                 runOnUiThread(() -> {
                     downloadBtn.setEnabled(true);
                     downloadBtn.setText(R.string.auto_import_displaylink_libs);

@@ -3,7 +3,6 @@ package io.github.jqssun.displaymirror.job;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.hardware.display.VirtualDisplay;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
@@ -12,18 +11,18 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.view.Surface;
 
-import io.github.jqssun.displaymirror.Pref;
-import io.github.jqssun.displaymirror.SunshineService;
-import io.github.jqssun.displaymirror.shizuku.ServiceUtils;
 import com.displaylink.manager.NativeDriver;
 import com.displaylink.manager.NativeDriverListener;
 import com.displaylink.manager.display.DisplayMode;
-import io.github.jqssun.displaymirror.MirrorMainActivity;
-import io.github.jqssun.displaymirror.State;
-import io.github.jqssun.displaymirror.DisplaylinkState;
-import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
 
 import io.github.jqssun.displaymirror.ApkImporter;
+import io.github.jqssun.displaymirror.DisplaylinkState;
+import io.github.jqssun.displaymirror.MirrorMainActivity;
+import io.github.jqssun.displaymirror.Pref;
+import io.github.jqssun.displaymirror.State;
+import io.github.jqssun.displaymirror.SunshineService;
+import io.github.jqssun.displaymirror.shizuku.ServiceUtils;
+import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -66,16 +65,16 @@ public class ProjectViaDisplaylink implements Job {
             return;
         }
         NativeDriver.load(ApkImporter.jniLibDir(context));
-        copyFirmwares(context);
+        _copyFirmwares(context);
 
-        if (!requestUsbPermission(context, usbManager, displaylinkState.device)) {
+        if (!_requestUsbPermission(context, usbManager, displaylinkState.device)) {
             return;
         }
-        if (!requestDevice2UsbPermission(context, usbManager, displaylinkState)) {
+        if (!_requestDevice2UsbPermission(context, usbManager, displaylinkState)) {
             return;
         }
-        openUsbConnection(context, usbManager, displaylinkState);
-        if (!initializeNativeDriver(context, displaylinkState)) {
+        _openUsbConnection(context, usbManager, displaylinkState);
+        if (!_initializeNativeDriver(context, displaylinkState)) {
             return;
         }
         boolean singleAppMode = Pref.getSingleAppMode();
@@ -87,7 +86,7 @@ public class ProjectViaDisplaylink implements Job {
                 State.showErrorStatus("DisplayLink single-app projection requires Shizuku permission");
             }
         } else {
-            if (requestMediaProjectionPermission(context, displaylinkState)) {
+            if (_requestMediaProjectionPermission(context, displaylinkState)) {
                 displaylinkState.nativeDriver.setMode(displaylinkState.encoderId, new DisplayMode(virtualDisplayArgs.width, virtualDisplayArgs.height, virtualDisplayArgs.refreshRate), virtualDisplayArgs.width * 4, 1);
                 new AutoRotateAndScaleForDisplaylink(virtualDisplayArgs, context);
             }
@@ -125,7 +124,7 @@ public class ProjectViaDisplaylink implements Job {
         }, 5000);
     }
 
-    private void copyFirmwares(Context context) {
+    private void _copyFirmwares(Context context) {
         File srcDir = ApkImporter.assetsDir(context);
         if (!srcDir.exists()) {
             State.log("No imported firmware directory found");
@@ -154,7 +153,7 @@ public class ProjectViaDisplaylink implements Job {
         }
     }
 
-    private boolean requestUsbPermission(Context context, UsbManager usbManager, UsbDevice device) throws YieldException {
+    private boolean _requestUsbPermission(Context context, UsbManager usbManager, UsbDevice device) throws YieldException {
         if (usbManager.hasPermission(device)) {
             State.log("USB device permission already granted: " + device.getDeviceName());
         } else if (usbRequested) {
@@ -169,7 +168,7 @@ public class ProjectViaDisplaylink implements Job {
         return true;
     }
 
-    private void openUsbConnection(Context context, UsbManager usbManager, DisplaylinkState displaylinkState) {
+    private void _openUsbConnection(Context context, UsbManager usbManager, DisplaylinkState displaylinkState) {
         if (displaylinkState.displaylinkDevice2 == null) {
             if (displaylinkState.usbConnection == null) {
                 displaylinkState.usbConnection = usbManager.openDevice(displaylinkState.device);
@@ -207,7 +206,7 @@ public class ProjectViaDisplaylink implements Job {
         }
     }
 
-    private boolean requestDevice2UsbPermission(Context context, UsbManager usbManager, DisplaylinkState displaylinkState) throws YieldException {
+    private boolean _requestDevice2UsbPermission(Context context, UsbManager usbManager, DisplaylinkState displaylinkState) throws YieldException {
         if (displaylinkState.displaylinkDevice2 == null) {
             for (UsbDevice device : usbManager.getDeviceList().values()) {
                 if (device.getDeviceName().equals(displaylinkState.device.getDeviceName())) {
@@ -234,7 +233,7 @@ public class ProjectViaDisplaylink implements Job {
         usbManager.requestPermission(displaylinkState.displaylinkDevice2, pendingIntent);
         throw new YieldException("Waiting for second USB permission");
     }
-    private boolean initializeNativeDriver(Context context, DisplaylinkState displaylinkState) throws YieldException {
+    private boolean _initializeNativeDriver(Context context, DisplaylinkState displaylinkState) throws YieldException {
         if (displaylinkState.displaylinkDevice2 != null && displaylinkState.monitorInfo == null) {
             if (displaylinkState.nativeDriver != null) {
                 displaylinkState.nativeDriver.destroy();
@@ -280,7 +279,7 @@ public class ProjectViaDisplaylink implements Job {
         return true;
     }
 
-    private boolean requestMediaProjectionPermission(Context context, DisplaylinkState displaylinkState) throws YieldException {
+    private boolean _requestMediaProjectionPermission(Context context, DisplaylinkState displaylinkState) throws YieldException {
         if (State.displaylinkState.getVirtualDisplay() != null) {
             State.log("Virtual display already exists, skipping projection permission request");
             return true;

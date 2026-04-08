@@ -7,11 +7,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.hardware.display.VirtualDisplay;
 import android.media.projection.MediaProjection;
-import android.os.Build;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
-import android.os.RemoteException;
 import android.util.Log;
 
 import androidx.lifecycle.MutableLiveData;
@@ -19,11 +15,7 @@ import androidx.lifecycle.MutableLiveData;
 import io.github.jqssun.displaymirror.job.Job;
 import io.github.jqssun.displaymirror.job.YieldException;
 import io.github.jqssun.displaymirror.shizuku.IUserService;
-import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
-import io.github.jqssun.displaymirror.shizuku.SurfaceControl;
 import io.github.jqssun.displaymirror.shizuku.UserService;
-import com.topjohnwu.superuser.Shell;
-import com.topjohnwu.superuser.ShellUtils;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -149,9 +141,7 @@ public class State {
 
     public static void resumeJobLater(long delayMillis) {
         if (currentActivity.get() != null) {
-            mainHandler.postDelayed(() -> {
-                resumeJob();
-            }, delayMillis);
+            mainHandler.postDelayed(State::resumeJob, delayMillis);
         }
     }
 

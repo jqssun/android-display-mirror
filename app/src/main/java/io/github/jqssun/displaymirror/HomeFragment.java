@@ -21,14 +21,14 @@ import io.github.jqssun.displaymirror.job.ExitAll;
 import io.github.jqssun.displaymirror.job.FetchLogAndShare;
 import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
 
-public class OverviewFragment extends Fragment {
+public class HomeFragment extends Fragment {
 
     private MaterialButton startBtn, stopBtn, screenOffBtn, touchScreenBtn;
     private TextView mirrorStatus;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_overview, container, false);
+        View view = inflater.inflate(R.layout.fragment_home, container, false);
 
         startBtn = view.findViewById(R.id.startBtn);
         stopBtn = view.findViewById(R.id.stopBtn);

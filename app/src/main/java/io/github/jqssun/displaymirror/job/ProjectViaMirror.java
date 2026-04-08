@@ -4,7 +4,6 @@ import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.hardware.display.DisplayManager;
 import android.os.Build;
@@ -79,7 +78,7 @@ public class ProjectViaMirror implements Job {
             }, null);
             return;
         }
-        if (requestMediaProjectionPermission(State.getCurrentActivity(), singleAppMode)) {
+        if (_requestMediaProjectionPermission(State.getCurrentActivity(), singleAppMode)) {
             if (singleAppMode) {
                 Point initialSize = new Point();
                 ServiceUtils.getWindowManager().getInitialDisplaySize(mirrorDisplay.getDisplayId(), initialSize);
@@ -119,7 +118,7 @@ public class ProjectViaMirror implements Job {
         }
     }
 
-    private boolean requestMediaProjectionPermission(Context context, boolean singleAppMode) throws YieldException {
+    private boolean _requestMediaProjectionPermission(Context context, boolean singleAppMode) throws YieldException {
         DisplayHidden displayHidden = Refine.unsafeCast(mirrorDisplay);
         if (displayHidden.getType() == TYPE_WIFI) {
             if (ShizukuUtils.hasPermission() && singleAppMode) {

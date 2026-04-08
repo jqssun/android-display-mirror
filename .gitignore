@@ -2,10 +2,10 @@
 /local.properties
 /.idea
 .DS_Store
-app/build
+/build
 /captures
 .externalNativeBuild
 .cxx
 local.properties
-/app/release
+/app/build
 /hidden-api-stub/bin

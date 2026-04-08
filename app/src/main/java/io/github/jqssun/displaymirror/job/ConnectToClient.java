@@ -31,7 +31,7 @@ public class ConnectToClient {
             State.log("Invalid client address: " + clientIpAndPort + "  " + e);
             return;
         }
-        String serverIp = findServerIpInSameSubnet(clientIp);
+        String serverIp = _findServerIpInSameSubnet(clientIp);
         if (serverIp == null) {
             State.log("Cannot find local IP on the same subnet as client");
             return;
@@ -48,12 +48,12 @@ public class ConnectToClient {
         final String finalRequest = request;
         
         new Thread(() -> {
-            connectToClientInBackground(finalClientIp, finalClientPort, finalRequest);
+            _connectToClientInBackground(finalClientIp, finalClientPort, finalRequest);
         }).start();
     }
     
     // connect to TCP client in background thread
-    private static void connectToClientInBackground(String clientIp, int clientPort, String request) {
+    private static void _connectToClientInBackground(String clientIp, int clientPort, String request) {
         try (Socket socket = new Socket(clientIp, clientPort)) {
             socket.setSoTimeout(15000);
 
@@ -76,9 +76,9 @@ public class ConnectToClient {
     }
     
     // find local ip address in the same subnet as the client
-    private static String findServerIpInSameSubnet(String clientIp) {
+    private static String _findServerIpInSameSubnet(String clientIp) {
         try {
-            String clientSubnet = getSubnetPrefix(clientIp);
+            String clientSubnet = _getSubnetPrefix(clientIp);
 
             Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
             while (networkInterfaces.hasMoreElements()) {
@@ -97,7 +97,7 @@ public class ConnectToClient {
                         continue;
                     }
                     
-                    if (getSubnetPrefix(localIp).equals(clientSubnet)) {
+                    if (_getSubnetPrefix(localIp).equals(clientSubnet)) {
                         return localIp;
                     }
                 }
@@ -110,7 +110,7 @@ public class ConnectToClient {
     }
     
     // get subnet prefix of an IP address, assume class C network, take first three numbers
-    private static String getSubnetPrefix(String ip) {
+    private static String _getSubnetPrefix(String ip) {
         String[] octets = ip.split("\\.");
         if (octets.length >= 3) {
             return octets[0] + "." + octets[1] + "." + octets[2];

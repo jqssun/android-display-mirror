@@ -34,6 +34,7 @@ import java.util.Set;
 
 import dev.rikka.tools.refine.Refine;
 
+
 public class SunshineMouse {
     private static String TAG = "SunshineMouse";
     public static AutoRotateAndScaleForMoonlight autoRotateAndScaleForMoonlight;
@@ -129,26 +130,26 @@ public class SunshineMouse {
 
     private static Map<Integer, Point> pointers = new HashMap<>();
 
-    private static Point translate(float x, float y) {
+    private static Point _translate(float x, float y) {
         if (singleAppMode) {
-            return translateSingleAppMode(x, y);
+            return _translateSingleAppMode(x, y);
         } else {
-            return translateMirrorMode(x, y);
+            return _translateMirrorMode(x, y);
         }
     }
 
-    private static Point translateMirrorMode(float x, float y) {
+    private static Point _translateMirrorMode(float x, float y) {
         boolean isLandscape = SunshineService.instance.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
         float xInScreen = x * screenWidth;
         float yInScreen = y * screenHeight;
         if (isLandscape) {
-            return translateRotation90Mirror(xInScreen, yInScreen);
+            return _translateRotation90Mirror(xInScreen, yInScreen);
         } else {
-            return translateRotation0Mirror(xInScreen, yInScreen);
+            return _translateRotation0Mirror(xInScreen, yInScreen);
         }
     }
 
-    private static Point translateRotation0Mirror(float xInScreen, float yInScreen) {
+    private static Point _translateRotation0Mirror(float xInScreen, float yInScreen) {
         if (autoRotate) {
             Point point = new Point();
             float xBlackBar = (screenWidth - landscapeMirrorWidth) / 2;
@@ -190,7 +191,7 @@ public class SunshineMouse {
         }
     }
 
-    private static Point translateRotation90Mirror(float xInScreen, float yInScreen) {
+    private static Point _translateRotation90Mirror(float xInScreen, float yInScreen) {
         Point point = new Point();
         float xBlackBar = (screenWidth - landscapeMirrorWidth) / 2;
         float yBlackBar = (screenHeight - landscapeMirrorHeight) / 2;
@@ -211,7 +212,7 @@ public class SunshineMouse {
         return point;
     }
 
-    private static @NonNull Point translateSingleAppMode(float x, float y) {
+    private static @NonNull Point _translateSingleAppMode(float x, float y) {
         int displayRotation = State.mirrorVirtualDisplay.getDisplay().getRotation();
         Point point = new Point();
         switch (displayRotation) {
@@ -239,10 +240,10 @@ public class SunshineMouse {
     public static void handleAbsMouseMovePacket(float x, float y, float width, float height) {
         x = x / width;
         y = y / height;
-        Point point = translate(x, y);
+        Point point = _translate(x, y);
         if (singlePoint != null) {
             singlePoint = point;
-            handleTouchEventMove(0, singlePoint.x, singlePoint.y);
+            _handleTouchEventMove(0, singlePoint.x, singlePoint.y);
         } else {
             singlePoint = point;
         }
@@ -253,43 +254,43 @@ public class SunshineMouse {
             return;
         }
         if (release) {
-            handleTouchEventUp(0, singlePoint.x, singlePoint.y, false);
+            _handleTouchEventUp(0, singlePoint.x, singlePoint.y, false);
             singlePoint = null;
         } else {
-            handleTouchEventDown(0, singlePoint.x, singlePoint.y);
+            _handleTouchEventDown(0, singlePoint.x, singlePoint.y);
         }
     }
 
     public static void handleTouchPacket(int eventType, int rotation, int pointerId,
                                          float x, float y, float pressureOrDistance,
                                          float contactAreaMajor, float contactAreaMinor) {
-        Point point = translate(x, y);
+        Point point = _translate(x, y);
         pointerId = pointerId % 10;
         switch (eventType) {
             case 0x01: // LI_TOUCH_EVENT_DOWN
-                handleTouchEventDown(pointerId, point.x, point.y);
+                _handleTouchEventDown(pointerId, point.x, point.y);
                 break;
             case 0x02: // LI_TOUCH_EVENT_UP
-                handleTouchEventUp(pointerId, point.x, point.y, false);
+                _handleTouchEventUp(pointerId, point.x, point.y, false);
                 break;
             case 0x03: // LI_TOUCH_EVENT_MOVE
-                handleTouchEventMove(pointerId, point.x, point.y);
+                _handleTouchEventMove(pointerId, point.x, point.y);
                 break;
             case 0x04: // LI_TOUCH_EVENT_CANCEL
-                handleTouchEventUp(pointerId, point.x, point.y, true);
+                _handleTouchEventUp(pointerId, point.x, point.y, true);
                 break;
             case 0x07: // LI_TOUCH_EVENT_CANCEL_ALL
-                handleTouchEventCancelAll();
+                _handleTouchEventCancelAll();
                 break;
             default:
                 Log.e(TAG, "Unknown touch event type: " + eventType);
         }
     }
 
-    private static void handleTouchEventDown(int pointerId, float x, float y) {
+    private static void _handleTouchEventDown(int pointerId, float x, float y) {
         if (!bufferedMove.isEmpty()) {
             bufferedMove.clear();
-            triggerTouchEventMove();
+            _triggerTouchEventMove();
         }
 
         Point point = new Point();
@@ -353,12 +354,12 @@ public class SunshineMouse {
                 InputDevice.SOURCE_TOUCHSCREEN,
                 0 // flags
         );
-        injectEvent("inject down", event);
+        _injectEvent("inject down", event);
     }
 
     private static List<MotionEvent> gesture = new ArrayList<>();
 
-    private static void injectEvent(String prefix, MotionEvent event) {
+    private static void _injectEvent(String prefix, MotionEvent event) {
         if (autoScale && autoRotateAndScaleForMoonlight != null) {
             autoRotateAndScaleForMoonlight.exitScale();
         }
@@ -388,14 +389,14 @@ public class SunshineMouse {
         }
     }
 
-    private static void handleTouchEventUp(int pointerId, float x, float y, boolean cancelled) {
+    private static void _handleTouchEventUp(int pointerId, float x, float y, boolean cancelled) {
         Point status = pointers.get(pointerId);
         if(status == null) {
             return;
         }
         if (!bufferedMove.isEmpty()) {
             bufferedMove.clear();
-            triggerTouchEventMove();
+            _triggerTouchEventMove();
         }
         status.x = x;
         status.y = y;
@@ -457,12 +458,12 @@ public class SunshineMouse {
 
         pointers.remove(pointerId);
 
-        injectEvent("inject up", event);
+        _injectEvent("inject up", event);
     }
 
     private static Set<Integer> bufferedMove = new HashSet<>();
 
-    private static void handleTouchEventMove(int pointerId, float x, float y) {
+    private static void _handleTouchEventMove(int pointerId, float x, float y) {
         Point status = pointers.get(pointerId);
         if (status == null) {
             return;
@@ -470,7 +471,7 @@ public class SunshineMouse {
 
         if (bufferedMove.contains(pointerId) || bufferedMove.size() == pointers.size()) {
             bufferedMove.clear();
-            triggerTouchEventMove();
+            _triggerTouchEventMove();
         } else {
             bufferedMove.add(pointerId);
         }
@@ -479,7 +480,7 @@ public class SunshineMouse {
         status.y = y;
     }
 
-    private static void handleTouchEventCancelAll() {
+    private static void _handleTouchEventCancelAll() {
         long downTime = SystemClock.uptimeMillis();
         long eventTime = SystemClock.uptimeMillis();
 
@@ -514,10 +515,10 @@ public class SunshineMouse {
         );
         pointers.clear();
 
-        injectEvent("inject cancel", event);
+        _injectEvent("inject cancel", event);
     }
 
-    private static void triggerTouchEventMove() {
+    private static void _triggerTouchEventMove() {
         if (pointers.isEmpty()) {
             return;
         }
@@ -552,6 +553,6 @@ public class SunshineMouse {
                 InputDevice.SOURCE_TOUCHSCREEN,
                 0
         );
-        injectEvent("inject move", event);
+        _injectEvent("inject move", event);
     }
 }

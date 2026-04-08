@@ -2,12 +2,12 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/overview_fragment">
+    app:startDestination="@id/home_fragment">
 
     <fragment
-        android:id="@+id/overview_fragment"
-        android:name="io.github.jqssun.displaymirror.OverviewFragment"
-        android:label="@string/tab_overview" />
+        android:id="@+id/home_fragment"
+        android:name="io.github.jqssun.displaymirror.HomeFragment"
+        android:label="@string/tab_home" />
 
     <fragment
         android:id="@+id/logs_fragment"

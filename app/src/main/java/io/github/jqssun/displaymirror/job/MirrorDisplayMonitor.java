@@ -1,11 +1,8 @@
 package io.github.jqssun.displaymirror.job;
 
-import static android.app.PendingIntent.getActivity;
-
 import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.hardware.display.DisplayManager;
 import android.media.AudioAttributes;
 import android.media.AudioDeviceAttributes;
@@ -16,25 +13,21 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.Display;
-import android.view.Surface;
 
 import io.github.jqssun.displaymirror.MirrorMainActivity;
 import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.State;
 import io.github.jqssun.displaymirror.SunshineService;
-import io.github.jqssun.displaymirror.TouchpadActivity;
-import io.github.jqssun.displaymirror.shizuku.DisplayControl;
 import io.github.jqssun.displaymirror.shizuku.ServiceUtils;
 import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
 
-import java.util.HashMap;
 import java.util.List;
 
 public class MirrorDisplayMonitor {
     private static boolean registered = false;
     public static void init(DisplayManager displayManager) {
         for (Display display : displayManager.getDisplays()) {
-            handleNewDisplay(display);
+            _handleNewDisplay(display);
         }
         if (registered) {
             return;
@@ -46,7 +39,7 @@ public class MirrorDisplayMonitor {
                 State.log("Display added, displayId: " + displayId);
                 Display display = displayManager.getDisplay(displayId);
                 if (display != null) {
-                    handleNewDisplay(display);
+                    _handleNewDisplay(display);
                 }
                 new Handler(Looper.getMainLooper()).postDelayed(() -> {
                     if (SunshineService.instance == null) {
@@ -77,7 +70,7 @@ public class MirrorDisplayMonitor {
         }, null);
     }
 
-    private static void handleNewDisplay(Display display) {
+    private static void _handleNewDisplay(Display display) {
         if (display.getDisplayId() == Display.DEFAULT_DISPLAY) {
             return;
         }
@@ -104,10 +97,10 @@ public class MirrorDisplayMonitor {
             return;
         }
         State.startNewJob(new ProjectViaMirror(display));
-        handleDisableUsbAudio(context);
+        _handleDisableUsbAudio(context);
     }
     
-    private static void handleDisableUsbAudio(Context context) {
+    private static void _handleDisableUsbAudio(Context context) {
         if (!ShizukuUtils.hasPermission()) {
             return;
         }

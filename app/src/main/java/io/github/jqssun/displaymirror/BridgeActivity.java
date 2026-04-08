@@ -12,10 +12,10 @@ import android.util.Log;
 import android.view.Display;
 import android.view.MotionEventHidden;
 import android.view.Surface;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.SurfaceView;
-import android.view.SurfaceHolder;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -38,7 +38,7 @@ public class BridgeActivity extends AppCompatActivity {
 
     private SurfaceView surfaceView;
 
-    private static float[] adjustTouchCoordinates(float x, float y, int rotation,
+    private static float[] _adjustTouchCoordinates(float x, float y, int rotation,
                                                   int targetWidth, int targetHeight, int sourceWidth, int sourceHeight) {
         float scaleX = (float) targetWidth / sourceWidth;
         float scaleY = (float) targetHeight / sourceHeight;
@@ -94,7 +94,6 @@ public class BridgeActivity extends AppCompatActivity {
             window.setDecorFitsSystemWindows(false);
         }
 
-        // support display cutout
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             WindowManager.LayoutParams layoutParams = window.getAttributes();
             layoutParams.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
@@ -169,7 +168,7 @@ public class BridgeActivity extends AppCompatActivity {
                 float x = event.getX();
                 float y = event.getY();
                 
-                float[] adjustedCoords = adjustTouchCoordinates(x, y, rotation, 
+                float[] adjustedCoords = _adjustTouchCoordinates(x, y, rotation, 
                     args.width, args.height,
                     surfaceView.getWidth(), surfaceView.getHeight());
                 

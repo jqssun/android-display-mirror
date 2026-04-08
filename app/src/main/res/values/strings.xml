@@ -6,7 +6,7 @@
     <string name="home_button">Home button</string>
 
     <!-- Tabs -->
-    <string name="tab_overview">Overview</string>
+    <string name="tab_home">Overview</string>
     <string name="tab_logs">Logs</string>
     <string name="logs">Logs</string>
     <string name="export">Export</string>
@@ -82,7 +82,7 @@
     <string name="shizuku_permission_status">Shizuku</string>
 
     <!-- dialog_resolution_settings -->
-    <string name="resolution_explanation">This only controls the output resolution of the DisplayLink chip in the connected adapter. For USB-C DisplayPort connections, the resolution is determined by Android automatically. For Sunshine/Moonlight connections, resolution and bitrate can be changed in client-side settings.</string>
+    <string name="resolution_explanation">This only controls the output resolution of the DisplayLink chip in the adapter. For USB-C DisplayPort connections, the resolution is determined by Android automatically. For Sunshine/Moonlight connections, resolution and bitrate can be changed on client side.</string>
     <string name="preset_resolution">Preset</string>
 
     <!-- dialog_manual_client_input -->
@@ -115,7 +115,7 @@
     <string name="auto_screen_off_desc">Turn off main screen when projecting</string>
     <string name="auto_screen_off_with_warning">Auto screen off</string>
     <string name="auto_screen_off_with_warning_desc">Use volume keys to wake up</string>
-    <string name="use_black_image_screen_off">Simulate screen off</string>
+    <string name="use_black_image_screen_off">Black screen</string>
     <string name="use_black_image_screen_off_desc">Use black image instead of turning off screen</string>
     <string name="disable_usb_audio">Disable USB audio</string>
     <string name="disable_usb_audio_desc">Disable automatic USB audio routing</string>
