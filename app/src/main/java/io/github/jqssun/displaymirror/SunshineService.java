@@ -18,7 +18,6 @@ import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.PowerManager;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -139,9 +138,9 @@ public class SunshineService extends Service {
                             dnsServers.add(jmdns);
                             ServiceInfo serviceInfo = ServiceInfo.create(
                                     "_nvstream._tcp.local.",
-                                    "ConnectScreen",
+                                    "Mirror",
                                     47989,
-                                    "ConnectScreen"
+                                    "Mirror"
                             );
 
                             jmdns.registerService(serviceInfo);
@@ -351,13 +350,12 @@ public class SunshineService extends Service {
                     + android.util.Base64.encodeToString(kp.getPrivate().getEncoded(), android.util.Base64.DEFAULT)
                     + "-----END PRIVATE KEY-----\n";
 
-            java.io.FileWriter certWriter = new java.io.FileWriter(certFile);
-            certWriter.write(certPem);
-            certWriter.close();
-
-            java.io.FileWriter keyWriter = new java.io.FileWriter(keyFile);
-            keyWriter.write(keyPem);
-            keyWriter.close();
+            try (java.io.FileWriter certWriter = new java.io.FileWriter(certFile)) {
+                certWriter.write(certPem);
+            }
+            try (java.io.FileWriter keyWriter = new java.io.FileWriter(keyFile)) {
+                keyWriter.write(keyPem);
+            }
 
             SunshineServer.setCertPath(certFile.getAbsolutePath());
             SunshineServer.setPkeyPath(keyFile.getAbsolutePath());

@@ -64,11 +64,7 @@ public class MirrorActivity extends AppCompatActivity {
     private int singleAppDpi;
 
     public static void stopVirtualDisplay() {
-        if (State.mirrorVirtualDisplay == null) {
-            return;
-        }
-        State.mirrorVirtualDisplay.release();
-        State.mirrorVirtualDisplay = null;
+        State.stopMirrorVirtualDisplay();
     }
 
     public static MirrorActivity getInstance() {

@@ -112,7 +112,7 @@
                 android:id="@+id/shizukuBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Shizuku"
+                android:text="@string/shizuku_permission_status"
                 style="@style/Widget.Material3.Button.TextButton" />
 
             <Space

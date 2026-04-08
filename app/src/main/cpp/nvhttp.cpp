@@ -225,7 +225,7 @@ namespace nvhttp {
             return;
         }
         http::unique_id = std::move(*unique_id_p);
-        sunshine_callbacks::callJavaSetConnectScreenServerUuid(http::unique_id);
+        sunshine_callbacks::callJavaSetMirrorServerUuid(http::unique_id);
 
         auto root = tree.get_child("root");
         client_t client;
@@ -681,11 +681,11 @@ namespace nvhttp {
     void serverinfo(std::shared_ptr<typename SimpleWeb::ServerBase<T>::Response> response, std::shared_ptr<typename SimpleWeb::ServerBase<T>::Request> request) {
         print_req<T>(request);
         auto args = request->parse_query_string();
-        auto connectScreenPort = args.find("connect_screen"s);
-        if (connectScreenPort != std::end(args)) {
-            auto client = request->remote_endpoint().address().to_string() + ":" + connectScreenPort->second;
+        auto mirrorPort = args.find("mirror"s);
+        if (mirrorPort != std::end(args)) {
+            auto client = request->remote_endpoint().address().to_string() + ":" + mirrorPort->second;
             BOOST_LOG(info) << "Found Mirror client "sv << client;
-            sunshine_callbacks::callJavaOnConnectScreenClientDiscovered(client);
+            sunshine_callbacks::callJavaOnMirrorClientDiscovered(client);
         }
 
         int pair_status = 0;

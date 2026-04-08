@@ -41,7 +41,7 @@ public class State {
     public static VirtualDisplay mirrorVirtualDisplay;
     public static Activity isInPureBlackActivity = null;
     public static volatile IUserService userService;
-    public static Set<String> discoveredConnectScreenClients = new HashSet<>();
+    public static Set<String> discoveredMirrorClients = new HashSet<>();
 
     public static MirrorMainActivity getCurrentActivity() {
         if (currentActivity == null) {
@@ -73,7 +73,7 @@ public class State {
                     State.userService.executeCommand("appops set io.github.jqssun.displaymirror PROJECT_MEDIA allow");
                     State.userService.executeCommand("appops set io.github.jqssun.displaymirror SYSTEM_ALERT_WINDOW allow");
                 } catch (Throwable e) {
-                    // ignorepp
+                    // ignore
                 }
             }
         }
@@ -86,8 +86,8 @@ public class State {
 
     public static Shizuku.UserServiceArgs userServiceArgs = new Shizuku.UserServiceArgs(new ComponentName(BuildConfig.APPLICATION_ID, UserService.class.getName()))
             .daemon(true)
-            .tag("temp7")
-            .processNameSuffix("connect-screen")
+            .tag("mirror")
+            .processNameSuffix("mirror")
             .debuggable(false)
             .version(BuildConfig.VERSION_CODE);
 
@@ -150,7 +150,7 @@ public class State {
 
     public static void log(String message) {
         logs.add(message);
-        Log.i("ConnectScreen", message);
+        Log.i("Mirror", message);
         logVersion.postValue(_logVersion.incrementAndGet());
     }
 
@@ -174,6 +174,13 @@ public class State {
             return -1;
         }
         return displaylinkState.getVirtualDisplay().getDisplay().getDisplayId();
+    }
+
+    public static void stopMirrorVirtualDisplay() {
+        if (mirrorVirtualDisplay != null) {
+            mirrorVirtualDisplay.release();
+            mirrorVirtualDisplay = null;
+        }
     }
 
     public static int getMirrorVirtualDisplayId() {

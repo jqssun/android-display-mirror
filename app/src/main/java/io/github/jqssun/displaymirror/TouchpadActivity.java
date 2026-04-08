@@ -28,14 +28,14 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.android.material.button.MaterialButton;
 
 import io.github.jqssun.displaymirror.job.StartTouchPad;
 import io.github.jqssun.displaymirror.shizuku.ServiceUtils;
@@ -183,29 +183,20 @@ public class TouchpadActivity extends AppCompatActivity {
             _setupTouchListenerForInputManager();
         }
         
-        ImageButton goDarkButton = findViewById(R.id.goDarkButton);
-        goDarkButton.setOnClickListener(v -> _toggleDarkMode());
-        
-        ImageButton backButton = findViewById(R.id.backButton);
-        backButton.setOnClickListener(v -> {
-            performBackGesture(inputManager, displayId);
-        });
-
-        ImageButton homeButton = findViewById(R.id.homeButton);
-        homeButton.setOnClickListener(v -> {
-            launchSingleApp(this, displayId);
-        });
+        findViewById(R.id.goDarkButton).setOnClickListener(v -> _toggleDarkMode());
+        findViewById(R.id.backButton).setOnClickListener(v -> performBackGesture(inputManager, displayId));
+        findViewById(R.id.homeButton).setOnClickListener(v -> launchSingleApp(this, displayId));
 
         _setupModeSpinner();
 
-        Button exitButton = findViewById(R.id.exitButton);
+        MaterialButton exitButton = findViewById(R.id.exitButton);
         exitButton.setOnClickListener(v -> finish());
 
         if (ShizukuUtils.hasPermission()) {
             setFocus(inputManager, displayId);
         }
 
-        Button switchModeButton = findViewById(R.id.switchModeButton);
+        MaterialButton switchModeButton = findViewById(R.id.switchModeButton);
         switchModeButton.setOnClickListener(v -> _switchMode());
     }
 

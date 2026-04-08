@@ -330,7 +330,7 @@ public class SettingsFragment extends Fragment {
         List<String> clients = new ArrayList<>();
         clients.add(getString(R.string.manual_input));
         if (!selectedClient.isEmpty()) clients.add(selectedClient);
-        clients.addAll(State.discoveredConnectScreenClients);
+        clients.addAll(State.discoveredMirrorClients);
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, clients);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -372,7 +372,7 @@ public class SettingsFragment extends Fragment {
             .show();
     }
 
-    static class _AppListAdapter extends ArrayAdapter<ResolveInfo> {
+    private static class _AppListAdapter extends ArrayAdapter<ResolveInfo> {
         private final PackageManager pm;
 
         _AppListAdapter(Context context, java.util.List<ResolveInfo> apps, PackageManager pm) {

@@ -69,11 +69,7 @@ public class BridgeActivity extends AppCompatActivity {
     }
 
     public static void stopVirtualDisplay() {
-        if (State.mirrorVirtualDisplay == null) {
-            return;
-        }
-        State.mirrorVirtualDisplay.release();
-        State.mirrorVirtualDisplay = null;
+        State.stopMirrorVirtualDisplay();
     }
 
     @Override

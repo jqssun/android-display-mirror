@@ -9,7 +9,7 @@ namespace sunshine_callbacks {
     void callJavaOnTouch(SS_TOUCH_PACKET* touchPacket);
     void callJavaOnAbsMouseMove(NV_ABS_MOUSE_MOVE_PACKET* packet);
     void callJavaOnMouseButton(std::uint8_t button, bool release);
-    void callJavaOnConnectScreenClientDiscovered(std::string connectScreenClient);
-    void callJavaSetConnectScreenServerUuid(std::string uuid);
+    void callJavaOnMirrorClientDiscovered(std::string mirrorClient);
+    void callJavaSetMirrorServerUuid(std::string uuid);
     void callJavaOnKeyboard(uint16_t modcode, bool release, uint8_t flags);
 }

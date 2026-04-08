@@ -61,32 +61,17 @@ public class UserService extends IUserService.Stub  {
     }
 
     @Override
-    public String fetchLogs() throws RemoteException  {
-        try {
-            Process process = Runtime.getRuntime().exec("logcat -d -f /sdcard/Download/Mirror.log");
-            java.io.BufferedReader reader = new java.io.BufferedReader(
-                    new java.io.InputStreamReader(process.getInputStream()));
-
-            StringBuilder output = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                output.append(line).append("\n");
-            }
-
-            reader.close();
-            process.waitFor();
-
-            return output.toString();
-        } catch (Exception e) {
-            Log.e("UserService", "logcat -d failed", e);
-            throw new RemoteException("Failed to execute logcat -d: " + e.getMessage());
-        }
+    public String fetchLogs() throws RemoteException {
+        return executeCommand("logcat -d");
     }
 
     @Override
     public String executeCommand(String command) throws RemoteException {
+        Process process = null;
         try {
-            Process process = Runtime.getRuntime().exec(command);
+            process = new ProcessBuilder(command.split("\\s+"))
+                    .redirectErrorStream(true)
+                    .start();
             java.io.BufferedReader reader = new java.io.BufferedReader(
                     new java.io.InputStreamReader(process.getInputStream()));
 
@@ -95,14 +80,16 @@ public class UserService extends IUserService.Stub  {
             while ((line = reader.readLine()) != null) {
                 output.append(line).append("\n");
             }
-
             reader.close();
             process.waitFor();
-
             return output.toString();
         } catch (Exception e) {
             Log.e("UserService", "execute command failed: " + command, e);
             throw new RemoteException("Failed to execute command: " + command + " " + e.getMessage());
+        } finally {
+            if (process != null) {
+                process.destroy();
+            }
         }
     }
 

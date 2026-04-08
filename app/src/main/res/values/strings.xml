@@ -37,10 +37,8 @@
     <string name="cancel">Cancel</string>
     <string name="confirm">Confirm</string>
     <string name="connect">Connect</string>
-    <string name="settings">Settings</string>
     <string name="about">About</string>
     <string name="disable">Disable</string>
-    <string name="bind">Bind</string>
     <string name="screen_off">Screen off</string>
     <string name="touchscreen">Touchscreen</string>
     <string name="touchpad">Touchpad</string>
@@ -57,12 +55,11 @@
     <string name="status_started_not_authorized">Unauthorized, started</string>
     <string name="status_authorized">Authorized</string>
     <string name="status_not_authorized">Unauthorized</string>
-    <string name="status_disabled">Disabled</string>
 
     <!-- activity_touchpad -->
     <string name="mode_normal">Normal mode</string>
-    <string name="mode_cursor_locked">Cursor locked</string>
-    <string name="touchpad_help_cursor_locked">Cursor is not moved, perform single finger gestures</string>
+    <string name="mode_cursor_locked">Locked cursor</string>
+    <string name="touchpad_help_cursor_locked">Cursor stays fixed, single-finger gestures only</string>
     <string name="touchpad_help_move_cursor">Move cursor</string>
     <string name="touchpad_help_text">Touch in this area:\n- Single finger swipe - %s\n- Single finger tap - click\n- Multi-finger gestures - perform multi-finger gestures\n- Back button - press back on the target screen\n- Home button - open the selected application again\n- Moon button - black display to save power\n- If a Bluetooth controller cannot control the display, try using the moon button to turn off the main screen, which forces the cursor to the secondary display</string>
 
@@ -71,8 +68,6 @@
     <string name="back_vertical">Ba\nck</string>
 
     <!-- activity_about -->
-    <string name="about_usage_instructions">About</string>
-    <string name="version_label">Version:</string>
     <string name="version_format">Version: %1$s (Android %2$s)</string>
     <string name="version_unknown">Version: Unknown</string>
     <string name="export_log_needs_shizuku">Exporting log files requires Shizuku permission</string>
@@ -87,9 +82,7 @@
 
     <!-- dialog_manual_client_input -->
     <string name="ip_address">IP address</string>
-    <string name="ip_hint">The auto-start client will show its IP</string>
     <string name="port">Port</string>
-    <string name="port_hint">e.g. 42515</string>
 
     <!-- activity_mirror_settings -->
     <string name="accessibility_status">Accessibility permission</string>
@@ -131,11 +124,7 @@
     <string name="auto_hide_floating_back_desc">Single tap to go back; double tap to return to projected app</string>
     <string name="auto_connect_moonlight">Auto-connect Moonlight</string>
     <string name="auto_connect_moonlight_desc">Moonlight autostart edition only (not compatible with standard Moonlight)</string>
-    <string name="displaylink_resolution_label">DisplayLink output resolution:</string>
     <string name="change_displaylink_output_settings">Change DisplayLink Output Settings</string>
-    <string name="note_wireless_display_single_app">- Note: Android\'s built-in wireless display can be used with Shizuku for single-app projection.</string>
-    <string name="note_usb3_no_shizuku">- Note: USB-C DisplayPort displays do not require Shizuku for single-app projection.</string>
-    <string name="settings_apply_next_launch">Changes take effect on next app launch</string>
     <string name="select_app_title">Select a launcher app such as Microsoft Launcher for the best experience</string>
     <string name="displaylink_resolution_title">DisplayLink Output Settings</string>
     <string name="displaylink_output_format">Current output: %1$dx%2$d@%3$dHz</string>
@@ -144,7 +133,6 @@
     <string name="manual_input_client_title">Manual input client</string>
 
     <!-- MirrorMainActivity status -->
-    <string name="status_no_projection_permission">Projection permission not granted. Tap Exit to close.</string>
     <string name="status_projecting">Projecting. Please disable battery optimization for this app in Settings, and lock the task in Recent Apps to prevent it from being killed. Touch will not work without Shizuku permission.</string>
     <string name="status_connect_display">Please connect a display. Devices with USB 2 should use Moonlight wireless projection or a DisplayLink compatible dock.</string>
 
@@ -178,7 +166,6 @@
     <string name="import_failed">Import failed: %s</string>
     <string name="downloading_displaylink">Downloading DisplayLink libraries...</string>
     <string name="displaylink_apk_url_label">Custom DisplayLink Presenter app download URL</string>
-    <string name="displaylink_apk_url_hint">Enter custom download URL</string>
     <string name="about_displaylink_legal_notice">This app uses publicly available drivers to support DisplayLink\u00ae devices. Users should comply with the relevant licensing terms of Synaptics when using DisplayLink\u00ae related features. This app has no official association with Synaptics.</string>
 
 </resources>

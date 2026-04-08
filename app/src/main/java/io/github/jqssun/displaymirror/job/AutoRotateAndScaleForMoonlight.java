@@ -3,7 +3,6 @@ package io.github.jqssun.displaymirror.job;
 import static android.opengl.GLES11Ext.GL_TEXTURE_EXTERNAL_OES;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.SurfaceTexture;
 import android.hardware.display.DisplayManager;
@@ -55,11 +54,7 @@ public class AutoRotateAndScaleForMoonlight {
     }
 
     public static void stopVirtualDisplay() {
-        if (State.mirrorVirtualDisplay == null) {
-            return;
-        }
-        State.mirrorVirtualDisplay.release();
-        State.mirrorVirtualDisplay = null;
+        State.stopMirrorVirtualDisplay();
     }
 
     public static AutoRotateAndScaleForMoonlight getInstance() {

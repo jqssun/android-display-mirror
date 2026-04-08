@@ -16,7 +16,6 @@ import android.os.HandlerThread;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.Surface;
-import android.content.SharedPreferences;
 
 import io.github.jqssun.displaymirror.DisplaylinkState;
 import io.github.jqssun.displaymirror.FloatingButtonService;

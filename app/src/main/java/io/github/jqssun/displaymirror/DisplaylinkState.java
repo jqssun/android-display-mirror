@@ -68,7 +68,9 @@ public class DisplaylinkState {
             return;
         }
         if (virtualDisplay != null) {
-            virtualDisplay.setSurface(ImageReader.newInstance(1920, 1080, 1, 2).getSurface());
+            ImageReader dummy = ImageReader.newInstance(1920, 1080, 1, 2);
+            virtualDisplay.setSurface(dummy.getSurface());
+            dummy.close();
         }
         monitorInfo = null;
         encoderId = 0;

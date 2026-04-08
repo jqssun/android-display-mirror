@@ -4,6 +4,10 @@ project("sunshine")
 
 include(dependencies/Boost_Sunshine.cmake)
 add_subdirectory(dependencies/moonlight-common-c/enet)
+set(BUILD_OPENSSL ON CACHE BOOL "Build OpenSSL from source" FORCE)
+set(OPENSSL_BUILD_VERSION "3.5.5" CACHE STRING "OpenSSL version" FORCE)
+set(CROSS_ANDROID ON CACHE BOOL "Cross-compiling for Android" FORCE)
+set(FORWARD_ANDROID_NDK_ROOT "${ANDROID_NDK}" CACHE STRING "" FORCE) # CI
 add_subdirectory(dependencies/openssl-cmake)
 add_subdirectory(dependencies/Simple-Web-Server)
 

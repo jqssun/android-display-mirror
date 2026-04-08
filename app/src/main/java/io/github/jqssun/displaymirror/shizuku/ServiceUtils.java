@@ -133,7 +133,7 @@ public class ServiceUtils {
             State.lastSingleAppDisplay = targetDisplayId;
         }
     }
-    public static void _launchPackage(Context context, String packageName, int targetDisplayId) {
+    private static void _launchPackage(Context context, String packageName, int targetDisplayId) {
         if (ShizukuUtils.hasPermission()) {
             launchAppWithShizuku(packageName, context, targetDisplayId);
             return;

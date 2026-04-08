@@ -775,12 +775,12 @@ namespace sunshine_callbacks {
         jvm->DetachCurrentThread();
     }
 
-    void callJavaOnConnectScreenClientDiscovered(std::string connectScreenClient) {
+    void callJavaOnMirrorClientDiscovered(std::string mirrorClient) {
         if (jvm == nullptr) {
             BOOST_LOG(error) << "JVM pointer is null"sv;
             return;
         }
-        
+
         if (sunshineServerClass == nullptr) {
             BOOST_LOG(error) << "SunshineServer class ref is null"sv;
             return;
@@ -793,14 +793,14 @@ namespace sunshine_callbacks {
             return;
         }
 
-        jmethodID onClientDiscoveredMethod = env->GetStaticMethodID(sunshineServerClass, "onConnectScreenClientDiscovered", "(Ljava/lang/String;)V");
+        jmethodID onClientDiscoveredMethod = env->GetStaticMethodID(sunshineServerClass, "onMirrorClientDiscovered", "(Ljava/lang/String;)V");
         if (onClientDiscoveredMethod == nullptr) {
-            BOOST_LOG(error) << "Cannot find onConnectScreenClientDiscovered method"sv;
+            BOOST_LOG(error) << "Cannot find onMirrorClientDiscovered method"sv;
             jvm->DetachCurrentThread();
             return;
         }
 
-        jstring jClientName = env->NewStringUTF(connectScreenClient.c_str());
+        jstring jClientName = env->NewStringUTF(mirrorClient.c_str());
         env->CallStaticVoidMethod(sunshineServerClass, onClientDiscoveredMethod, jClientName);
         env->DeleteLocalRef(jClientName);
 
@@ -812,12 +812,12 @@ namespace sunshine_callbacks {
         jvm->DetachCurrentThread();
     }
 
-    void callJavaSetConnectScreenServerUuid(std::string uuid) {
+    void callJavaSetMirrorServerUuid(std::string uuid) {
         if (jvm == nullptr) {
             BOOST_LOG(error) << "JVM pointer is null"sv;
             return;
         }
-        
+
         if (sunshineServerClass == nullptr) {
             BOOST_LOG(error) << "SunshineServer class ref is null"sv;
             return;
@@ -830,9 +830,9 @@ namespace sunshine_callbacks {
             return;
         }
 
-        jmethodID setServerUuidMethod = env->GetStaticMethodID(sunshineServerClass, "setConnectScreenServerUuid", "(Ljava/lang/String;)V");
+        jmethodID setServerUuidMethod = env->GetStaticMethodID(sunshineServerClass, "setMirrorServerUuid", "(Ljava/lang/String;)V");
         if (setServerUuidMethod == nullptr) {
-            BOOST_LOG(error) << "Cannot find setConnectScreenServerUuid method"sv;
+            BOOST_LOG(error) << "Cannot find setMirrorServerUuid method"sv;
             jvm->DetachCurrentThread();
             return;
         }

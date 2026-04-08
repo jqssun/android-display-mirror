@@ -4,8 +4,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.Handler;
-import android.util.Log;
 
 import io.github.jqssun.displaymirror.BuildConfig;
 import io.github.jqssun.displaymirror.PureBlackActivity;
@@ -42,9 +40,7 @@ public class ExitAll {
             context.startActivity(mainIntent);
         }
 
-        if (State.mirrorVirtualDisplay != null) {
-            State.mirrorVirtualDisplay.release();
-        }
+        State.stopMirrorVirtualDisplay();
 
         State.displaylinkState.destroy();
 

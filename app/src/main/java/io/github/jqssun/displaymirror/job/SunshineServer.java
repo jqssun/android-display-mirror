@@ -1,50 +1,19 @@
 package io.github.jqssun.displaymirror.job;
 
-import android.content.res.Configuration;
-import android.graphics.Rect;
-import android.hardware.display.DisplayManager;
-import android.hardware.input.IInputManager;
+import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import android.content.Context;
-import android.os.RemoteException;
-import android.os.SystemClock;
 import android.text.InputFilter;
 import android.text.InputType;
-import android.widget.FrameLayout;
-import android.util.Log;
-import android.view.Display;
-import android.view.DisplayCutout;
-import android.view.IWindowManager;
-import android.view.InputDevice;
-import android.view.MotionEvent;
-import android.view.MotionEventHidden;
 import android.view.Surface;
-
+import android.widget.FrameLayout;
 import android.widget.Toast;
-import android.media.AudioRecord;
-import android.media.AudioManager;
 
-import androidx.annotation.NonNull;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
-import io.github.jqssun.displaymirror.R;
 import io.github.jqssun.displaymirror.Pref;
+import io.github.jqssun.displaymirror.R;
 import io.github.jqssun.displaymirror.State;
-import io.github.jqssun.displaymirror.SunshineService;
-import io.github.jqssun.displaymirror.TouchpadAccessibilityService;
-import io.github.jqssun.displaymirror.TouchpadActivity;
-import io.github.jqssun.displaymirror.shizuku.ServiceUtils;
-import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import dev.rikka.tools.refine.Refine;
 
 // from Sunshine v2025.122.141614
 public class SunshineServer {
@@ -131,10 +100,7 @@ public class SunshineServer {
                 SunshineMouse.autoRotateAndScaleForMoonlight.stop();
                 SunshineMouse.autoRotateAndScaleForMoonlight = null;
             }
-            if (State.mirrorVirtualDisplay != null) {
-                State.mirrorVirtualDisplay.release();
-                State.mirrorVirtualDisplay = null;
-            }
+            State.stopMirrorVirtualDisplay();
             Context context = State.getContext();
             ExitAll.execute(context, true);
         });
@@ -162,14 +128,14 @@ public class SunshineServer {
         });
     }
 
-    public static void onConnectScreenClientDiscovered(String connectScreenClient) {
-        if (State.discoveredConnectScreenClients.contains(connectScreenClient)) {
+    public static void onMirrorClientDiscovered(String mirrorClient) {
+        if (State.discoveredMirrorClients.contains(mirrorClient)) {
             return;
         }
-        State.discoveredConnectScreenClients.add(connectScreenClient);
+        State.discoveredMirrorClients.add(mirrorClient);
     }
 
-    public static void setConnectScreenServerUuid(String uuid) {
+    public static void setMirrorServerUuid(String uuid) {
         State.serverUuid = uuid;
         if (!Pref.doNotAutoStartMoonlight) {
             new Handler(Looper.getMainLooper()).postDelayed(() -> {

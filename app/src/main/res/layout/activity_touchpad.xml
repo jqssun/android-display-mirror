@@ -22,13 +22,13 @@
                 android:layout_weight="1"
                 android:orientation="horizontal">
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/switchModeButton"
+                    style="@style/Widget.Material3.Button.TonalButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="8dp"
-                    android:text="@string/switch_mode"
-                    android:textSize="14sp"/>
+                    android:text="@string/switch_mode" />
 
                 <Spinner
                     android:id="@+id/modeSpinner"
@@ -36,12 +36,12 @@
                     android:layout_height="wrap_content" />
             </LinearLayout>
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/exitButton"
+                style="@style/Widget.Material3.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/exit"
-                android:textSize="14sp"/>
+                android:text="@string/exit" />
         </LinearLayout>
 
         <TextView
