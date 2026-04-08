@@ -17,6 +17,7 @@ import android.view.Surface;
 
 import androidx.annotation.NonNull;
 
+import io.github.jqssun.displaymirror.MoonlightCursorOverlay;
 import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.State;
 import io.github.jqssun.displaymirror.SunshineService;
@@ -51,6 +52,7 @@ public class SunshineMouse {
     private static boolean autoScale;
     private static boolean singleAppMode;
     private static boolean autoRotate;
+    private static boolean showCursor;
 
     public static void initialize(int width, int height) {
         Context context = State.getContext();
@@ -65,6 +67,10 @@ public class SunshineMouse {
         singleAppMode = Pref.getSingleAppMode();
         autoRotate = Pref.getAutoRotate();
         autoScale = Pref.getAutoScale();
+        showCursor = Pref.getShowMoonlightCursor();
+        if (showCursor) {
+            MoonlightCursorOverlay.show();
+        }
 
         DisplayManager displayManager = (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
         Display defaultDisplay = displayManager.getDisplay(Display.DEFAULT_DISPLAY);
@@ -237,6 +243,9 @@ public class SunshineMouse {
     }
 
     private static Point singlePoint = null;
+    // cursor position in device coordinates for relative mouse
+    private static Point cursorPos = null;
+
     public static void handleAbsMouseMovePacket(float x, float y, float width, float height) {
         x = x / width;
         y = y / height;
@@ -247,11 +256,35 @@ public class SunshineMouse {
         } else {
             singlePoint = point;
         }
+        cursorPos = point;
+        if (showCursor) MoonlightCursorOverlay.update(point.x, point.y);
+    }
+
+    public static void handleRelMouseMovePacket(short deltaX, short deltaY) {
+        if (cursorPos == null) {
+            cursorPos = new Point();
+            cursorPos.x = defaultDisplayHeight / 2;
+            cursorPos.y = defaultDisplayWidth / 2;
+        }
+        cursorPos.x += deltaX;
+        cursorPos.y += deltaY;
+        // clamp
+        cursorPos.x = Math.max(0, Math.min(cursorPos.x, defaultDisplayHeight));
+        cursorPos.y = Math.max(0, Math.min(cursorPos.y, defaultDisplayWidth));
+
+        if (singlePoint != null) {
+            singlePoint = cursorPos;
+            _handleTouchEventMove(0, singlePoint.x, singlePoint.y);
+        }
+        if (showCursor) MoonlightCursorOverlay.update(cursorPos.x, cursorPos.y);
     }
 
     public static void handleLeftMouseButton(boolean release) {
-        if (singlePoint == null) {
+        if (singlePoint == null && cursorPos == null) {
             return;
+        }
+        if (singlePoint == null) {
+            singlePoint = cursorPos;
         }
         if (release) {
             _handleTouchEventUp(0, singlePoint.x, singlePoint.y, false);
@@ -371,9 +404,16 @@ public class SunshineMouse {
                 MotionEventHidden motionEventHidden = Refine.unsafeCast(event);
                 motionEventHidden.setDisplayId(State.mirrorVirtualDisplay.getDisplay().getDisplayId());
             }
-            inputManager.injectInputEvent(event, 0);
-            Log.d(TAG, prefix + ": " + event);
-        } else if (TouchpadAccessibilityService.getInstance() != null) {
+            try {
+                inputManager.injectInputEvent(event, 0);
+                Log.d(TAG, prefix + ": " + event);
+                return;
+            } catch (Exception e) {
+                Log.w(TAG, "Shizuku inject failed, clearing inputManager", e);
+                inputManager = null;
+            }
+        }
+        if (TouchpadAccessibilityService.getInstance() != null) {
             gesture.add(event);
             if ((event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) && pointers.isEmpty()) {
                 if (singleAppMode) {

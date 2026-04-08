@@ -91,6 +91,8 @@ public class MirrorMainActivity extends AppCompatActivity {
         }
 
         Shizuku.addRequestPermissionResultListener(REQUEST_PERMISSION_RESULT_LISTENER);
+        Shizuku.addBinderReceivedListenerSticky(_binderReceivedListener);
+        Shizuku.addBinderDeadListener(_binderDeadListener);
 
         setContentView(R.layout.activity_main);
 
@@ -118,10 +120,21 @@ public class MirrorMainActivity extends AppCompatActivity {
         refresh();
     }
 
+    private final Shizuku.OnBinderReceivedListener _binderReceivedListener = () -> {
+        State.log("Shizuku binder received");
+    };
+
+    private final Shizuku.OnBinderDeadListener _binderDeadListener = () -> {
+        State.log("Shizuku binder DIED");
+        io.github.jqssun.displaymirror.shizuku.ServiceUtils.invalidate();
+    };
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
         Shizuku.removeRequestPermissionResultListener(REQUEST_PERMISSION_RESULT_LISTENER);
+        Shizuku.removeBinderReceivedListener(_binderReceivedListener);
+        Shizuku.removeBinderDeadListener(_binderDeadListener);
         State.setCurrentActivity(null);
     }
 

@@ -44,6 +44,17 @@ public class ServiceUtils {
     private static IPackageManager packageManager;
     private static IAudioService audioManager;
 
+    public static void invalidate() {
+        activityManager = null;
+        activityTaskManager = null;
+        windowManager = null;
+        displayManager = null;
+        inputManager = null;
+        permissionManager = null;
+        packageManager = null;
+        audioManager = null;
+    }
+
     private static void initWithShizuku() {
         if (!ShizukuUtils.hasPermission()) {
             return;

@@ -33,6 +33,7 @@ static std::thread audioRecordingThread;
 // Cache frequently used method IDs
 static jmethodID handleTouchPacketMethod = nullptr;
 static jmethodID handleAbsMouseMoveMethod = nullptr;
+static jmethodID handleRelMouseMoveMethod = nullptr;
 static jmethodID handleLeftMouseButtonMethod = nullptr;
 
 // Additional cached variables
@@ -60,9 +61,10 @@ Java_io_github_jqssun_displaymirror_job_SunshineServer_start(JNIEnv *env, jclass
         // Cache method IDs right after creating class refs
         handleTouchPacketMethod = env->GetStaticMethodID(sunshineMouseClass, "handleTouchPacket", "(IIIFFFFF)V");
         handleAbsMouseMoveMethod = env->GetStaticMethodID(sunshineMouseClass, "handleAbsMouseMovePacket", "(FFFF)V");
+        handleRelMouseMoveMethod = env->GetStaticMethodID(sunshineMouseClass, "handleRelMouseMovePacket", "(SS)V");
         handleLeftMouseButtonMethod = env->GetStaticMethodID(sunshineMouseClass, "handleLeftMouseButton", "(Z)V");
-        
-        if (!handleTouchPacketMethod || !handleAbsMouseMoveMethod || !handleLeftMouseButtonMethod) {
+
+        if (!handleTouchPacketMethod || !handleAbsMouseMoveMethod || !handleRelMouseMoveMethod || !handleLeftMouseButtonMethod) {
             BOOST_LOG(warning) << "Failed to cache one or more input handler method IDs"sv;
         }
     } else {
@@ -736,6 +738,27 @@ namespace sunshine_callbacks {
             env->ExceptionClear();
         }
 
+        jvm->DetachCurrentThread();
+    }
+
+    void callJavaOnRelMouseMove(NV_REL_MOUSE_MOVE_PACKET* packet) {
+        if (jvm == nullptr || sunshineMouseClass == nullptr || handleRelMouseMoveMethod == nullptr) {
+            return;
+        }
+
+        JNIEnv *env;
+        if (jvm->AttachCurrentThread(&env, nullptr) != JNI_OK) {
+            return;
+        }
+
+        jshort dx = util::endian::big(packet->deltaX);
+        jshort dy = util::endian::big(packet->deltaY);
+        env->CallStaticVoidMethod(sunshineMouseClass, handleRelMouseMoveMethod, dx, dy);
+
+        if (env->ExceptionCheck()) {
+            env->ExceptionDescribe();
+            env->ExceptionClear();
+        }
         jvm->DetachCurrentThread();
     }
 

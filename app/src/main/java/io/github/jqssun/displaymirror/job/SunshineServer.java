@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
+import io.github.jqssun.displaymirror.MoonlightCursorOverlay;
 import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.R;
 import io.github.jqssun.displaymirror.State;
@@ -94,6 +95,7 @@ public class SunshineServer {
     public static void stopVirtualDisplay() {
         new Handler(Looper.getMainLooper()).post(() -> {
             State.log("Stopping Moonlight projection");
+            MoonlightCursorOverlay.hide();
             CreateVirtualDisplay.powerOnScreen();
             CreateVirtualDisplay.restoreAspectRatio();
             if (SunshineMouse.autoRotateAndScaleForMoonlight != null) {

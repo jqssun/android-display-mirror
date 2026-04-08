@@ -76,7 +76,8 @@ public class SettingsFragment extends Fragment {
         View singleAppContainer = view.findViewById(R.id.singleAppContainer);
         MaterialSwitch autoRotateCheckbox = view.findViewById(R.id.autoRotateCheckbox);
         MaterialSwitch autoScaleCheckbox = view.findViewById(R.id.autoScaleCheckbox);
-        EditText dpiEditText = view.findViewById(R.id.dpiEditText);
+        TextView dpiValueText = view.findViewById(R.id.dpiValueText);
+        View dpiRow = view.findViewById(R.id.dpiRow);
         MaterialSwitch autoHideFloatingCheckbox = view.findViewById(R.id.autoHideFloatingCheckbox);
         MaterialSwitch autoScreenOffCheckbox = view.findViewById(R.id.autoScreenOffCheckbox);
         MaterialSwitch autoBindInputCheckbox = view.findViewById(R.id.autoBindInputCheckbox);
@@ -85,6 +86,7 @@ public class SettingsFragment extends Fragment {
         MaterialSwitch useTouchscreenCheckbox = view.findViewById(R.id.useTouchscreenCheckbox);
         MaterialSwitch autoMatchAspectRatioCheckbox = view.findViewById(R.id.autoMatchAspectRatioCheckbox);
         MaterialSwitch showFloatingInMirrorModeCheckbox = view.findViewById(R.id.showFloatingInMirrorModeCheckbox);
+        MaterialSwitch showMoonlightCursorCheckbox = view.findViewById(R.id.showMoonlightCursorCheckbox);
         MaterialSwitch autoConnectClientCheckbox = view.findViewById(R.id.autoConnectClientCheckbox);
         LinearLayout clientConnectionContainer = view.findViewById(R.id.clientConnectionContainer);
         Spinner clientSpinner = view.findViewById(R.id.clientSpinner);
@@ -97,7 +99,7 @@ public class SettingsFragment extends Fragment {
         singleAppModeCheckbox.setChecked(singleAppMode);
         autoRotateCheckbox.setChecked(Pref.getAutoRotate());
         autoScaleCheckbox.setChecked(Pref.getAutoScale());
-        dpiEditText.setText(String.valueOf(Pref.getSingleAppDpi()));
+        dpiValueText.setText(getString(R.string.dpi_text_size_value, Pref.getSingleAppDpi()));
         autoHideFloatingCheckbox.setChecked(Pref.getAutoHideFloatingBackButton());
         autoScreenOffCheckbox.setChecked(Pref.getAutoScreenOff());
         autoBindInputCheckbox.setChecked(Pref.getAutoBindInput());
@@ -106,6 +108,7 @@ public class SettingsFragment extends Fragment {
         useTouchscreenCheckbox.setChecked(Pref.getUseTouchscreen());
         autoMatchAspectRatioCheckbox.setChecked(Pref.getAutoMatchAspectRatio());
         showFloatingInMirrorModeCheckbox.setChecked(Pref.getShowFloatingInMirrorMode());
+        showMoonlightCursorCheckbox.setChecked(Pref.getShowMoonlightCursor());
         boolean autoConnectClient = Pref.getAutoConnectClient();
         autoConnectClientCheckbox.setChecked(autoConnectClient);
         useBlackImageCheckbox.setChecked(Pref.getUseBlackImage());
@@ -124,12 +127,13 @@ public class SettingsFragment extends Fragment {
         }
 
         TextView singleAppTitle = view.findViewById(R.id.singleAppTitle);
+        boolean hasShizuku = ShizukuUtils.hasPermission();
         singleAppModeCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
             preferences.edit().putBoolean(Pref.KEY_SINGLE_APP_MODE, isChecked).apply();
             autoScaleCheckbox.setEnabled(!isChecked);
-            autoMatchAspectRatioCheckbox.setEnabled(!isChecked);
+            autoMatchAspectRatioCheckbox.setEnabled(!isChecked && hasShizuku);
             showFloatingInMirrorModeCheckbox.setEnabled(!isChecked);
-            singleAppContainer.setVisibility(isChecked ? View.VISIBLE : View.GONE);
+            _setSingleAppChildrenEnabled(singleAppContainer, isChecked, hasShizuku);
             if (!isChecked) {
                 singleAppTitle.setText(R.string.single_app_projection);
             } else if (!selectedAppName.isEmpty()) {
@@ -137,8 +141,9 @@ public class SettingsFragment extends Fragment {
             }
         });
         autoScaleCheckbox.setEnabled(!singleAppMode);
-        autoMatchAspectRatioCheckbox.setEnabled(!singleAppMode);
+        autoMatchAspectRatioCheckbox.setEnabled(!singleAppMode && hasShizuku);
         showFloatingInMirrorModeCheckbox.setEnabled(!singleAppMode);
+        _setSingleAppChildrenEnabled(singleAppContainer, singleAppMode, hasShizuku);
 
         autoRotateCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_AUTO_ROTATE, c).apply());
         autoScaleCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_AUTO_SCALE, c).apply());
@@ -146,10 +151,7 @@ public class SettingsFragment extends Fragment {
         autoScreenOffCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_AUTO_SCREEN_OFF, c).apply());
 
         autoBindInputCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_AUTO_BIND_INPUT, c).apply());
-        if (!ShizukuUtils.hasPermission()) autoBindInputCheckbox.setEnabled(false);
-
         autoMoveImeCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_AUTO_MOVE_IME, c).apply());
-        if (!ShizukuUtils.hasPermission()) autoMoveImeCheckbox.setEnabled(false);
 
         disableUsbAudioCheckbox.setOnCheckedChangeListener((b, isChecked) -> {
             preferences.edit().putBoolean(Pref.KEY_DISABLE_USB_AUDIO, isChecked).apply();
@@ -167,7 +169,6 @@ public class SettingsFragment extends Fragment {
         if (!ShizukuUtils.hasPermission()) disableUsbAudioCheckbox.setEnabled(false);
 
         useTouchscreenCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_USE_TOUCHSCREEN, c).apply());
-        if (!ShizukuUtils.hasPermission()) useTouchscreenCheckbox.setEnabled(false);
 
         autoMatchAspectRatioCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_AUTO_MATCH_ASPECT_RATIO, c).apply());
         if (!ShizukuUtils.hasPermission()) autoMatchAspectRatioCheckbox.setEnabled(false);
@@ -180,13 +181,9 @@ public class SettingsFragment extends Fragment {
 
         disableRemoteSubmixCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_DISABLE_REMOTE_SUBMIX, c).apply());
 
-        singleAppContainer.setVisibility(singleAppMode ? View.VISIBLE : View.GONE);
-
         selectAppButton.setOnClickListener(v -> _showAppSelectionDialog());
 
-        dpiEditText.setOnFocusChangeListener((v, hasFocus) -> { if (!hasFocus) _saveDpi(dpiEditText); });
-        MaterialButton dpiConfirmButton = view.findViewById(R.id.dpiConfirmButton);
-        dpiConfirmButton.setOnClickListener(v -> _saveDpi(dpiEditText));
+        dpiRow.setOnClickListener(v -> _showDpiDialog(dpiValueText));
 
         // Permissions
         MaterialButton shizukuPermissionBtn = view.findViewById(R.id.shizukuPermissionBtn);
@@ -205,6 +202,9 @@ public class SettingsFragment extends Fragment {
                 TouchpadAccessibilityService.disableAll(requireContext());
             }
         });
+
+        // Moonlight cursor
+        showMoonlightCursorCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_SHOW_MOONLIGHT_CURSOR, c).apply());
 
         // Moonlight client
         clientConnectionContainer.setVisibility(autoConnectClient ? View.VISIBLE : View.GONE);
@@ -313,16 +313,31 @@ public class SettingsFragment extends Fragment {
             .show();
     }
 
-    private void _saveDpi(EditText dpiEditText) {
-        try {
-            int dpi = Integer.parseInt(dpiEditText.getText().toString());
-            if (dpi < 60) dpi = 60;
-            if (dpi > 600) dpi = 600;
-            dpiEditText.setText(String.valueOf(dpi));
-            preferences.edit().putInt(Pref.KEY_SINGLE_APP_DPI, dpi).apply();
-        } catch (NumberFormatException e) {
-            dpiEditText.setText(String.valueOf(Pref.getSingleAppDpi()));
-        }
+    private void _showDpiDialog(TextView dpiValueText) {
+        EditText input = new EditText(requireContext());
+        input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        input.setText(String.valueOf(Pref.getSingleAppDpi()));
+        input.setSelectAllOnFocus(true);
+        int pad = (int) (16 * getResources().getDisplayMetrics().density);
+        android.widget.FrameLayout container = new android.widget.FrameLayout(requireContext());
+        container.setPadding(pad, pad, pad, 0);
+        container.addView(input);
+
+        new MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.dpi_text_size)
+            .setView(container)
+            .setPositiveButton(R.string.ok, (dialog, which) -> {
+                try {
+                    int dpi = Integer.parseInt(input.getText().toString());
+                    if (dpi < 60) dpi = 60;
+                    if (dpi > 600) dpi = 600;
+                    preferences.edit().putInt(Pref.KEY_SINGLE_APP_DPI, dpi).apply();
+                    dpiValueText.setText(getString(R.string.dpi_text_size_value, dpi));
+                } catch (NumberFormatException ignored) {
+                }
+            })
+            .setNegativeButton(R.string.cancel, null)
+            .show();
     }
 
     private void _loadClientList(Spinner spinner) {
@@ -370,6 +385,30 @@ public class SettingsFragment extends Fragment {
             })
             .setNegativeButton(R.string.cancel, null)
             .show();
+    }
+
+    private void _setSingleAppChildrenEnabled(View container, boolean singleAppOn, boolean hasShizuku) {
+        boolean enabled = singleAppOn && hasShizuku;
+        if (container instanceof ViewGroup) {
+            ViewGroup vg = (ViewGroup) container;
+            for (int i = 0; i < vg.getChildCount(); i++) {
+                View child = vg.getChildAt(i);
+                child.setEnabled(enabled);
+                if (child instanceof ViewGroup) {
+                    _setAllEnabled((ViewGroup) child, enabled);
+                }
+            }
+        }
+    }
+
+    private void _setAllEnabled(ViewGroup vg, boolean enabled) {
+        for (int i = 0; i < vg.getChildCount(); i++) {
+            View child = vg.getChildAt(i);
+            child.setEnabled(enabled);
+            if (child instanceof ViewGroup) {
+                _setAllEnabled((ViewGroup) child, enabled);
+            }
+        }
     }
 
     private static class _AppListAdapter extends ArrayAdapter<ResolveInfo> {

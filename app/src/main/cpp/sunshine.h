@@ -8,6 +8,7 @@ namespace sunshine_callbacks {
     void captureAudioLoop(void *channel_data, safe::mail_t mail, const audio::config_t& config);
     void callJavaOnTouch(SS_TOUCH_PACKET* touchPacket);
     void callJavaOnAbsMouseMove(NV_ABS_MOUSE_MOVE_PACKET* packet);
+    void callJavaOnRelMouseMove(NV_REL_MOUSE_MOVE_PACKET* packet);
     void callJavaOnMouseButton(std::uint8_t button, bool release);
     void callJavaOnMirrorClientDiscovered(std::string mirrorClient);
     void callJavaSetMirrorServerUuid(std::string uuid);

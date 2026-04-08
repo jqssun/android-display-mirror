@@ -35,8 +35,6 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.material.button.MaterialButton;
-
 import io.github.jqssun.displaymirror.job.StartTouchPad;
 import io.github.jqssun.displaymirror.shizuku.ServiceUtils;
 import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
@@ -149,10 +147,6 @@ public class TouchpadActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().hide();
-        }
 
         setContentView(R.layout.activity_touchpad);
 
@@ -161,7 +155,7 @@ public class TouchpadActivity extends AppCompatActivity {
         _updateHelp();
 
         displayId = getIntent().getIntExtra("display_id", Display.DEFAULT_DISPLAY);
-        
+
         if (ShizukuUtils.hasPermission()) {
             inputManager = ServiceUtils.getInputManager();
         }
@@ -182,22 +176,20 @@ public class TouchpadActivity extends AppCompatActivity {
         } else {
             _setupTouchListenerForInputManager();
         }
-        
+
         findViewById(R.id.goDarkButton).setOnClickListener(v -> _toggleDarkMode());
         findViewById(R.id.backButton).setOnClickListener(v -> performBackGesture(inputManager, displayId));
         findViewById(R.id.homeButton).setOnClickListener(v -> launchSingleApp(this, displayId));
 
         _setupModeSpinner();
 
-        MaterialButton exitButton = findViewById(R.id.exitButton);
-        exitButton.setOnClickListener(v -> finish());
+        findViewById(R.id.exitButton).setOnClickListener(v -> finish());
 
         if (ShizukuUtils.hasPermission()) {
             setFocus(inputManager, displayId);
         }
 
-        MaterialButton switchModeButton = findViewById(R.id.switchModeButton);
-        switchModeButton.setOnClickListener(v -> _switchMode());
+        findViewById(R.id.switchModeButton).setOnClickListener(v -> _switchMode());
     }
 
     private void _setupTouchListenerForAccessibility() {
@@ -234,14 +226,11 @@ public class TouchpadActivity extends AppCompatActivity {
                         replayGestureViaAccessibility(gestureState.allMotionEvents, displayId);
                     }
                 }
-                gestureState.lastReplayed = 0;
-                gestureState.isSingleFinger = false;
-                gestureState.allMotionEvents.clear();
+                _recycleGestureEvents();
                 return true;
             }
 
             if (!isCursorLocked) {
-                // move cursor with single finger if not locked
                 if (gestureState.isSingleFinger || (event.getPointerCount() == 1 && (gestureState.allMotionEvents.size() == 5 || Math.abs(relativeX) > 10 || Math.abs(relativeY) > 10))) {
                     if (gestureState.allMotionEvents.size() == 5 && Math.abs(relativeX) < 1 && Math.abs(relativeY) < 1) {
                         Log.d(TAG, "No movement detected");
@@ -288,14 +277,11 @@ public class TouchpadActivity extends AppCompatActivity {
                         _replayBufferedEvents();
                     }
                 }
-                gestureState.lastReplayed = 0;
-                gestureState.isSingleFinger = false;
-                gestureState.allMotionEvents.clear();
+                _recycleGestureEvents();
                 return true;
             }
 
             if (!isCursorLocked && gestureState.lastReplayed == 0) {
-                // move cursor with single finger if not locked
                 if (gestureState.isSingleFinger || (event.getPointerCount() == 1 && (gestureState.allMotionEvents.size() == 5 || Math.abs(relativeX) > 10 || Math.abs(relativeY) > 10))) {
                     if (gestureState.allMotionEvents.size() == 5 && Math.abs(relativeX) < 1 && Math.abs(relativeY) < 1) {
                         Log.d(TAG, "No movement detected");
@@ -343,6 +329,15 @@ public class TouchpadActivity extends AppCompatActivity {
         }
         
         touchpadArea.setText(getString(R.string.touchpad_help_text, singleFingerAction));
+    }
+
+    private void _recycleGestureEvents() {
+        for (MotionEvent e : gestureState.allMotionEvents) {
+            e.recycle();
+        }
+        gestureState.allMotionEvents.clear();
+        gestureState.lastReplayed = 0;
+        gestureState.isSingleFinger = false;
     }
 
     private void _replayBufferedEvents() {

@@ -28,6 +28,7 @@ public class Pref {
     public static final String KEY_USE_BLACK_IMAGE = "use_black_image";
     public static final String KEY_PREVENT_AUTO_LOCK = "prevent_auto_lock";
     public static final String KEY_DISABLE_REMOTE_SUBMIX = "disable_remote_submix";
+    public static final String KEY_SHOW_MOONLIGHT_CURSOR = "show_moonlight_cursor";
     public static final String KEY_DISPLAYLINK_APK_URL = "displaylink_apk_url";
     public static final String DEFAULT_DISPLAYLINK_APK_URL = "https://www.synaptics.com/sites/default/files/exe_files/2024-12/DisplayLink%C2%AE%20USB%20Graphics%20Software%20for%20Android%204.2.0-EXE.apk";
     public static boolean doNotAutoStartMoonlight;
@@ -118,6 +119,10 @@ public class Pref {
 
     public static boolean getDisableRemoteSubmix() {
         return getBoolean(KEY_DISABLE_REMOTE_SUBMIX, false);
+    }
+
+    public static boolean getShowMoonlightCursor() {
+        return getBoolean(KEY_SHOW_MOONLIGHT_CURSOR, false);
     }
 
     public static String getDisplaylinkApkUrl() {

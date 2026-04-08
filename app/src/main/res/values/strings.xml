@@ -39,7 +39,7 @@
     <string name="connect">Connect</string>
     <string name="about">About</string>
     <string name="disable">Disable</string>
-    <string name="screen_off">Screen off</string>
+    <string name="screen_off">Turn display off</string>
     <string name="touchscreen">Touchscreen</string>
     <string name="touchpad">Touchpad</string>
     <string name="screen">Screens</string>
@@ -57,15 +57,15 @@
     <string name="status_not_authorized">Unauthorized</string>
 
     <!-- activity_touchpad -->
-    <string name="mode_normal">Normal mode</string>
+    <string name="mode_normal">Normal</string>
     <string name="mode_cursor_locked">Locked cursor</string>
     <string name="touchpad_help_cursor_locked">Cursor stays fixed, single-finger gestures only</string>
     <string name="touchpad_help_move_cursor">Move cursor</string>
-    <string name="touchpad_help_text">Touch in this area:\n- Single finger swipe - %s\n- Single finger tap - click\n- Multi-finger gestures - perform multi-finger gestures\n- Back button - press back on the target screen\n- Home button - open the selected application again\n- Moon button - black display to save power\n- If a Bluetooth controller cannot control the display, try using the moon button to turn off the main screen, which forces the cursor to the secondary display</string>
+    <string name="touchpad_help_text">Touch this area to control the target screen:\n\n- Single-finger swipe: %s\n- Single-finger tap: Tap on the target screen\n- Multi-finger gesture: Sent to the target screen\n- Back button: Go back on the target screen\n- Home button: Reopen the selected app\n- Moon button: Black screen to save power\n\nIf a Bluetooth controller cannot control the display, use the moon button to turn off the main screen and shift focus.</string>
 
     <!-- activity_touchscreen -->
-    <string name="exit_vertical">Ex\nit</string>
-    <string name="back_vertical">Ba\nck</string>
+    <string name="exit_vertical">Exit</string>
+    <string name="back_vertical">Back</string>
 
     <!-- activity_about -->
     <string name="version_format">Version: %1$s (Android %2$s)</string>
@@ -89,17 +89,18 @@
     <string name="overlay_status">Overlay permission</string>
     <string name="use_accessibility">Use Accessibility</string>
     <string name="use_accessibility_desc">Enable accessibility service for touchpad and input control</string>
-    <string name="single_app_projection">Single-app projection</string>
+    <string name="single_app_projection">Project an application</string>
     <string name="single_app_projection_desc">Project launcher apps like Microsoft Launcher</string>
-    <string name="single_app_projection_with_name">Single-app projection: %s</string>
+    <string name="single_app_projection_with_name">Project an application: %s</string>
     <string name="select_projected_app">Select application to project</string>
     <string name="auto_move_mouse">Auto-move mouse input</string>
-    <string name="auto_move_mouse_desc">Move mouse to external display. Requires Android 15 with Shizuku. Bluetooth gamepads and keyboards follow system focus \u2014 use screen off to transfer focus.</string>
+    <string name="auto_move_mouse_desc">Move mouse to external display. Requires Android 15 with Shizuku. Bluetooth gamepads and keyboards follow system cursor focus. Use the \"Turn display off\" button to transfer focus.</string>
     <string name="auto_move_ime">Auto-move keyboard</string>
     <string name="auto_move_ime_desc">Move keyboard input to external display</string>
     <string name="enable_touchscreen_control">Touch control</string>
     <string name="enable_touchscreen_control_desc">Use main screen to control extended display</string>
-    <string name="dpi_text_size">DPI text size:</string>
+    <string name="dpi_text_size">DPI and text size</string>
+    <string name="dpi_text_size_value">Current: %d</string>
     <string name="auto_rotate">Auto rotate</string>
     <string name="auto_rotate_desc">Automatically rotate display to match orientation</string>
     <string name="auto_scale_remove_bars">Auto scale</string>
@@ -122,10 +123,12 @@
     <string name="no_audio_try_no_remote_submix_desc">Fix audio issues in Moonlight</string>
     <string name="auto_hide_floating_back">Auto-hide floating button</string>
     <string name="auto_hide_floating_back_desc">Single tap to go back; double tap to return to projected app</string>
-    <string name="auto_connect_moonlight">Auto-connect Moonlight</string>
-    <string name="auto_connect_moonlight_desc">Moonlight autostart edition only (not compatible with standard Moonlight)</string>
+    <string name="auto_connect_moonlight">Auto-connect Moonlight (Beta)</string>
+    <string name="auto_connect_moonlight_desc">Proactively send a JSON connect request to the Moonlight client. Requires a fork with the autostart listener. Not compatible with standard Moonlight.</string>
+    <string name="show_moonlight_cursor">Show cursor location</string>
+    <string name="show_moonlight_cursor_desc">Show a cursor overlay on the device screen for Moonlight mouse input</string>
     <string name="change_displaylink_output_settings">Change DisplayLink Output Settings</string>
-    <string name="select_app_title">Select a launcher app such as Microsoft Launcher for the best experience</string>
+    <string name="select_app_title">Select a launcher app for the best experience</string>
     <string name="displaylink_resolution_title">DisplayLink Output Settings</string>
     <string name="displaylink_output_format">Current output: %1$dx%2$d@%3$dHz</string>
     <string name="quick_presets">Custom</string>

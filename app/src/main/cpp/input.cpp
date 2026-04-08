@@ -449,7 +449,7 @@ namespace input {
     }
 
     input->mouse_left_button_timeout = DISABLE_LEFT_BUTTON_DELAY;
-//    platf::move_mouse(platf_input, util::endian::big(packet->deltaX), util::endian::big(packet->deltaY));
+    sunshine_callbacks::callJavaOnRelMouseMove(packet);
   }
 
   /**

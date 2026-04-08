@@ -44,7 +44,8 @@ public class ExitAll {
 
         State.displaylinkState.destroy();
 
-        if (!wasSunshineStarted && !ShizukuUtils.hasPermission() && TouchpadAccessibilityService.getInstance() != null) {
+        boolean sunshineServiceRunning = SunshineService.instance != null;
+        if (!wasSunshineStarted && !sunshineServiceRunning && !ShizukuUtils.hasPermission() && TouchpadAccessibilityService.getInstance() != null) {
             // direct connection but don't exit accessibility
             if (State.getCurrentActivity() != null) {
                 State.getCurrentActivity().finish();

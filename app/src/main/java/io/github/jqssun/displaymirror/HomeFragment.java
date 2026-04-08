@@ -41,7 +41,7 @@ public class HomeFragment extends Fragment {
             if (AutoRotateAndScaleForDisplaylink.instance != null) {
                 AutoRotateAndScaleForDisplaylink.instance.release();
             }
-            ExitAll.execute(requireActivity(), false);
+            ExitAll.execute(requireActivity(), true);
         });
         screenOffBtn.setOnClickListener(v -> CreateVirtualDisplay.doPowerOffScreen(requireActivity()));
         touchScreenBtn.setOnClickListener(v -> _onTouchScreenClick());

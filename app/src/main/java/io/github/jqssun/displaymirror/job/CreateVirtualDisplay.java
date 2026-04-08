@@ -292,16 +292,19 @@ public class CreateVirtualDisplay {
         if(!_shouldChangeAspectRatio()) {
             return;
         }
-        IWindowManager wm = ServiceUtils.getWindowManager();
-        Point baseSize = new Point();
-        wm.getBaseDisplaySize(Display.DEFAULT_DISPLAY, baseSize);
-        Point initialSize = new Point();
-        wm.getInitialDisplaySize(Display.DEFAULT_DISPLAY, initialSize);
-        if (baseSize.y == initialSize.y) {
-            return;
+        try {
+            IWindowManager wm = ServiceUtils.getWindowManager();
+            Point baseSize = new Point();
+            wm.getBaseDisplaySize(Display.DEFAULT_DISPLAY, baseSize);
+            Point initialSize = new Point();
+            wm.getInitialDisplaySize(Display.DEFAULT_DISPLAY, initialSize);
+            if (baseSize.y == initialSize.y) {
+                return;
+            }
+            wm.clearForcedDisplaySize(Display.DEFAULT_DISPLAY);
+            wm.setForcedDisplaySize(Display.DEFAULT_DISPLAY, initialSize.x, initialSize.y);
+        } catch (Exception ignored) {
         }
-        wm.clearForcedDisplaySize(Display.DEFAULT_DISPLAY);
-        wm.setForcedDisplaySize(Display.DEFAULT_DISPLAY, initialSize.x, initialSize.y);
     }
 
     public static class VirtualDisplayCallback extends IVirtualDisplayCallback.Stub {

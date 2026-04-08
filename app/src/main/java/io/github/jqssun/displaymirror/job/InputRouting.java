@@ -150,7 +150,10 @@ public class InputRouting {
         if (!ShizukuUtils.hasPermission()) {
             return;
         }
-        IWindowManager windowManager = ServiceUtils.getWindowManager();
-        windowManager.setDisplayImePolicy(Display.DEFAULT_DISPLAY, 0);
+        try {
+            IWindowManager windowManager = ServiceUtils.getWindowManager();
+            windowManager.setDisplayImePolicy(Display.DEFAULT_DISPLAY, 0);
+        } catch (Exception ignored) {
+        }
     }
 }
