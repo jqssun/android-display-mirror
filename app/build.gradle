@@ -18,8 +18,8 @@ android {
         applicationId "io.github.jqssun.displaymirror"
         minSdk 28
         targetSdk 34
-        versionCode 3
-        versionName "0.0.3"
+        versionCode 4
+        versionName "0.0.4"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -82,7 +82,7 @@ dependencies {
     implementation 'androidx.navigation:navigation-ui:2.7.7'
     implementation 'androidx.recyclerview:recyclerview:1.3.2'
     implementation 'androidx.fragment:fragment:1.6.2'
-    implementation 'androidx.core:core-ktx:1.8.0'
+    implementation 'androidx.core:core-ktx:1.12.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation libs.androidx.window

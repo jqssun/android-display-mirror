@@ -60,10 +60,10 @@ public class OverviewFragment extends Fragment {
 
         // Double-tap about card to export logs
         View aboutCard = view.findViewById(R.id.aboutCard);
-        GestureDetector gestureDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener() {
+        GestureDetector gestureDetector = new GestureDetector(requireContext(), new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onDoubleTap(MotionEvent e) {
-                if (ShizukuUtils.hasPermission()) {
+                if (ShizukuUtils.hasPermission() && getContext() != null) {
                     State.startNewJob(new FetchLogAndShare(getContext()));
                 }
                 return true;

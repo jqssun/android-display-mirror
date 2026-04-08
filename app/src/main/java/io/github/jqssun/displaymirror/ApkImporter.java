@@ -56,28 +56,55 @@ public class ApkImporter {
         return false;
     }
 
-    public static String downloadAndImport(Context ctx, String url) throws IOException {
+    public static String downloadAndImport(Context ctx, String url, java.util.function.IntConsumer onProgress) throws IOException {
         File tmp = new File(_dir(ctx), "tmp.apk");
         _dir(ctx).mkdirs();
         try {
-            HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
-            conn.setInstanceFollowRedirects(true);
-            conn.connect();
+            HttpURLConnection conn = _openFollowingRedirects(url);
             if (conn.getResponseCode() != 200) {
                 return "Download failed: HTTP " + conn.getResponseCode();
             }
+            long downloaded = 0;
+            int lastMb = -1;
             try (InputStream is = conn.getInputStream();
                  FileOutputStream fos = new FileOutputStream(tmp)) {
                 byte[] buf = new byte[8192];
                 int n;
                 while ((n = is.read(buf)) != -1) {
                     fos.write(buf, 0, n);
+                    downloaded += n;
+                    if (onProgress != null) {
+                        int mb = (int)(downloaded / (1024 * 1024));
+                        if (mb != lastMb) {
+                            lastMb = mb;
+                            onProgress.accept(mb);
+                        }
+                    }
                 }
             }
             return importFromFile(ctx, tmp);
         } finally {
             tmp.delete();
         }
+    }
+
+    private static HttpURLConnection _openFollowingRedirects(String url) throws IOException {
+        int maxRedirects = 10;
+        for (int i = 0; i < maxRedirects; i++) {
+            HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+            conn.setInstanceFollowRedirects(false);
+            conn.connect();
+            int code = conn.getResponseCode();
+            if (code == 301 || code == 302 || code == 303 || code == 307 || code == 308) {
+                String location = conn.getHeaderField("Location");
+                conn.disconnect();
+                if (location == null) break;
+                url = location;
+                continue;
+            }
+            return conn;
+        }
+        throw new IOException("Too many redirects");
     }
 
     public static String importFromFile(Context ctx, File apk) throws IOException {
@@ -87,7 +114,9 @@ public class ApkImporter {
     }
 
     public static String importFromApk(Context ctx, Uri uri) throws IOException {
-        try (InputStream is = ctx.getContentResolver().openInputStream(uri)) {
+        InputStream is = ctx.getContentResolver().openInputStream(uri);
+        if (is == null) return "Failed to open file";
+        try (is) {
             return _importFromStream(ctx, is);
         }
     }

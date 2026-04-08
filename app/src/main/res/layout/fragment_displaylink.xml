@@ -71,15 +71,6 @@
             android:textAppearance="?attr/textAppearanceLabelLarge"
             android:textColor="?colorPrimary" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="8dp"
-            android:text="@string/import_displaylink_libs_prompt"
-            android:textAppearance="?attr/textAppearanceBodyMedium"
-            android:textColor="?colorOnSurfaceVariant" />
-
         <com.google.android.material.button.MaterialButton
             android:id="@+id/downloadApkBtn"
             android:layout_width="match_parent"

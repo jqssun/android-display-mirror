@@ -26,7 +26,11 @@ public class LogAdapter extends RecyclerView.Adapter<LogAdapter.LogViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull LogViewHolder holder, int position) {
-        holder.textView.setText(logs.get(position));
+        try {
+            holder.textView.setText(logs.get(position));
+        } catch (IndexOutOfBoundsException e) {
+            // list modified concurrently
+        }
     }
 
     @Override

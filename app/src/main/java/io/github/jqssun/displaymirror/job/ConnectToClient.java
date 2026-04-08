@@ -19,6 +19,10 @@ public class ConnectToClient {
         SunshineServer.pinCandidate = String.valueOf(pin);
         String clientIpAndPort = Pref.getSelectedClient();
         String[] parts = clientIpAndPort.split(":");
+        if (parts.length < 2) {
+            State.log("Invalid client address (missing port): " + clientIpAndPort);
+            return;
+        }
         String clientIp = parts[0];
         int clientPort = -1;
         try {

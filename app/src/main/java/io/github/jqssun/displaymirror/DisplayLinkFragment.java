@@ -84,7 +84,7 @@ public class DisplayLinkFragment extends Fragment {
         ImageView icon = view.findViewById(R.id.libStatusIcon);
         boolean imported = ApkImporter.areLibsImported(requireContext());
         title.setText(imported ? R.string.displaylink_libs_status_imported : R.string.displaylink_libs_status_missing);
-        detail.setText(imported ? R.string.displaylink_libs_detail_imported : R.string.displaylink_libs_detail_missing);
+        detail.setText(imported ? R.string.displaylink_libs_detail_imported : R.string.import_displaylink_libs_prompt);
         icon.setImageResource(imported ? R.drawable.ic_check_circle : R.drawable.ic_error);
     }
 

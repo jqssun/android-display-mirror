@@ -296,12 +296,13 @@ namespace stream {
 
     int send(const std::string_view &payload, net::peer_t peer) {
       auto packet = enet_packet_create(payload.data(), payload.size(), ENET_PACKET_FLAG_RELIABLE);
-      if (enet_peer_send(peer, 0, packet)) {
-        enet_packet_destroy(packet);
-
+      if (!packet) {
         return -1;
       }
-
+      if (enet_peer_send(peer, 0, packet)) {
+        enet_packet_destroy(packet);
+        return -1;
+      }
       return 0;
     }
 

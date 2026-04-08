@@ -171,7 +171,9 @@ public class TouchpadAccessibilityService extends AccessibilityService {
             targetDisplayWindows = getWindows();
         } else {
             SparseArray<List<AccessibilityWindowInfo>> windows = getWindowsOnAllDisplays();
-            targetDisplayWindows = windows.get(displayId);
+            if (windows != null) {
+                targetDisplayWindows = windows.get(displayId);
+            }
         }
         android.util.Log.d("AccessibilityService", "Got window list: " + (targetDisplayWindows != null ? targetDisplayWindows.size() : 0) + " windows");
 

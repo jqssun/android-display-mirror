@@ -190,22 +190,17 @@ Java_io_github_jqssun_displaymirror_job_SunshineServer_startAudioRecording(JNIEn
         
         try {
             while (true) {
-                // Read audio data
                 jint samplesRead = threadEnv->CallIntMethod(globalAudioRecord, readMethod, buffer, 0, framesPerPacket * 2, 0);
-                
+
                 if (samplesRead > 0) {
-                    // Get buffer data
                     jfloat *audioData = threadEnv->GetFloatArrayElements(buffer, nullptr);
                     if (audioData) {
-                        // Convert audio data to std::vector<float>
                         std::vector<float> audioSamples(audioData, audioData + samplesRead);
-                        
-                        // Pass audio data to Sunshine audio pipeline
+
                         if (samples) {
                             samples->raise(std::move(audioSamples));
                         }
 
-                        // Release buffer
                         threadEnv->ReleaseFloatArrayElements(buffer, audioData, JNI_ABORT);
                     }
                 }
@@ -214,7 +209,7 @@ Java_io_github_jqssun_displaymirror_job_SunshineServer_startAudioRecording(JNIEn
             BOOST_LOG(error) << "Exception during audio recording"sv;
         }
 
-        // Detach thread
+        threadEnv->DeleteLocalRef(buffer);
         jvm->DetachCurrentThread();
     });
 }

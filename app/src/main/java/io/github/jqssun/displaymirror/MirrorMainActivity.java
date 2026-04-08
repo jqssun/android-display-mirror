@@ -100,7 +100,7 @@ public class MirrorMainActivity extends AppCompatActivity {
         BottomNavigationView bottomNav = findViewById(R.id.bottom_nav);
         NavigationUI.setupWithNavController(bottomNav, navController);
 
-        State.uiState.observe(this, state -> {}); // keep observing for refresh
+        State.uiState.observe(this, state -> {});
     }
 
     private void _ensureAccessibilityServiceStarted() {
@@ -165,7 +165,9 @@ public class MirrorMainActivity extends AppCompatActivity {
                     State.log("Starting SunshineService");
                 } else {
                     MediaProjectionManager mediaProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+                    if (mediaProjectionManager == null) return;
                     State.setMediaProjection(mediaProjectionManager.getMediaProjection(RESULT_OK, data));
+                    if (State.getMediaProjection() == null) { State.resumeJob(); return; }
                     State.getMediaProjection().registerCallback(new MediaProjection.Callback() {
                         @Override
                         public void onStop() {
@@ -215,7 +217,8 @@ public class MirrorMainActivity extends AppCompatActivity {
     }
 
     public void refresh() {
-        if (State.uiState.getValue().errorStatusText != null) {
+        MirrorUiState current = State.uiState.getValue();
+        if (current != null && current.errorStatusText != null) {
             return;
         }
         boolean singleAppMode = Pref.getSingleAppMode();
@@ -268,7 +271,8 @@ public class MirrorMainActivity extends AppCompatActivity {
         String url = Pref.getDisplaylinkApkUrl();
         new Thread(() -> {
             try {
-                String err = ApkImporter.downloadAndImport(this, url);
+                String err = ApkImporter.downloadAndImport(this, url, mb ->
+                    runOnUiThread(() -> downloadBtn.setText(mb + " MB")));
                 runOnUiThread(() -> {
                     downloadBtn.setEnabled(true);
                     downloadBtn.setText(R.string.auto_import_displaylink_libs);

@@ -40,7 +40,7 @@ public class State {
     public static FloatingButtonService floatingButtonService;
     public static String serverUuid;
     private static Job currentJob;
-    public static List<String> logs = new ArrayList<>();
+    public static List<String> logs = java.util.Collections.synchronizedList(new ArrayList<>());
     public static DisplaylinkState displaylinkState = new DisplaylinkState();
     private static MediaProjection mediaProjection;
     public static MediaProjection mediaProjectionInUse;
@@ -155,14 +155,13 @@ public class State {
         }
     }
 
-    private static int _logVersion = 0;
+    private static final java.util.concurrent.atomic.AtomicInteger _logVersion = new java.util.concurrent.atomic.AtomicInteger(0);
     public static final MutableLiveData<Integer> logVersion = new MutableLiveData<>(0);
 
     public static void log(String message) {
         logs.add(message);
         Log.i("ConnectScreen", message);
-        _logVersion++;
-        logVersion.postValue(_logVersion);
+        logVersion.postValue(_logVersion.incrementAndGet());
     }
 
     public static MediaProjection getMediaProjection() {

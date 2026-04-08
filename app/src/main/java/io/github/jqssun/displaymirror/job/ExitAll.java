@@ -32,6 +32,7 @@ public class ExitAll {
         if (restart) {
             PackageManager packageManager = context.getPackageManager();
             Intent intent = packageManager.getLaunchIntentForPackage(BuildConfig.APPLICATION_ID);
+            if (intent == null) return;
             ComponentName componentName = intent.getComponent();
             Intent mainIntent = Intent.makeRestartActivityTask(componentName);
             // Required for API 34 and later

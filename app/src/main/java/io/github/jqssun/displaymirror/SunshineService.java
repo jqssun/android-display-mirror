@@ -98,7 +98,15 @@ public class SunshineService extends Service {
         if (intent != null && intent.hasExtra("data")) {
             MediaProjectionManager mediaProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
             Intent data = intent.getParcelableExtra("data");
+            if (mediaProjectionManager == null || data == null) {
+                State.log("Failed to get media projection service or data");
+                return START_NOT_STICKY;
+            }
             State.setMediaProjection(mediaProjectionManager.getMediaProjection(RESULT_OK, data));
+            if (State.getMediaProjection() == null) {
+                State.log("Failed to get media projection");
+                return START_NOT_STICKY;
+            }
             State.getMediaProjection().registerCallback(new MediaProjection.Callback() {
                 @Override
                 public void onStop() {
@@ -269,7 +277,7 @@ public class SunshineService extends Service {
         Set<String> ipAddresses = new HashSet<>();
         
         WifiManager wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        if (wifiManager != null && wifiManager.isWifiEnabled()) {
+        if (wifiManager != null && wifiManager.isWifiEnabled() && wifiManager.getConnectionInfo() != null) {
             int ipAddress = wifiManager.getConnectionInfo().getIpAddress();
             if (ipAddress != 0) {
                 // Convert little-endian to big-endian if needed

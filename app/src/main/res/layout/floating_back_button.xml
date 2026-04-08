@@ -7,4 +7,4 @@
     android:background="@drawable/floating_button_background"
     android:alpha="0.8"
     android:tint="#FFFFFF"
-    android:src="@drawable/ic_back" /> 
+    android:src="@drawable/ic_back" />

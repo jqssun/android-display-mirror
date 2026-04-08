@@ -16,7 +16,6 @@
     <string name="displaylink_libs_status_imported">Libraries Imported</string>
     <string name="displaylink_libs_status_missing">Libraries Missing</string>
     <string name="displaylink_libs_detail_imported">DisplayLink USB display support is ready</string>
-    <string name="displaylink_libs_detail_missing">Import the DisplayLink Presenter APK to enable USB display support</string>
 
     <!-- Settings section headers -->
     <string name="section_permissions">Permissions</string>
@@ -83,8 +82,8 @@
     <string name="shizuku_permission_status">Shizuku</string>
 
     <!-- dialog_resolution_settings -->
-    <string name="resolution_explanation">This only controls the output resolution of the DisplayLink chip in the docking station. For USB-C DisplayPort connections, the resolution is determined by Android automatically. For Moonlight wireless projection, resolution and bitrate can be changed in Moonlight\'s settings.</string>
-    <string name="preset_resolution">Preset resolution</string>
+    <string name="resolution_explanation">This only controls the output resolution of the DisplayLink chip in the connected adapter. For USB-C DisplayPort connections, the resolution is determined by Android automatically. For Sunshine/Moonlight connections, resolution and bitrate can be changed in client-side settings.</string>
+    <string name="preset_resolution">Preset</string>
 
     <!-- dialog_manual_client_input -->
     <string name="ip_address">IP address</string>
@@ -115,7 +114,7 @@
     <string name="auto_screen_off">Auto screen off</string>
     <string name="auto_screen_off_desc">Turn off main screen when projecting</string>
     <string name="auto_screen_off_with_warning">Auto screen off</string>
-    <string name="auto_screen_off_with_warning_desc">Requires using volume keys to wake up</string>
+    <string name="auto_screen_off_with_warning_desc">Use volume keys to wake up</string>
     <string name="use_black_image_screen_off">Simulate screen off</string>
     <string name="use_black_image_screen_off_desc">Use black image instead of turning off screen</string>
     <string name="disable_usb_audio">Disable USB audio</string>
@@ -172,9 +171,9 @@
     <string name="show_cursor_failed">Failed to show mouse cursor</string>
 
     <!-- APK Import -->
-    <string name="auto_import_displaylink_libs">Automatically download and import DisplayLink libraries</string>
-    <string name="manual_import_displaylink_libs">Manually import DisplayLink libraries from APK</string>
-    <string name="import_displaylink_libs_prompt">DisplayLink libraries not found. Import the DisplayLink Presenter Android application package (APK) to enable USB display support for USB 2 devices.</string>
+    <string name="auto_import_displaylink_libs">Automatically download and import libraries</string>
+    <string name="manual_import_displaylink_libs">Manually import from an application package (APK)</string>
+    <string name="import_displaylink_libs_prompt">DisplayLink libraries not found. Import the DisplayLink Presenter Android application package (APK). This will enable USB display support for USB 2 devices.</string>
     <string name="import_success">Libraries imported successfully</string>
     <string name="import_failed">Import failed: %s</string>
     <string name="downloading_displaylink">Downloading DisplayLink libraries...</string>

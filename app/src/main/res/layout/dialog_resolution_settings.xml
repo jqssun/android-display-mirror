@@ -100,4 +100,4 @@
             android:inputType="number"
             android:hint="Hz"/>
     </LinearLayout>
-</LinearLayout> 
+</LinearLayout>

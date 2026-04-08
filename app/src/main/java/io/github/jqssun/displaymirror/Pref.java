@@ -33,7 +33,7 @@ public class Pref {
     public static boolean doNotAutoStartMoonlight;
 
     public static boolean getAutoRotate() {
-        return getBoolean(KEY_AUTO_ROTATE, true);
+        return getBoolean(KEY_AUTO_ROTATE, false);
     }
 
     public static boolean  getAutoScale() {

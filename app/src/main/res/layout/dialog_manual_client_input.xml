@@ -34,4 +34,4 @@
         android:inputType="number"
         android:hint="@string/port_hint"/>
 
-</LinearLayout> 
+</LinearLayout>
