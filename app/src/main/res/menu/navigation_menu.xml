@@ -5,6 +5,10 @@
         android:icon="@drawable/ic_overview"
         android:title="@string/tab_home" />
     <item
+        android:id="@+id/airplay_fragment"
+        android:icon="@drawable/ic_airplay"
+        android:title="@string/tab_airplay" />
+    <item
         android:id="@+id/displaylink_fragment"
         android:icon="@drawable/ic_displaylink"
         android:title="@string/tab_displaylink" />

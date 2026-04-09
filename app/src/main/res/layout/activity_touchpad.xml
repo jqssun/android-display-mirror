@@ -83,14 +83,14 @@
             style="@style/Widget.Material3.Button.IconButton.Filled.Tonal" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/goDarkButton"
+            android:id="@+id/displayOffButton"
             android:layout_width="56dp"
             android:layout_height="56dp"
             android:layout_margin="8dp"
             app:icon="@drawable/ic_dark_mode"
             app:iconGravity="textStart"
             app:iconPadding="0dp"
-            android:contentDescription="@string/go_dark_button"
+            android:contentDescription="@string/display_off_button"
             style="@style/Widget.Material3.Button.IconButton.Filled.Tonal" />
     </LinearLayout>
 </LinearLayout>

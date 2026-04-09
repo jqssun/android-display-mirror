@@ -18,8 +18,8 @@ android {
         applicationId "io.github.jqssun.displaymirror"
         minSdk 28
         targetSdk 35
-        versionCode 7
-        versionName "0.0.7"
+        versionCode 8
+        versionName "0.0.8"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -102,4 +102,5 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-viewmodel:2.10.0"
     implementation "androidx.lifecycle:lifecycle-livedata:2.10.0"
     implementation "androidx.lifecycle:lifecycle-viewmodel-savedstate:2.10.0"
+    implementation fileTree(dir: 'libs', include: ['*.aar'])
 }

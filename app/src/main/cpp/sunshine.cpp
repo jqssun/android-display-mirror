@@ -40,6 +40,10 @@ static jmethodID handleLeftMouseButtonMethod = nullptr;
 static jclass sunshineKeyboardClass = nullptr;
 static jmethodID handleKeyboardMethod = nullptr;
 
+// AirPlay frame forwarding
+static jclass airPlayServiceClass = nullptr;
+static jmethodID airPlaySendFrameMethod = nullptr;
+
 JNIEXPORT void JNICALL
 Java_io_github_jqssun_displaymirror_job_SunshineServer_start(JNIEnv *env, jclass clazz) {
     env->GetJavaVM(&jvm);
@@ -86,7 +90,15 @@ Java_io_github_jqssun_displaymirror_job_SunshineServer_start(JNIEnv *env, jclass
     } else {
         BOOST_LOG(error) << "Failed to find SunshineKeyboard class at startup"sv;
     }
-    
+
+    // Cache AirPlay frame forwarding class
+    jclass apClass = env->FindClass("io/github/jqssun/displaymirror/job/AirPlayService");
+    if (apClass != nullptr) {
+        airPlayServiceClass = (jclass)env->NewGlobalRef(apClass);
+        env->DeleteLocalRef(apClass);
+        airPlaySendFrameMethod = env->GetStaticMethodID(airPlayServiceClass, "onNativeVideoFrame", "([BZ)V");
+    }
+
     deinit = logging::init(1, "/dev/null");
     BOOST_LOG(info) << "start sunshine server"sv;
     mail::man = std::make_shared<safe::mail_raw_t>();
@@ -603,14 +615,16 @@ namespace sunshine_callbacks {
                             if (!codecConfigData.empty()) {
                                 // Build complete frame with config + keyframe
                                 std::vector<uint8_t> frameData;
-                                
+
                                 // Append config data
                                 frameData.insert(frameData.end(), codecConfigData.begin(), codecConfigData.end());
-                                
+
                                 // Append keyframe data
                                 frameData.insert(frameData.end(), buffer, buffer + bufferSize);
 
                                 BOOST_LOG(verbose) << "Sending keyframe (with config data), total size: "sv << frameData.size();
+                                // Forward to AirPlay if active
+                                sunshine_callbacks::callJavaOnVideoFrame(frameData.data(), frameData.size(), true);
                                 // Send complete keyframe data
                                 stream::postFrame(std::move(frameData), frameIndex, true, channel_data);
                             } else {
@@ -619,6 +633,8 @@ namespace sunshine_callbacks {
                         } else {
                             std::vector<uint8_t> frameData;
                             frameData.insert(frameData.end(), buffer, buffer + bufferSize);
+                            // Forward to AirPlay if active
+                            sunshine_callbacks::callJavaOnVideoFrame(frameData.data(), frameData.size(), false);
                             stream::postFrame(std::move(frameData), frameIndex, false, channel_data);
                         }
                     }
@@ -901,6 +917,30 @@ namespace sunshine_callbacks {
             env->ExceptionClear();
         }
 
+        jvm->DetachCurrentThread();
+    }
+
+    void callJavaOnVideoFrame(const uint8_t* data, size_t size, bool isKeyframe) {
+        if (jvm == nullptr || airPlayServiceClass == nullptr || airPlaySendFrameMethod == nullptr) {
+            return;
+        }
+
+        JNIEnv *env;
+        if (jvm->AttachCurrentThread(&env, nullptr) != JNI_OK) {
+            return;
+        }
+
+        jbyteArray jdata = env->NewByteArray(size);
+        if (jdata != nullptr) {
+            env->SetByteArrayRegion(jdata, 0, size, reinterpret_cast<const jbyte*>(data));
+            env->CallStaticVoidMethod(airPlayServiceClass, airPlaySendFrameMethod, jdata, (jboolean)isKeyframe);
+            env->DeleteLocalRef(jdata);
+        }
+
+        if (env->ExceptionCheck()) {
+            env->ExceptionDescribe();
+            env->ExceptionClear();
+        }
         jvm->DetachCurrentThread();
     }
 }

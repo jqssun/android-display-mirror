@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Mirror</string>
     <string name="accessibility_service_description">Accessibility service for simulating touch events on the secondary screen</string>
-    <string name="go_dark_button">Toggle dark mode</string>
+    <string name="display_off_button">Display off</string>
     <string name="back_button">Back button</string>
     <string name="home_button">Home button</string>
 
@@ -12,6 +12,7 @@
     <string name="export">Export</string>
     <string name="clear">Clear</string>
     <string name="tab_settings">Settings</string>
+    <string name="tab_airplay">AirPlay</string>
     <string name="tab_displaylink">DisplayLink</string>
     <string name="displaylink_libs_status_imported">Libraries Imported</string>
     <string name="displaylink_libs_status_missing">Libraries Missing</string>
@@ -22,6 +23,7 @@
     <string name="section_projection">Projection</string>
     <string name="section_display">Display</string>
     <string name="section_audio_input">Audio &amp; Input</string>
+    <string name="section_airplay">AirPlay</string>
     <string name="section_moonlight">Moonlight</string>
     <string name="section_displaylink">DisplayLink</string>
     <string name="section_displaylink_libraries">DisplayLink Libraries</string>
@@ -39,7 +41,7 @@
     <string name="connect">Connect</string>
     <string name="about">About</string>
     <string name="disable">Disable</string>
-    <string name="screen_off">Turn display off</string>
+    <string name="screen_off">Turn display off (use volume keys to wake up)</string>
     <string name="touchscreen">Touchscreen</string>
     <string name="touchpad">Touchpad</string>
     <string name="screen">Screens</string>
@@ -48,7 +50,7 @@
     <string name="width_label">Width</string>
     <string name="height_label">Height</string>
     <string name="refresh_rate_label">Refresh rate</string>
-    <string name="switch_mode">Switch mode</string>
+    <string name="switch_mode">Mode</string>
 
     <!-- Permission status -->
     <string name="status_not_started">Not started</string>
@@ -61,7 +63,7 @@
     <string name="mode_cursor_locked">Locked cursor</string>
     <string name="touchpad_help_cursor_locked">Cursor stays fixed, single-finger gestures only</string>
     <string name="touchpad_help_move_cursor">Move cursor</string>
-    <string name="touchpad_help_text">Touch this area to control the target screen:\n\n- Single-finger swipe: %s\n- Single-finger tap: Tap on the target screen\n- Multi-finger gesture: Sent to the target screen\n- Back button: Go back on the target screen\n- Home button: Reopen the selected app\n- Moon button: Black screen to save power\n\nIf a Bluetooth controller cannot control the display, use the moon button to turn off the main screen and shift focus.</string>
+    <string name="touchpad_help_text">Touch this area to control the target screen:\n\n- Single-finger swipe: %s\n- Single-finger tap: Tap on the target screen\n- Multi-finger gesture: Sent to the target screen\n- Back button: Go back on the target screen\n- Home button: Reopen the selected app\n- Display off button: Turn off the main screen to save power\n\nIf a Bluetooth controller cannot control the display, use the display off button to turn off the main screen and shift focus.</string>
 
     <!-- activity_touchscreen -->
     <string name="exit_vertical">Exit</string>
@@ -127,6 +129,12 @@
     <string name="auto_connect_moonlight_desc">Proactively send a JSON connect request to the Moonlight client. Requires a fork with the autostart listener. Not compatible with standard Moonlight.</string>
     <string name="show_moonlight_cursor">Show cursor location</string>
     <string name="show_moonlight_cursor_desc">Show a cursor overlay on the device screen for Moonlight mouse input</string>
+    <string name="airplay_enabled">AirPlay output</string>
+    <string name="airplay_enabled_desc">Mirror to AirPlay receivers (Apple TV, etc.)</string>
+    <string name="airplay_discover">Scan for AirPlay devices</string>
+    <string name="airplay_no_devices">No AirPlay devices found</string>
+    <string name="airplay_connecting">Connecting to AirPlay...</string>
+    <string name="airplay_connected">AirPlay connected</string>
     <string name="change_displaylink_output_settings">Change DisplayLink Output Settings</string>
     <string name="select_app_title">Select a launcher app for the best experience</string>
     <string name="displaylink_resolution_title">DisplayLink Output Settings</string>
@@ -156,7 +164,7 @@
     <string name="check_log_file_export">Check if the \'Mirror.log\' file has been exported in the download directory</string>
 
     <!-- InputRouting Toast -->
-    <string name="need_screen_off_for_touchscreen">Due to Android version limitiation, you need to tap the \'Simulate screen off\' button to use the touchscreen</string>
+    <string name="need_screen_off_for_touchscreen">Due to Android version limitation, tap \'Turn display off\' to use the touchscreen</string>
 
     <!-- TouchpadActivity Toast -->
     <string name="show_cursor_failed">Failed to show mouse cursor</string>

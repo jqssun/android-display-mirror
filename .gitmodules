@@ -16,3 +16,6 @@
 [submodule "app/src/main/cpp/dependencies/opus"]
 	path = app/src/main/cpp/dependencies/opus
 	url = https://github.com/xiph/opus.git
+[submodule "doubletake/doubletake"]
+	path = doubletake/doubletake
+	url = https://github.com/omarroth/doubletake.git

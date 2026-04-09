@@ -13,4 +13,5 @@ namespace sunshine_callbacks {
     void callJavaOnMirrorClientDiscovered(std::string mirrorClient);
     void callJavaSetMirrorServerUuid(std::string uuid);
     void callJavaOnKeyboard(uint16_t modcode, bool release, uint8_t flags);
+    void callJavaOnVideoFrame(const uint8_t* data, size_t size, bool isKeyframe);
 }

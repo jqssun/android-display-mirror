@@ -124,7 +124,13 @@
             android:foregroundServiceType="mediaProjection"
             android:enabled="true"
             android:exported="false" />
-        
+
+        <service
+            android:name=".AirPlayForegroundService"
+            android:foregroundServiceType="mediaProjection"
+            android:enabled="true"
+            android:exported="false" />
+
     </application>
 
     <queries>

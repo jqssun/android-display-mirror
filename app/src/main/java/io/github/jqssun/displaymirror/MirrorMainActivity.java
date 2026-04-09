@@ -41,6 +41,7 @@ public class MirrorMainActivity extends AppCompatActivity {
     public static final int REQUEST_CODE_MEDIA_PROJECTION = 1001;
     public static final int REQUEST_RECORD_AUDIO_PERMISSION = 1002;
     public static final int REQUEST_IMPORT_APK = 1003;
+    public static final int REQUEST_AIRPLAY_PROJECTION = 1004;
     public static final String TAG = "MirrorMainActivity";
 
     private long lastCheckTime = 0;
@@ -164,6 +165,18 @@ public class MirrorMainActivity extends AppCompatActivity {
             }
             return;
         }
+        if (requestCode == REQUEST_AIRPLAY_PROJECTION) {
+            if (resultCode == RESULT_OK && data != null) {
+                Intent svc = new Intent(this, AirPlayForegroundService.class);
+                svc.putExtra("data", data);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    startForegroundService(svc);
+                } else {
+                    startService(svc);
+                }
+            }
+            return;
+        }
         if (requestCode == REQUEST_CODE_MEDIA_PROJECTION) {
             if (resultCode == RESULT_OK && data != null) {
                 State.log("User granted screen projection permission");
@@ -209,6 +222,19 @@ public class MirrorMainActivity extends AppCompatActivity {
         } else {
             State.log("SunshineService already running");
             refresh();
+        }
+    }
+
+    public void requestAirPlayProjection() {
+        MediaProjectionManager mpm = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+        if (mpm != null) {
+            Intent captureIntent;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                captureIntent = mpm.createScreenCaptureIntent(MediaProjectionConfig.createConfigForDefaultDisplay());
+            } else {
+                captureIntent = mpm.createScreenCaptureIntent();
+            }
+            startActivityForResult(captureIntent, REQUEST_AIRPLAY_PROJECTION);
         }
     }
 

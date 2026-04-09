@@ -15,6 +15,11 @@
         android:label="@string/tab_logs" />
 
     <fragment
+        android:id="@+id/airplay_fragment"
+        android:name="io.github.jqssun.displaymirror.AirPlayFragment"
+        android:label="@string/tab_airplay" />
+
+    <fragment
         android:id="@+id/displaylink_fragment"
         android:name="io.github.jqssun.displaymirror.DisplayLinkFragment"
         android:label="@string/tab_displaylink" />

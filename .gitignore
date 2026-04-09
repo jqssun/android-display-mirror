@@ -9,3 +9,6 @@
 local.properties
 /app/build
 /hidden-api-stub/bin
+
+/app/libs/airplaylib.aar
+/app/libs/airplaylib-sources.jar

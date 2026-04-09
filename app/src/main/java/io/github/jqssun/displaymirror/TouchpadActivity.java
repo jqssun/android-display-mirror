@@ -177,7 +177,7 @@ public class TouchpadActivity extends AppCompatActivity {
             _setupTouchListenerForInputManager();
         }
 
-        findViewById(R.id.goDarkButton).setOnClickListener(v -> _toggleDarkMode());
+        findViewById(R.id.displayOffButton).setOnClickListener(v -> _toggleDarkMode());
         findViewById(R.id.backButton).setOnClickListener(v -> performBackGesture(inputManager, displayId));
         findViewById(R.id.homeButton).setOnClickListener(v -> launchSingleApp(this, displayId));
 

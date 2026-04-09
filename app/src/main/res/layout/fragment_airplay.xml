@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingVertical="8dp">
+
+        <!-- Status -->
+        <TextView
+            android:id="@+id/airplayStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="16dp"
+            android:text="@string/airplay_no_devices"
+            android:textAppearance="?attr/textAppearanceBodyLarge" />
+
+        <!-- Scan -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/airplayScanBtn"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="8dp"
+            android:text="@string/airplay_discover" />
+
+        <!-- Device list -->
+        <Spinner
+            android:id="@+id/airplayDeviceSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="8dp"
+            android:visibility="gone" />
+
+        <!-- Connect / Disconnect -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/airplayConnectBtn"
+            style="@style/Widget.Material3.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="16dp"
+            android:text="@string/connect"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+</ScrollView>
