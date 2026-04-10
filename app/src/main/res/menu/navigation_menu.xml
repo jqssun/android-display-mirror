@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/home_fragment"
-        android:icon="@drawable/ic_overview"
-        android:title="@string/tab_home" />
+        android:id="@+id/moonlight_fragment"
+        android:icon="@drawable/ic_moonlight"
+        android:title="@string/tab_moonlight" />
     <item
         android:id="@+id/airplay_fragment"
         android:icon="@drawable/ic_airplay"

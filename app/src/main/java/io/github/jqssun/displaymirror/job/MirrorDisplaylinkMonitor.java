@@ -73,7 +73,7 @@ public class MirrorDisplaylinkMonitor {
         }
         if (device.getDeviceName().equals(State.displaylinkDeviceName)) {
             State.displaylinkState.virtualDisplayArgs = new VirtualDisplayArgs("DisplayLink", Pref.getDisplaylinkWidth(), Pref.getDisplaylinkHeight(), Pref.getDisplaylinkRefreshRate(), Pref.getSingleAppDpi(), Pref.getAutoRotate());
-            State.startNewJob(new ProjectViaDisplaylink(device, State.displaylinkState.virtualDisplayArgs));
+            State.startNewJob(State.MODE_DISPLAYLINK, new ProjectViaDisplaylink(device, State.displaylinkState.virtualDisplayArgs));
         }
     }
     public static void onUsbDeviceAttached(Context context, UsbDevice device) {

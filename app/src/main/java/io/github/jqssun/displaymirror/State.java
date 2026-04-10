@@ -19,18 +19,28 @@ import io.github.jqssun.displaymirror.shizuku.UserService;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import rikka.shizuku.Shizuku;
 
 public class State {
+    // Job modes — each mode gets its own independent job slot
+    public static final String MODE_MOONLIGHT = "moonlight";
+    public static final String MODE_DISPLAYLINK = "displaylink";
+    public static final String MODE_MIRROR = "mirror";
+    public static final String MODE_UTILITY = "utility"; // for non-mode jobs like FetchLogAndShare
+
     // WeakReference to avoid leaking the activity
     private static WeakReference<MirrorMainActivity> currentActivity = new WeakReference<>(null);
     public static final MutableLiveData<MirrorUiState> uiState = new MutableLiveData<>(new MirrorUiState());
     public static FloatingButtonService floatingButtonService;
     public static String serverUuid;
+    private static final Map<String, Job> jobs = new HashMap<>();
+    // Legacy single-job alias — used by code that doesn't specify a mode
     private static Job currentJob;
     public static List<String> logs = java.util.Collections.synchronizedList(new ArrayList<>());
     public static DisplaylinkState displaylinkState = new DisplaylinkState();
@@ -95,48 +105,94 @@ public class State {
 
     public static boolean isJobRunning() {
         return currentJob != null;
-    }   
+    }
 
-    public static void startNewJob(Job job) {
-        if (currentJob != null) {
-            if (currentActivity != null && currentActivity.get() != null) {
-                State.log("Task " + currentJob.getClass().getSimpleName() + " is already running");
-            }
+    public static boolean isJobRunning(String mode) {
+        return jobs.containsKey(mode);
+    }
+
+    /** Start a job in a specific mode slot. Different modes can run concurrently. */
+    public static void startNewJob(String mode, Job job) {
+        if (jobs.containsKey(mode)) {
+            State.log("Task " + jobs.get(mode).getClass().getSimpleName() + " is already running for " + mode);
             return;
         }
+        jobs.put(mode, job);
+        // Keep legacy alias pointing at most recent job for backward compat
         currentJob = job;
         try {
-            State.log("Starting task " + job.getClass().getSimpleName());
-            currentJob.start();
-            State.log("Task " + job.getClass().getSimpleName() + " completed");
-            currentJob = null;
+            State.log("Starting task " + job.getClass().getSimpleName() + " [" + mode + "]");
+            job.start();
+            State.log("Task " + job.getClass().getSimpleName() + " completed [" + mode + "]");
+            jobs.remove(mode);
+            if (currentJob == job) currentJob = null;
         } catch (YieldException e) {
-            State.log("Task " + job.getClass().getSimpleName() + " yielded, " + e.getMessage());
+            State.log("Task " + job.getClass().getSimpleName() + " yielded [" + mode + "], " + e.getMessage());
         } catch (RuntimeException e) {
-            State.log("Task " + job.getClass().getSimpleName() + " failed to start");
+            State.log("Task " + job.getClass().getSimpleName() + " failed [" + mode + "]");
             String stackTrace = android.util.Log.getStackTraceString(e);
             State.log("Stack trace: " + stackTrace);
-            currentJob = null;
+            jobs.remove(mode);
+            if (currentJob == job) currentJob = null;
         }
     }
 
+    /** Legacy: start a job in the utility slot (blocks only other utility jobs). */
+    public static void startNewJob(Job job) {
+        startNewJob(MODE_UTILITY, job);
+    }
+
+    /** Resume all yielded jobs (e.g. after permission grant). */
     public static void resumeJob() {
-        if (currentJob == null) {
-            return;
-        }
+        // Resume legacy job
+        if (currentJob == null) return;
+        Job job = currentJob;
         try {
-            State.log("Resuming task " + currentJob.getClass().getSimpleName());
-            currentJob.start();
-            State.log("Task " + currentJob.getClass().getSimpleName() + " completed");
-            currentJob = null;
+            State.log("Resuming task " + job.getClass().getSimpleName());
+            job.start();
+            State.log("Task " + job.getClass().getSimpleName() + " completed");
+            // Remove from mode map
+            jobs.values().remove(job);
+            if (currentJob == job) currentJob = null;
         } catch (YieldException e) {
-            State.log("Task " + currentJob.getClass().getSimpleName() + " yielded, " + e.getMessage());
+            State.log("Task " + job.getClass().getSimpleName() + " yielded, " + e.getMessage());
         } catch (RuntimeException e) {
-            State.log("Task " + currentJob.getClass().getSimpleName() + " failed to resume");
+            State.log("Task " + job.getClass().getSimpleName() + " failed to resume");
             String stackTrace = android.util.Log.getStackTraceString(e);
             State.log("Stack trace: " + stackTrace);
-            currentJob = null;
+            jobs.values().remove(job);
+            if (currentJob == job) currentJob = null;
         }
+    }
+
+    /** Resume a job in a specific mode slot. */
+    public static void resumeJob(String mode) {
+        Job job = jobs.get(mode);
+        if (job == null) {
+            resumeJob();
+            return;
+        }
+        currentJob = job; // update legacy alias
+        try {
+            State.log("Resuming task " + job.getClass().getSimpleName() + " [" + mode + "]");
+            job.start();
+            State.log("Task " + job.getClass().getSimpleName() + " completed [" + mode + "]");
+            jobs.remove(mode);
+            if (currentJob == job) currentJob = null;
+        } catch (YieldException e) {
+            State.log("Task " + job.getClass().getSimpleName() + " yielded [" + mode + "], " + e.getMessage());
+        } catch (RuntimeException e) {
+            State.log("Task " + job.getClass().getSimpleName() + " failed to resume [" + mode + "]");
+            String stackTrace = android.util.Log.getStackTraceString(e);
+            State.log("Stack trace: " + stackTrace);
+            jobs.remove(mode);
+            if (currentJob == job) currentJob = null;
+        }
+    }
+
+    public static void clearJob(String mode) {
+        Job job = jobs.remove(mode);
+        if (job != null && currentJob == job) currentJob = null;
     }
 
     public static void resumeJobLater(long delayMillis) {

@@ -96,7 +96,7 @@ public class MirrorDisplayMonitor {
         if (context == null) {
             return;
         }
-        State.startNewJob(new ProjectViaMirror(display));
+        State.startNewJob(State.MODE_MIRROR, new ProjectViaMirror(display));
         _handleDisableUsbAudio(context);
     }
     

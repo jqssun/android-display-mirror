@@ -22,6 +22,7 @@ add_library(
         sunshine
         SHARED
         sunshine.cpp
+        airplay_bridge.cpp
         logging.cpp
         network.cpp
         config.cpp

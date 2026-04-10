@@ -13,10 +13,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -27,13 +26,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.materialswitch.MaterialSwitch;
 
 import io.github.jqssun.displaymirror.job.AcquireShizuku;
-import io.github.jqssun.displaymirror.job.ConnectToClient;
-import io.github.jqssun.displaymirror.job.SunshineServer;
 import io.github.jqssun.displaymirror.shizuku.PermissionManager;
 import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class SettingsFragment extends Fragment {
     private SharedPreferences preferences;
@@ -65,12 +59,6 @@ public class SettingsFragment extends Fragment {
         useAccessibilityCheckbox.setChecked(!preferences.getBoolean(Pref.KEY_DISABLE_ACCESSIBILITY, false));
     }
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        SunshineServer.suppressPin = null;
-    }
-
     private void _initSettings(View view) {
         MaterialSwitch singleAppModeCheckbox = view.findViewById(R.id.singleAppModeCheckbox);
         MaterialButton selectAppButton = view.findViewById(R.id.selectAppButton);
@@ -87,14 +75,8 @@ public class SettingsFragment extends Fragment {
         MaterialSwitch useTouchscreenCheckbox = view.findViewById(R.id.useTouchscreenCheckbox);
         MaterialSwitch autoMatchAspectRatioCheckbox = view.findViewById(R.id.autoMatchAspectRatioCheckbox);
         MaterialSwitch showFloatingInMirrorModeCheckbox = view.findViewById(R.id.showFloatingInMirrorModeCheckbox);
-        MaterialSwitch showMoonlightCursorCheckbox = view.findViewById(R.id.showMoonlightCursorCheckbox);
-        MaterialSwitch autoConnectClientCheckbox = view.findViewById(R.id.autoConnectClientCheckbox);
-        LinearLayout clientConnectionContainer = view.findViewById(R.id.clientConnectionContainer);
-        Spinner clientSpinner = view.findViewById(R.id.clientSpinner);
-        MaterialButton connectClientButton = view.findViewById(R.id.connectClientButton);
         MaterialSwitch useBlackImageCheckbox = view.findViewById(R.id.useBlackImageCheckbox);
         MaterialSwitch preventAutoLockCheckbox = view.findViewById(R.id.preventAutoLockCheckbox);
-        MaterialSwitch disableRemoteSubmixCheckbox = view.findViewById(R.id.disableRemoteSubmixCheckbox);
 
         boolean singleAppMode = Pref.getSingleAppMode();
         singleAppModeCheckbox.setChecked(singleAppMode);
@@ -109,12 +91,8 @@ public class SettingsFragment extends Fragment {
         useTouchscreenCheckbox.setChecked(Pref.getUseTouchscreen());
         autoMatchAspectRatioCheckbox.setChecked(Pref.getAutoMatchAspectRatio());
         showFloatingInMirrorModeCheckbox.setChecked(Pref.getShowFloatingInMirrorMode());
-        showMoonlightCursorCheckbox.setChecked(Pref.getShowMoonlightCursor());
-        boolean autoConnectClient = Pref.getAutoConnectClient();
-        autoConnectClientCheckbox.setChecked(autoConnectClient);
         useBlackImageCheckbox.setChecked(Pref.getUseBlackImage());
         preventAutoLockCheckbox.setChecked(Pref.getPreventAutoLock());
-        disableRemoteSubmixCheckbox.setChecked(Pref.getDisableRemoteSubmix());
 
         if (ShizukuUtils.hasPermission()) {
             TextView autoScreenOffDesc = view.findViewById(R.id.autoScreenOffDesc);
@@ -180,8 +158,6 @@ public class SettingsFragment extends Fragment {
         preventAutoLockCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_PREVENT_AUTO_LOCK, c).apply());
         if (!ShizukuUtils.hasPermission()) preventAutoLockCheckbox.setEnabled(false);
 
-        disableRemoteSubmixCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_DISABLE_REMOTE_SUBMIX, c).apply());
-
         selectAppButton.setOnClickListener(v -> _showAppSelectionDialog());
 
         dpiRow.setOnClickListener(v -> _showDpiDialog(dpiValueText));
@@ -204,32 +180,25 @@ public class SettingsFragment extends Fragment {
             }
         });
 
-        // Moonlight cursor
-        showMoonlightCursorCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_SHOW_MOONLIGHT_CURSOR, c).apply());
+        // About
+        TextView versionText = view.findViewById(R.id.versionText);
+        try {
+            String ver = requireContext().getPackageManager()
+                    .getPackageInfo(requireContext().getPackageName(), 0).versionName;
+            versionText.setText(getString(R.string.version_format, ver, android.os.Build.VERSION.RELEASE));
+        } catch (Exception e) {
+            versionText.setText(R.string.version_unknown);
+        }
+        view.findViewById(R.id.websiteLink).setOnClickListener(v ->
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/jqssun/android-screen-mirror"))));
 
-        // Moonlight client
-        clientConnectionContainer.setVisibility(autoConnectClient ? View.VISIBLE : View.GONE);
-        autoConnectClientCheckbox.setOnCheckedChangeListener((b, isChecked) -> {
-            preferences.edit().putBoolean(Pref.KEY_AUTO_CONNECT_CLIENT, isChecked).apply();
-            clientConnectionContainer.setVisibility(isChecked ? View.VISIBLE : View.GONE);
-            if (isChecked) _loadClientList(clientSpinner);
+        view.findViewById(R.id.shizukuBtn).setOnClickListener(v ->
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/rikkaapps/shizuku"))));
+
+        view.findViewById(R.id.exitBtn).setOnClickListener(v -> {
+            io.github.jqssun.displaymirror.job.AutoRotateAndScaleForDisplaylink.instance = null;
+            io.github.jqssun.displaymirror.job.ExitAll.execute(requireActivity(), false);
         });
-        if (autoConnectClient) _loadClientList(clientSpinner);
-
-        connectClientButton.setOnClickListener(v -> {
-            String selectedClient = (String) clientSpinner.getSelectedItem();
-            if (selectedClient != null && !selectedClient.isEmpty()) {
-                if (selectedClient.equals(getString(R.string.manual_input))) {
-                    _showManualInputDialog();
-                } else {
-                    preferences.edit().putString(Pref.KEY_SELECTED_CLIENT, selectedClient).apply();
-                    int pin = (int)(Math.random() * 9000) + 1000;
-                    SunshineServer.suppressPin = String.valueOf(pin);
-                    ConnectToClient.connect(pin);
-                }
-            }
-        });
-
     }
 
     private void _updateShizukuStatus(View view) {
@@ -335,53 +304,6 @@ public class SettingsFragment extends Fragment {
                     preferences.edit().putInt(Pref.KEY_SINGLE_APP_DPI, dpi).apply();
                     dpiValueText.setText(getString(R.string.dpi_text_size_value, dpi));
                 } catch (NumberFormatException ignored) {
-                }
-            })
-            .setNegativeButton(R.string.cancel, null)
-            .show();
-    }
-
-    private void _loadClientList(Spinner spinner) {
-        String selectedClient = Pref.getSelectedClient();
-        List<String> clients = new ArrayList<>();
-        clients.add(getString(R.string.manual_input));
-        if (!selectedClient.isEmpty()) clients.add(selectedClient);
-        clients.addAll(State.discoveredMirrorClients);
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, clients);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
-
-        if (!selectedClient.isEmpty()) {
-            for (int i = 0; i < clients.size(); i++) {
-                if (clients.get(i).equals(selectedClient)) {
-                    spinner.setSelection(i);
-                    break;
-                }
-            }
-        }
-    }
-
-    private void _showManualInputDialog() {
-        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_manual_client_input, null);
-        EditText ipEditText = dialogView.findViewById(R.id.ipEditText);
-        EditText portEditText = dialogView.findViewById(R.id.portEditText);
-        portEditText.setText("42515");
-
-        new MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.manual_input_client_title)
-            .setView(dialogView)
-            .setPositiveButton(R.string.ok, (dialog, which) -> {
-                String ip = ipEditText.getText().toString().trim();
-                String port = portEditText.getText().toString().trim();
-                if (!ip.isEmpty()) {
-                    String addr = port.isEmpty() ? ip : ip + ":" + port;
-                    preferences.edit().putString(Pref.KEY_SELECTED_CLIENT, addr).apply();
-                    View view = getView();
-                    if (view != null) _loadClientList(view.findViewById(R.id.clientSpinner));
-                    int pin = (int)(Math.random() * 9000) + 1000;
-                    SunshineServer.suppressPin = String.valueOf(pin);
-                    ConnectToClient.connect(pin);
                 }
             })
             .setNegativeButton(R.string.cancel, null)

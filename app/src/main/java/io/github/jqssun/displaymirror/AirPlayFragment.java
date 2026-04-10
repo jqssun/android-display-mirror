@@ -9,6 +9,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -17,26 +19,54 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.textfield.TextInputEditText;
 
 import io.github.jqssun.displaymirror.job.AirPlayService;
 
 import java.util.List;
 
 public class AirPlayFragment extends Fragment {
-    private TextView statusText;
+    private TextView statusTitle, statusDetail;
+    private ImageView statusIcon;
     private Spinner deviceSpinner;
     private MaterialButton scanBtn, connectBtn;
+    private LinearLayout manualLayout;
+    private TextInputEditText manualIp, manualPort;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_airplay, container, false);
 
-        statusText = view.findViewById(R.id.airplayStatus);
+        statusTitle = view.findViewById(R.id.airplayStatusTitle);
+        statusDetail = view.findViewById(R.id.airplayStatusDetail);
+        statusIcon = view.findViewById(R.id.airplayStatusIcon);
         scanBtn = view.findViewById(R.id.airplayScanBtn);
         deviceSpinner = view.findViewById(R.id.airplayDeviceSpinner);
         connectBtn = view.findViewById(R.id.airplayConnectBtn);
 
+        manualLayout = view.findViewById(R.id.airplayManualLayout);
+        manualIp = view.findViewById(R.id.airplayManualIp);
+        manualPort = view.findViewById(R.id.airplayManualPort);
+        MaterialButton manualBtn = view.findViewById(R.id.airplayManualBtn);
+        MaterialButton manualConnectBtn = view.findViewById(R.id.airplayManualConnectBtn);
+
+        manualBtn.setOnClickListener(v -> {
+            boolean show = manualLayout.getVisibility() != View.VISIBLE;
+            manualLayout.setVisibility(show ? View.VISIBLE : View.GONE);
+        });
+
         AirPlayService airplay = AirPlayService.getInstance();
+
+        manualConnectBtn.setOnClickListener(v -> {
+            String ip = manualIp.getText() != null ? manualIp.getText().toString().trim() : "";
+            if (ip.isEmpty()) {
+                Toast.makeText(requireContext(), "Enter an IP address", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            String portStr = manualPort.getText() != null ? manualPort.getText().toString().trim() : "";
+            int port = portStr.isEmpty() ? 7000 : Integer.parseInt(portStr);
+            _showPinDialog(new AirPlayService.AirPlayDevice("Manual (" + ip + ")", ip, port));
+        });
 
         airplay.setListener(new AirPlayService.AirPlayListener() {
             @Override
@@ -46,14 +76,15 @@ public class AirPlayFragment extends Fragment {
 
             @Override
             public void onConnected() {
-                statusText.setText(R.string.airplay_connected);
-                connectBtn.setText(R.string.disable);
+                _updateStatus(R.drawable.ic_check_circle, R.string.airplay_connected, R.string.airplay_connected_detail);
+                connectBtn.setText(R.string.stop);
                 connectBtn.setVisibility(View.VISIBLE);
+                manualLayout.setVisibility(View.GONE);
             }
 
             @Override
             public void onDisconnected(String error) {
-                statusText.setText(R.string.airplay_no_devices);
+                _updateStatus(R.drawable.ic_error, R.string.airplay_no_devices, R.string.airplay_no_devices_detail);
                 connectBtn.setText(R.string.connect);
                 if (airplay.getDevices().isEmpty()) {
                     connectBtn.setVisibility(View.GONE);
@@ -69,12 +100,12 @@ public class AirPlayFragment extends Fragment {
 
         scanBtn.setOnClickListener(v -> {
             scanBtn.setEnabled(false);
-            statusText.setText(R.string.airplay_connecting);
+            _updateStatus(R.drawable.ic_sync, R.string.airplay_connecting, R.string.airplay_connecting_detail);
             airplay.discover();
             v.postDelayed(() -> {
                 scanBtn.setEnabled(true);
                 if (airplay.getDevices().isEmpty()) {
-                    statusText.setText(R.string.airplay_no_devices);
+                    _updateStatus(R.drawable.ic_error, R.string.airplay_no_devices, R.string.airplay_no_devices_detail);
                 }
             }, 6000);
         });
@@ -97,8 +128,8 @@ public class AirPlayFragment extends Fragment {
             _updateDeviceList();
         }
         if (airplay.isConnected()) {
-            statusText.setText(R.string.airplay_connected);
-            connectBtn.setText(R.string.disable);
+            _updateStatus(R.drawable.ic_check_circle, R.string.airplay_connected, R.string.airplay_connected_detail);
+            connectBtn.setText(R.string.stop);
             connectBtn.setVisibility(View.VISIBLE);
         }
 
@@ -113,7 +144,9 @@ public class AirPlayFragment extends Fragment {
         deviceSpinner.setAdapter(adapter);
         deviceSpinner.setVisibility(View.VISIBLE);
         connectBtn.setVisibility(View.VISIBLE);
-        statusText.setText(devices.size() + " device(s) found");
+        statusIcon.setImageResource(R.drawable.ic_check_circle);
+        statusTitle.setText(devices.size() + " device(s) found");
+        statusDetail.setText(R.string.airplay_devices_found_detail);
     }
 
     private void _showPinDialog(AirPlayService.AirPlayDevice dev) {
@@ -132,11 +165,17 @@ public class AirPlayFragment extends Fragment {
             .setView(container)
             .setPositiveButton(R.string.connect, (dialog, which) -> {
                 String pin = pinInput.getText().toString().trim();
-                statusText.setText(R.string.airplay_connecting);
+                _updateStatus(R.drawable.ic_sync, R.string.airplay_connecting, R.string.airplay_connecting_detail);
                 AirPlayService.getInstance().connect(dev.ip, dev.port, pin, 0, 0, 30);
             })
             .setNegativeButton(R.string.cancel, null)
             .show();
+    }
+
+    private void _updateStatus(int iconRes, int titleRes, int detailRes) {
+        statusIcon.setImageResource(iconRes);
+        statusTitle.setText(titleRes);
+        statusDetail.setText(detailRes);
     }
 
     private AirPlayService.AirPlayDevice _getSelectedDevice() {

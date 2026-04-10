@@ -2,17 +2,17 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/home_fragment">
+    app:startDestination="@id/moonlight_fragment">
 
     <fragment
-        android:id="@+id/home_fragment"
-        android:name="io.github.jqssun.displaymirror.HomeFragment"
-        android:label="@string/tab_home" />
+        android:id="@+id/moonlight_fragment"
+        android:name="io.github.jqssun.displaymirror.MoonlightFragment"
+        android:label="@string/tab_moonlight" />
 
     <fragment
-        android:id="@+id/logs_fragment"
-        android:name="io.github.jqssun.displaymirror.LogsFragment"
-        android:label="@string/tab_logs" />
+        android:id="@+id/displaylink_fragment"
+        android:name="io.github.jqssun.displaymirror.DisplayLinkFragment"
+        android:label="@string/tab_displaylink" />
 
     <fragment
         android:id="@+id/airplay_fragment"
@@ -20,9 +20,9 @@
         android:label="@string/tab_airplay" />
 
     <fragment
-        android:id="@+id/displaylink_fragment"
-        android:name="io.github.jqssun.displaymirror.DisplayLinkFragment"
-        android:label="@string/tab_displaylink" />
+        android:id="@+id/logs_fragment"
+        android:name="io.github.jqssun.displaymirror.LogsFragment"
+        android:label="@string/tab_logs" />
 
     <fragment
         android:id="@+id/settings_fragment"

@@ -87,7 +87,7 @@ public class SunshineServer {
         SunshineKeyboard.initialize();
         
         new Handler(Looper.getMainLooper()).post(() -> {
-            State.startNewJob(new ProjectViaMoonlight(width, height, frameRate, packetDuration, surface, shouldMute));
+            State.startNewJob(State.MODE_MOONLIGHT, new ProjectViaMoonlight(width, height, frameRate, packetDuration, surface, shouldMute));
         });
     }
 

@@ -81,18 +81,24 @@ public class AirPlayService {
 
     private void _ensureSession() {
         if (session != null) return;
-        session = airplaylib.Airplaylib.newSession(new airplaylib.EventHandler() {
+        airplaylib.Session s = airplaylib.Airplaylib.newSession(new airplaylib.EventHandler() {
             @Override
             public void onDeviceFound(String deviceJSON) {}
 
             @Override
             public void onConnected() {
                 connected = true;
-                _startEncoder();
+                State.log("AirPlay connected, requesting projection...");
+                // Now request projection — only after AirPlay handshake succeeded
                 mainHandler.post(() -> {
+                    MirrorMainActivity activity = State.getCurrentActivity();
+                    if (activity != null) {
+                        activity.requestAirPlayProjection();
+                    } else {
+                        State.log("AirPlay: no activity for projection request");
+                    }
                     if (listener != null) listener.onConnected();
                 });
-                State.log("AirPlay connected, encoder started");
             }
 
             @Override
@@ -112,12 +118,17 @@ public class AirPlayService {
 
             @Override
             public void onError(String err) {
+                // Reset session so next connect attempt starts fresh
+                if (!connected) {
+                    session = null;
+                }
                 mainHandler.post(() -> {
                     if (listener != null) listener.onError(err);
                 });
                 State.log("AirPlay error: " + err);
             }
         });
+        session = s;
     }
 
     public void discover() {
@@ -175,30 +186,21 @@ public class AirPlayService {
         }).start();
     }
 
-    // Step 1: User hits connect → request screen capture permission
+    // Step 1: User hits connect → start AirPlay handshake (no projection yet)
     public void connect(String host, int port, String pin, int width, int height, int fps) {
+        // Tear down any previous session/attempt
+        if (session != null) {
+            session.disconnect();
+            session = null;
+        }
+        connected = false;
+
         pendingHost = host;
         pendingPort = port;
         pendingPin = pin;
-        pendingWidth = width;
-        pendingHeight = height;
         pendingFps = fps;
 
-        MirrorMainActivity activity = State.getCurrentActivity();
-        if (activity != null) {
-            State.log("AirPlay: requesting screen capture permission");
-            activity.requestAirPlayProjection();
-        } else {
-            State.log("AirPlay: no activity available for projection request");
-        }
-    }
-
-    // Step 2: Called from MirrorMainActivity.onActivityResult when projection is granted
-    public void onProjectionReady(MediaProjection projection) {
-        State.log("AirPlay: projection granted, connecting...");
-        pendingProjection = projection;
-
-        // Get actual screen dimensions
+        // Get screen dimensions now (doesn't need projection)
         Context ctx = State.getContext();
         if (ctx != null) {
             android.util.DisplayMetrics dm = new android.util.DisplayMetrics();
@@ -207,10 +209,17 @@ public class AirPlayService {
             pendingWidth = dm.widthPixels;
             pendingHeight = dm.heightPixels;
         }
-        State.log("AirPlay: screen " + pendingWidth + "x" + pendingHeight);
+        State.log("AirPlay: connecting to " + host + ":" + port + " (" + pendingWidth + "x" + pendingHeight + ")");
 
         _ensureSession();
-        session.connect(pendingHost, pendingPort, pendingPin, pendingWidth, pendingHeight, pendingFps);
+        session.connect(host, port, pin, pendingWidth, pendingHeight, pendingFps);
+    }
+
+    // Step 2: Called from AirPlayForegroundService after projection is granted
+    public void onProjectionReady(MediaProjection projection) {
+        State.log("AirPlay: projection granted, starting encoder");
+        pendingProjection = projection;
+        _startEncoder();
     }
 
     private void _startEncoder() {

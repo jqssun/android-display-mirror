@@ -10,6 +10,7 @@
 #include "audio.h"
 #include "moonlight-common-c/src/Input.h"
 #include "video_colorspace.h"
+#include "airplay_bridge.h"
 
 #include <media/NdkMediaCodec.h>
 #include <media/NdkMediaFormat.h>
@@ -40,9 +41,6 @@ static jmethodID handleLeftMouseButtonMethod = nullptr;
 static jclass sunshineKeyboardClass = nullptr;
 static jmethodID handleKeyboardMethod = nullptr;
 
-// AirPlay frame forwarding
-static jclass airPlayServiceClass = nullptr;
-static jmethodID airPlaySendFrameMethod = nullptr;
 
 JNIEXPORT void JNICALL
 Java_io_github_jqssun_displaymirror_job_SunshineServer_start(JNIEnv *env, jclass clazz) {
@@ -91,13 +89,8 @@ Java_io_github_jqssun_displaymirror_job_SunshineServer_start(JNIEnv *env, jclass
         BOOST_LOG(error) << "Failed to find SunshineKeyboard class at startup"sv;
     }
 
-    // Cache AirPlay frame forwarding class
-    jclass apClass = env->FindClass("io/github/jqssun/displaymirror/job/AirPlayService");
-    if (apClass != nullptr) {
-        airPlayServiceClass = (jclass)env->NewGlobalRef(apClass);
-        env->DeleteLocalRef(apClass);
-        airPlaySendFrameMethod = env->GetStaticMethodID(airPlayServiceClass, "onNativeVideoFrame", "([BZ)V");
-    }
+    // Init AirPlay bridge (separate module)
+    airplay_bridge::init(env);
 
     deinit = logging::init(1, "/dev/null");
     BOOST_LOG(info) << "start sunshine server"sv;
@@ -921,26 +914,6 @@ namespace sunshine_callbacks {
     }
 
     void callJavaOnVideoFrame(const uint8_t* data, size_t size, bool isKeyframe) {
-        if (jvm == nullptr || airPlayServiceClass == nullptr || airPlaySendFrameMethod == nullptr) {
-            return;
-        }
-
-        JNIEnv *env;
-        if (jvm->AttachCurrentThread(&env, nullptr) != JNI_OK) {
-            return;
-        }
-
-        jbyteArray jdata = env->NewByteArray(size);
-        if (jdata != nullptr) {
-            env->SetByteArrayRegion(jdata, 0, size, reinterpret_cast<const jbyte*>(data));
-            env->CallStaticVoidMethod(airPlayServiceClass, airPlaySendFrameMethod, jdata, (jboolean)isKeyframe);
-            env->DeleteLocalRef(jdata);
-        }
-
-        if (env->ExceptionCheck()) {
-            env->ExceptionDescribe();
-            env->ExceptionClear();
-        }
-        jvm->DetachCurrentThread();
+        airplay_bridge::sendVideoFrame(jvm, data, size, isKeyframe);
     }
 }
