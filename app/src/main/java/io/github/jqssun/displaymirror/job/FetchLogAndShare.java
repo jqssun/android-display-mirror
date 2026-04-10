@@ -41,7 +41,7 @@ public class FetchLogAndShare implements Job {
                 userServiceRequested = true;
                 Shizuku.peekUserService(State.userServiceArgs, State.userServiceConnection);
                 Shizuku.bindUserService(State.userServiceArgs, State.userServiceConnection);
-                State.resumeJobLater(1000);
+                State.resumeJobLater(State.MODE_UTILITY, 1000);
                 throw new YieldException("Waiting for user service to start");
             }
             Toast.makeText(State.getContext(), R.string.cannot_start_user_service, Toast.LENGTH_SHORT).show();

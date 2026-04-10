@@ -57,7 +57,7 @@ public class SunshineService extends Service {
             android.util.Log.d("SunshineService", "received action: " + intent.getAction());
             String action = intent.getAction();
             if (ACTION_USB_PERMISSION.equals(action)) {
-                State.resumeJob();
+                State.resumeJob(State.MODE_DISPLAYLINK);
             }
         }
     };

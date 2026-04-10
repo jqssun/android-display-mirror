@@ -201,6 +201,12 @@ public class State {
         }
     }
 
+    public static void resumeJobLater(String mode, long delayMillis) {
+        if (currentActivity.get() != null) {
+            mainHandler.postDelayed(() -> resumeJob(mode), delayMillis);
+        }
+    }
+
     private static final java.util.concurrent.atomic.AtomicInteger _logVersion = new java.util.concurrent.atomic.AtomicInteger(0);
     public static final MutableLiveData<Integer> logVersion = new MutableLiveData<>(0);
 

@@ -52,6 +52,8 @@
     <string name="height_label">Height</string>
     <string name="refresh_rate_label">Refresh rate</string>
     <string name="switch_mode">Mode</string>
+    <string name="rotate">Rotate</string>
+    <string name="rotate_cw">Rotate clockwise</string>
 
     <!-- Permission status -->
     <string name="status_not_started">Not started</string>
