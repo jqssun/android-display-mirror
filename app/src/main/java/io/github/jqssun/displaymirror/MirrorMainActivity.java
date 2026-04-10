@@ -107,13 +107,6 @@ public class MirrorMainActivity extends AppCompatActivity {
         State.uiState.observe(this, state -> {});
     }
 
-    private void _ensureAccessibilityServiceStarted() {
-        if (TouchpadAccessibilityService.isAccessibilityServiceEnabled(this)) {
-            Intent serviceIntent = new Intent(this, TouchpadAccessibilityService.class);
-            this.startService(serviceIntent);
-        }
-    }
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -214,9 +207,6 @@ public class MirrorMainActivity extends AppCompatActivity {
 
     public void startMirroring() {
         AcquireShizuku.fixRootShizuku();
-        if (!Pref.getDisableAccessibility()) {
-            _ensureAccessibilityServiceStarted();
-        }
         if (SunshineService.instance == null) {
             startMediaProjectionService();
         } else {
@@ -261,9 +251,6 @@ public class MirrorMainActivity extends AppCompatActivity {
         if (current != null && current.errorStatusText != null) {
             return;
         }
-        boolean singleAppMode = Pref.getSingleAppMode();
-        boolean useTouchscreen = Pref.getUseTouchscreen();
-
         boolean isScreenMirroring = State.mirrorVirtualDisplay != null ||
                                    State.displaylinkState.getVirtualDisplay() != null ||
                                    State.lastSingleAppDisplay != 0;
@@ -273,19 +260,11 @@ public class MirrorMainActivity extends AppCompatActivity {
         if (SunshineService.instance == null) {
             newUiState.mirrorStatusText = getString(R.string.status_idle);
             newUiState.startBtnVisibility = true;
-
             newUiState.screenOffBtnVisibility = false;
-            newUiState.touchScreenBtnVisibility = false;
         } else if (isScreenMirroring) {
             newUiState.mirrorStatusText = getString(R.string.status_projecting);
-
             newUiState.stopBtnVisibility = true;
             newUiState.screenOffBtnVisibility = ShizukuUtils.hasPermission();
-            newUiState.touchScreenBtnVisibility = singleAppMode;
-
-            if (singleAppMode) {
-                newUiState.touchScreenBtnText = useTouchscreen ? getString(R.string.touchscreen) : getString(R.string.touchpad);
-            }
         } else {
             newUiState.mirrorStatusText = getString(R.string.status_connect_display);
             try {
@@ -296,10 +275,8 @@ public class MirrorMainActivity extends AppCompatActivity {
             } catch(Throwable e) {
                 // ignore
             }
-
             newUiState.stopBtnVisibility = true;
             newUiState.screenOffBtnVisibility = false;
-            newUiState.touchScreenBtnVisibility = false;
         }
 
         State.uiState.setValue(newUiState);

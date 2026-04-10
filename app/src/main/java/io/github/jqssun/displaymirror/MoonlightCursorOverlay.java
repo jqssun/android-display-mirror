@@ -1,7 +1,13 @@
 package io.github.jqssun.displaymirror;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.PixelFormat;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -34,7 +40,7 @@ public class MoonlightCursorOverlay {
             cursorParams.y = 0;
 
             cursorView = new ImageView(context);
-            cursorView.setImageResource(R.drawable.mouse_cursor);
+            cursorView.setImageDrawable(new BitmapDrawable(context.getResources(), _createCursorBitmap()));
 
             wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
             try {
@@ -60,6 +66,30 @@ public class MoonlightCursorOverlay {
                 Log.e(TAG, "Failed to update cursor", e);
             }
         });
+    }
+
+    private static Bitmap _createCursorBitmap() {
+        int w = 24, h = 32;
+        Bitmap bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        Canvas c = new Canvas(bmp);
+        Path arrow = new Path();
+        arrow.moveTo(0, 0);
+        arrow.lineTo(0, h);
+        arrow.lineTo(w * 0.55f, h * 0.7f);
+        arrow.lineTo(w, h);
+        arrow.lineTo(w * 0.65f, h * 0.55f);
+        arrow.lineTo(w, h * 0.35f);
+        arrow.close();
+        Paint fill = new Paint(Paint.ANTI_ALIAS_FLAG);
+        fill.setColor(Color.WHITE);
+        fill.setStyle(Paint.Style.FILL);
+        c.drawPath(arrow, fill);
+        Paint border = new Paint(Paint.ANTI_ALIAS_FLAG);
+        border.setColor(Color.BLACK);
+        border.setStyle(Paint.Style.STROKE);
+        border.setStrokeWidth(1.5f);
+        c.drawPath(arrow, border);
+        return bmp;
     }
 
     public static void hide() {

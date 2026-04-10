@@ -1,9 +1,7 @@
 package io.github.jqssun.displaymirror;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.hardware.display.VirtualDisplay;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MoonlightFragment extends Fragment {
-    private MaterialButton startBtn, stopBtn, screenOffBtn, touchScreenBtn;
+    private MaterialButton startBtn, stopBtn, screenOffBtn;
     private ImageView statusIcon;
     private TextView statusTitle, statusDetail;
     private SharedPreferences preferences;
@@ -48,7 +46,6 @@ public class MoonlightFragment extends Fragment {
         startBtn = view.findViewById(R.id.startBtn);
         stopBtn = view.findViewById(R.id.stopBtn);
         screenOffBtn = view.findViewById(R.id.screenOffBtn);
-        touchScreenBtn = view.findViewById(R.id.touchScreenBtn);
 
         startBtn.setOnClickListener(v -> ((MirrorMainActivity) requireActivity()).startMirroring());
         stopBtn.setOnClickListener(v -> {
@@ -58,7 +55,6 @@ public class MoonlightFragment extends Fragment {
             ExitAll.execute(requireActivity(), true);
         });
         screenOffBtn.setOnClickListener(v -> CreateVirtualDisplay.doPowerOffScreen(requireActivity()));
-        touchScreenBtn.setOnClickListener(v -> _onTouchScreenClick());
 
         // Moonlight settings
         _initMoonlightSettings(view);
@@ -116,22 +112,19 @@ public class MoonlightFragment extends Fragment {
 
         disableRemoteSubmixCheckbox.setChecked(Pref.getDisableRemoteSubmix());
         disableRemoteSubmixCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_DISABLE_REMOTE_SUBMIX, c).apply());
-    }
 
-    private void _onTouchScreenClick() {
-        boolean useTouchscreen = Pref.getUseTouchscreen();
-        if (ShizukuUtils.hasPermission() && useTouchscreen) {
-            VirtualDisplay virtualDisplay = State.displaylinkState.getVirtualDisplay();
-            if (virtualDisplay == null) virtualDisplay = State.mirrorVirtualDisplay;
-            if (virtualDisplay == null) return;
-            int displayId = virtualDisplay.getDisplay().getDisplayId();
-            Intent intent = new Intent(requireContext(), TouchscreenActivity.class);
-            intent.putExtra("surface", virtualDisplay.getSurface());
-            intent.putExtra("display", displayId);
-            startActivity(intent);
-        } else {
-            TouchpadActivity.startTouchpad(requireActivity(), State.lastSingleAppDisplay, false);
-        }
+        MaterialSwitch autoMatchCheckbox = view.findViewById(R.id.autoMatchAspectRatioCheckbox);
+        MaterialSwitch preventAutoLockCheckbox = view.findViewById(R.id.preventAutoLockCheckbox);
+
+        boolean hasShizuku = ShizukuUtils.hasPermission();
+
+        autoMatchCheckbox.setChecked(Pref.getAutoMatchAspectRatio());
+        autoMatchCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_AUTO_MATCH_ASPECT_RATIO, c).apply());
+        if (!hasShizuku) autoMatchCheckbox.setEnabled(false);
+
+        preventAutoLockCheckbox.setChecked(Pref.getPreventAutoLock());
+        preventAutoLockCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_PREVENT_AUTO_LOCK, c).apply());
+        if (!hasShizuku) preventAutoLockCheckbox.setEnabled(false);
     }
 
     private void _updateUI(MirrorUiState state) {
@@ -142,7 +135,6 @@ public class MoonlightFragment extends Fragment {
             startBtn.setVisibility(View.GONE);
             stopBtn.setVisibility(View.GONE);
             screenOffBtn.setVisibility(View.GONE);
-            touchScreenBtn.setVisibility(View.GONE);
             return;
         }
 
@@ -175,10 +167,6 @@ public class MoonlightFragment extends Fragment {
         startBtn.setVisibility(state.startBtnVisibility ? View.VISIBLE : View.GONE);
         stopBtn.setVisibility(state.stopBtnVisibility ? View.VISIBLE : View.GONE);
         screenOffBtn.setVisibility(state.screenOffBtnVisibility ? View.VISIBLE : View.GONE);
-        touchScreenBtn.setVisibility(state.touchScreenBtnVisibility ? View.VISIBLE : View.GONE);
-        if (state.touchScreenBtnVisibility) {
-            touchScreenBtn.setText(state.touchScreenBtnText);
-        }
     }
 
     private void _loadClientList(Spinner spinner) {

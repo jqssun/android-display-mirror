@@ -63,9 +63,6 @@ public class MirrorDisplayMonitor {
 
             @Override
             public void onDisplayChanged(int displayId) {
-                if (State.floatingButtonService != null) {
-                    State.floatingButtonService.onDisplayChanged(displayId);
-                }
             }
         }, null);
     }

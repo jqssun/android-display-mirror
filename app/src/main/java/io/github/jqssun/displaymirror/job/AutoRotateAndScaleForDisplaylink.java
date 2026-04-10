@@ -18,7 +18,6 @@ import android.view.Display;
 import android.view.Surface;
 
 import io.github.jqssun.displaymirror.DisplaylinkState;
-import io.github.jqssun.displaymirror.FloatingButtonService;
 import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.State;
 
@@ -303,7 +302,6 @@ public class AutoRotateAndScaleForDisplaylink {
                     DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC,
                     currentSurface, null, displaylinkState.handler));
             State.setMediaProjection(null);
-            FloatingButtonService.startForMirror();
             CreateVirtualDisplay.powerOffScreen();
         } else if (displaylinkState.getVirtualDisplay() != null) {
             DisplayMetrics metrics = new DisplayMetrics();

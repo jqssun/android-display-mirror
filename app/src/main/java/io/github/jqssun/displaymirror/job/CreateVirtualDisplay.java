@@ -24,11 +24,9 @@ import android.view.Surface;
 
 import androidx.annotation.NonNull;
 
-import io.github.jqssun.displaymirror.FloatingButtonService;
 import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.PureBlackActivity;
 import io.github.jqssun.displaymirror.State;
-import io.github.jqssun.displaymirror.TouchpadActivity;
 import io.github.jqssun.displaymirror.shizuku.ServiceUtils;
 import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
 import io.github.jqssun.displaymirror.shizuku.SurfaceControl;
@@ -93,9 +91,6 @@ public class CreateVirtualDisplay {
     }
 
     public static void doPowerOffScreen(Context context) {
-        if (State.floatingButtonService != null) {
-            State.floatingButtonService.resetButtonVisibility();
-        }
         boolean singleApp = Pref.getSingleAppMode();
         if (State.userService != null && !Pref.getUseBlackImage()) {
             try {
@@ -116,21 +111,6 @@ public class CreateVirtualDisplay {
             context.startActivity(intent, options.toBundle());
         } else {
             State.log("Shizuku permission required for screen-off during mirror projection");
-        }
-        int targetDisplayId = -1;
-        if (singleApp) {
-            if (State.displaylinkState.getVirtualDisplay() != null) {
-                targetDisplayId = State.displaylinkState.getVirtualDisplay().getDisplay().getDisplayId();
-            } else if (State.mirrorVirtualDisplay != null) {
-                targetDisplayId = State.mirrorVirtualDisplay.getDisplay().getDisplayId();
-            }
-        }
-        if (targetDisplayId != -1) {
-            if (ShizukuUtils.hasPermission()) {
-                TouchpadActivity.setFocus(ServiceUtils.getInputManager(), targetDisplayId);
-            } else {
-                TouchpadActivity.setFocus(null, targetDisplayId);
-            }
         }
     }
 
@@ -246,9 +226,6 @@ public class CreateVirtualDisplay {
     }
 
     public static void powerOnScreen() {
-        if (State.floatingButtonService != null) {
-            State.floatingButtonService.resetButtonVisibility();
-        }
         if (State.isInPureBlackActivity != null) {
             State.isInPureBlackActivity.finish();
         } else {

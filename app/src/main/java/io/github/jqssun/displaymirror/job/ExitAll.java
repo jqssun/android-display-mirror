@@ -6,11 +6,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 
 import io.github.jqssun.displaymirror.BuildConfig;
-import io.github.jqssun.displaymirror.PureBlackActivity;
 import io.github.jqssun.displaymirror.State;
 import io.github.jqssun.displaymirror.SunshineService;
-import io.github.jqssun.displaymirror.TouchpadAccessibilityService;
-import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
 
 public class ExitAll {
     public static void execute(Context context, boolean restart) {
@@ -33,28 +30,14 @@ public class ExitAll {
             if (intent == null) return;
             ComponentName componentName = intent.getComponent();
             Intent mainIntent = Intent.makeRestartActivityTask(componentName);
-            // Required for API 34 and later
-            // Ref: https://developer.android.com/about/versions/14/behavior-changes-14#safer-intents
             mainIntent.setPackage(context.getPackageName());
             mainIntent.putExtra("DoNotAutoStartMoonlight", true);
             context.startActivity(mainIntent);
         }
 
         State.stopMirrorVirtualDisplay();
-
         State.displaylinkState.destroy();
 
-        boolean sunshineServiceRunning = SunshineService.instance != null;
-        if (!wasSunshineStarted && !sunshineServiceRunning && !ShizukuUtils.hasPermission() && TouchpadAccessibilityService.getInstance() != null) {
-            // direct connection but don't exit accessibility
-            if (State.getCurrentActivity() != null) {
-                State.getCurrentActivity().finish();
-            }
-            return;
-        }
-        if (TouchpadAccessibilityService.getInstance() != null && ShizukuUtils.hasPermission()) {
-            TouchpadAccessibilityService.getInstance().disableSelf();
-        }
         if (context != null) {
             context.stopService(new Intent(context, SunshineService.class));
         }

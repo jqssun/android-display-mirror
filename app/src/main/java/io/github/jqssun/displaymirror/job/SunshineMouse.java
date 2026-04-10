@@ -21,8 +21,6 @@ import io.github.jqssun.displaymirror.MoonlightCursorOverlay;
 import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.State;
 import io.github.jqssun.displaymirror.SunshineService;
-import io.github.jqssun.displaymirror.TouchpadAccessibilityService;
-import io.github.jqssun.displaymirror.TouchpadActivity;
 import io.github.jqssun.displaymirror.shizuku.ServiceUtils;
 import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
 
@@ -390,8 +388,6 @@ public class SunshineMouse {
         _injectEvent("inject down", event);
     }
 
-    private static List<MotionEvent> gesture = new ArrayList<>();
-
     private static void _injectEvent(String prefix, MotionEvent event) {
         if (autoScale && autoRotateAndScaleForMoonlight != null) {
             autoRotateAndScaleForMoonlight.exitScale();
@@ -413,20 +409,8 @@ public class SunshineMouse {
                 inputManager = null;
             }
         }
-        if (TouchpadAccessibilityService.getInstance() != null) {
-            gesture.add(event);
-            if ((event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) && pointers.isEmpty()) {
-                if (singleAppMode) {
-                    if (State.mirrorVirtualDisplay == null) {
-                        return;
-                    }
-                    TouchpadActivity.replayGestureViaAccessibility(gesture, State.mirrorVirtualDisplay.getDisplay().getDisplayId());
-                } else {
-                    TouchpadActivity.replayGestureViaAccessibility(gesture, Display.DEFAULT_DISPLAY);
-                }
-                gesture.clear();
-            }
-        }
+        // Without Shizuku, touch injection is not available.
+        // Use the Display Extend app for touchpad/accessibility-based input.
     }
 
     private static void _handleTouchEventUp(int pointerId, float x, float y, boolean cancelled) {

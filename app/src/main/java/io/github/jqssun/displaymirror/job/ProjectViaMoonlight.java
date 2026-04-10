@@ -4,7 +4,6 @@ import android.content.Context;
 import android.hardware.display.DisplayManager;
 import android.view.Surface;
 
-import io.github.jqssun.displaymirror.FloatingButtonService;
 import io.github.jqssun.displaymirror.MirrorMainActivity;
 import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.State;
@@ -73,7 +72,6 @@ public class ProjectViaMoonlight implements Job {
                     DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC,
                     surface, null, null);
             State.setMediaProjection(null);
-            FloatingButtonService.startForMirror();
             CreateVirtualDisplay.powerOffScreen();
         }
     }

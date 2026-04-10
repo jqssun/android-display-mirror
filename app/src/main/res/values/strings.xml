@@ -27,7 +27,7 @@
     <string name="section_displaylink_libraries">DisplayLink Libraries</string>
 
     <string name="section_moonlight_controls">Controls</string>
-    <string name="start">Start Moonlight</string>
+    <string name="start">Start Sunshine Server</string>
     <string name="stop">Stop</string>
     <string name="status_idle">Ready to start. Configure settings first if needed, then tap Start.</string>
 
@@ -117,8 +117,8 @@
     <string name="use_black_image_screen_off_desc">Use black image instead of turning off screen</string>
     <string name="disable_usb_audio">Disable USB audio</string>
     <string name="disable_usb_audio_desc">Disable automatic USB audio routing</string>
-    <string name="auto_match_aspect_ratio">Match aspect ratio</string>
-    <string name="auto_match_aspect_ratio_desc">Adjust main screen aspect ratio to match external display</string>
+    <string name="auto_match_aspect_ratio">Match Moonlight aspect ratio</string>
+    <string name="auto_match_aspect_ratio_desc">Adjust main screen aspect ratio to match external Moonlight display</string>
     <string name="show_floating_in_mirror_mode">Floating back button</string>
     <string name="show_floating_in_mirror_mode_desc">Show floating back button in mirror mode</string>
     <string name="prevent_auto_lock">Prevent auto-lock</string>
@@ -132,7 +132,7 @@
     <string name="show_moonlight_cursor">Show cursor location</string>
     <string name="show_moonlight_cursor_desc">Show a cursor overlay on the device screen for Moonlight mouse input</string>
     <string name="section_airplay_connections">AirPlay Connections (Beta)</string>
-    <string name="airplay_discover">Scan for AirPlay devices</string>
+    <string name="airplay_discover">Scan for AirPlay servers</string>
     <string name="airplay_no_devices">AirPlay Devices Not Found</string>
     <string name="airplay_no_devices_detail">Search for receivers on your network</string>
     <string name="airplay_connecting">Connecting to AirPlay…</string>

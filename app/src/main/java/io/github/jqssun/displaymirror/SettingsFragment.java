@@ -52,47 +52,34 @@ public class SettingsFragment extends Fragment {
         if (view == null) return;
 
         _updateShizukuStatus(view);
-        _updateAccessibilityStatus(view);
         _updateOverlayStatus(view);
-
-        MaterialSwitch useAccessibilityCheckbox = view.findViewById(R.id.useAccessibilityCheckbox);
-        useAccessibilityCheckbox.setChecked(!preferences.getBoolean(Pref.KEY_DISABLE_ACCESSIBILITY, false));
     }
 
     private void _initSettings(View view) {
+        MaterialSwitch autoRotateCheckbox = view.findViewById(R.id.autoRotateCheckbox);
+        MaterialSwitch autoScaleCheckbox = view.findViewById(R.id.autoScaleCheckbox);
+        MaterialSwitch autoScreenOffCheckbox = view.findViewById(R.id.autoScreenOffCheckbox);
+        MaterialSwitch useBlackImageCheckbox = view.findViewById(R.id.useBlackImageCheckbox);
         MaterialSwitch singleAppModeCheckbox = view.findViewById(R.id.singleAppModeCheckbox);
         MaterialButton selectAppButton = view.findViewById(R.id.selectAppButton);
         View singleAppContainer = view.findViewById(R.id.singleAppContainer);
-        MaterialSwitch autoRotateCheckbox = view.findViewById(R.id.autoRotateCheckbox);
-        MaterialSwitch autoScaleCheckbox = view.findViewById(R.id.autoScaleCheckbox);
-        TextView dpiValueText = view.findViewById(R.id.dpiValueText);
-        View dpiRow = view.findViewById(R.id.dpiRow);
-        MaterialSwitch autoHideFloatingCheckbox = view.findViewById(R.id.autoHideFloatingCheckbox);
-        MaterialSwitch autoScreenOffCheckbox = view.findViewById(R.id.autoScreenOffCheckbox);
         MaterialSwitch autoBindInputCheckbox = view.findViewById(R.id.autoBindInputCheckbox);
         MaterialSwitch autoMoveImeCheckbox = view.findViewById(R.id.autoMoveImeCheckbox);
+        TextView dpiValueText = view.findViewById(R.id.dpiValueText);
+        View dpiRow = view.findViewById(R.id.dpiRow);
         MaterialSwitch disableUsbAudioCheckbox = view.findViewById(R.id.disableUsbAudioCheckbox);
-        MaterialSwitch useTouchscreenCheckbox = view.findViewById(R.id.useTouchscreenCheckbox);
-        MaterialSwitch autoMatchAspectRatioCheckbox = view.findViewById(R.id.autoMatchAspectRatioCheckbox);
-        MaterialSwitch showFloatingInMirrorModeCheckbox = view.findViewById(R.id.showFloatingInMirrorModeCheckbox);
-        MaterialSwitch useBlackImageCheckbox = view.findViewById(R.id.useBlackImageCheckbox);
-        MaterialSwitch preventAutoLockCheckbox = view.findViewById(R.id.preventAutoLockCheckbox);
+
+        autoRotateCheckbox.setChecked(Pref.getAutoRotate());
+        autoScaleCheckbox.setChecked(Pref.getAutoScale());
+        autoScreenOffCheckbox.setChecked(Pref.getAutoScreenOff());
+        useBlackImageCheckbox.setChecked(Pref.getUseBlackImage());
+        disableUsbAudioCheckbox.setChecked(Pref.getDisableUsbAudio());
 
         boolean singleAppMode = Pref.getSingleAppMode();
         singleAppModeCheckbox.setChecked(singleAppMode);
-        autoRotateCheckbox.setChecked(Pref.getAutoRotate());
-        autoScaleCheckbox.setChecked(Pref.getAutoScale());
-        dpiValueText.setText(getString(R.string.dpi_text_size_value, Pref.getSingleAppDpi()));
-        autoHideFloatingCheckbox.setChecked(Pref.getAutoHideFloatingBackButton());
-        autoScreenOffCheckbox.setChecked(Pref.getAutoScreenOff());
         autoBindInputCheckbox.setChecked(Pref.getAutoBindInput());
         autoMoveImeCheckbox.setChecked(Pref.getAutoMoveIme());
-        disableUsbAudioCheckbox.setChecked(Pref.getDisableUsbAudio());
-        useTouchscreenCheckbox.setChecked(Pref.getUseTouchscreen());
-        autoMatchAspectRatioCheckbox.setChecked(Pref.getAutoMatchAspectRatio());
-        showFloatingInMirrorModeCheckbox.setChecked(Pref.getShowFloatingInMirrorMode());
-        useBlackImageCheckbox.setChecked(Pref.getUseBlackImage());
-        preventAutoLockCheckbox.setChecked(Pref.getPreventAutoLock());
+        dpiValueText.setText(getString(R.string.dpi_text_size_value, Pref.getSingleAppDpi()));
 
         if (ShizukuUtils.hasPermission()) {
             TextView autoScreenOffDesc = view.findViewById(R.id.autoScreenOffDesc);
@@ -100,18 +87,15 @@ public class SettingsFragment extends Fragment {
         }
 
         String selectedAppName = preferences.getString(Pref.KEY_SELECTED_APP_NAME, "");
+        TextView singleAppTitle = view.findViewById(R.id.singleAppTitle);
         if (!selectedAppName.isEmpty() && singleAppMode) {
-            TextView singleAppTitle = view.findViewById(R.id.singleAppTitle);
             singleAppTitle.setText(getString(R.string.single_app_projection_with_name, selectedAppName));
         }
 
-        TextView singleAppTitle = view.findViewById(R.id.singleAppTitle);
         boolean hasShizuku = ShizukuUtils.hasPermission();
         singleAppModeCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
             preferences.edit().putBoolean(Pref.KEY_SINGLE_APP_MODE, isChecked).apply();
             autoScaleCheckbox.setEnabled(!isChecked);
-            autoMatchAspectRatioCheckbox.setEnabled(!isChecked && hasShizuku);
-            showFloatingInMirrorModeCheckbox.setEnabled(!isChecked);
             _setSingleAppChildrenEnabled(singleAppContainer, isChecked, hasShizuku);
             if (!isChecked) {
                 singleAppTitle.setText(R.string.single_app_projection);
@@ -120,17 +104,17 @@ public class SettingsFragment extends Fragment {
             }
         });
         autoScaleCheckbox.setEnabled(!singleAppMode);
-        autoMatchAspectRatioCheckbox.setEnabled(!singleAppMode && hasShizuku);
-        showFloatingInMirrorModeCheckbox.setEnabled(!singleAppMode);
         _setSingleAppChildrenEnabled(singleAppContainer, singleAppMode, hasShizuku);
 
         autoRotateCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_AUTO_ROTATE, c).apply());
         autoScaleCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_AUTO_SCALE, c).apply());
-        autoHideFloatingCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_AUTO_HIDE_FLOATING_BACK_BUTTON, c).apply());
         autoScreenOffCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_AUTO_SCREEN_OFF, c).apply());
-
+        useBlackImageCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_USE_BLACK_IMAGE, c).apply());
         autoBindInputCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_AUTO_BIND_INPUT, c).apply());
         autoMoveImeCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_AUTO_MOVE_IME, c).apply());
+
+        selectAppButton.setOnClickListener(v -> _showAppSelectionDialog());
+        dpiRow.setOnClickListener(v -> _showDpiDialog(dpiValueText));
 
         disableUsbAudioCheckbox.setOnCheckedChangeListener((b, isChecked) -> {
             preferences.edit().putBoolean(Pref.KEY_DISABLE_USB_AUDIO, isChecked).apply();
@@ -147,38 +131,12 @@ public class SettingsFragment extends Fragment {
         });
         if (!ShizukuUtils.hasPermission()) disableUsbAudioCheckbox.setEnabled(false);
 
-        useTouchscreenCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_USE_TOUCHSCREEN, c).apply());
-
-        autoMatchAspectRatioCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_AUTO_MATCH_ASPECT_RATIO, c).apply());
-        if (!ShizukuUtils.hasPermission()) autoMatchAspectRatioCheckbox.setEnabled(false);
-
-        showFloatingInMirrorModeCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_SHOW_FLOATING_IN_MIRROR_MODE, c).apply());
-        useBlackImageCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_USE_BLACK_IMAGE, c).apply());
-
-        preventAutoLockCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_PREVENT_AUTO_LOCK, c).apply());
-        if (!ShizukuUtils.hasPermission()) preventAutoLockCheckbox.setEnabled(false);
-
-        selectAppButton.setOnClickListener(v -> _showAppSelectionDialog());
-
-        dpiRow.setOnClickListener(v -> _showDpiDialog(dpiValueText));
-
         // Permissions
         MaterialButton shizukuPermissionBtn = view.findViewById(R.id.shizukuPermissionBtn);
         shizukuPermissionBtn.setOnClickListener(v -> State.startNewJob(new AcquireShizuku()));
 
         _updateShizukuStatus(view);
-        _updateAccessibilityStatus(view);
         _updateOverlayStatus(view);
-
-        MaterialSwitch useAccessibilityCheckbox = view.findViewById(R.id.useAccessibilityCheckbox);
-        useAccessibilityCheckbox.setChecked(!preferences.getBoolean(Pref.KEY_DISABLE_ACCESSIBILITY, false));
-        useAccessibilityCheckbox.setOnCheckedChangeListener((b, isChecked) -> {
-            preferences.edit().putBoolean(Pref.KEY_DISABLE_ACCESSIBILITY, !isChecked).apply();
-            _updateAccessibilityStatus(view);
-            if (!isChecked && ShizukuUtils.hasPermission()) {
-                TouchpadAccessibilityService.disableAll(requireContext());
-            }
-        });
 
         // About
         TextView versionText = view.findViewById(R.id.versionText);
@@ -218,43 +176,6 @@ public class SettingsFragment extends Fragment {
         }
     }
 
-    private void _updateAccessibilityStatus(View view) {
-        View accessibilityRow = view.findViewById(R.id.accessibilityRow);
-        TextView statusView = view.findViewById(R.id.accessibilityStatus);
-        MaterialButton permissionBtn = view.findViewById(R.id.accessibilityPermissionBtn);
-        boolean useAccessibility = !preferences.getBoolean(Pref.KEY_DISABLE_ACCESSIBILITY, false);
-        if (!useAccessibility) {
-            accessibilityRow.setVisibility(View.GONE);
-            return;
-        }
-        boolean isEnabled = TouchpadAccessibilityService.isAccessibilityServiceEnabled(requireContext());
-        accessibilityRow.setVisibility(View.VISIBLE);
-        if (isEnabled) {
-            statusView.setText(R.string.status_authorized);
-            permissionBtn.setVisibility(View.GONE);
-        } else {
-            statusView.setText(R.string.status_not_authorized);
-            permissionBtn.setVisibility(View.VISIBLE);
-            permissionBtn.setOnClickListener(v ->
-                startActivity(new Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS)));
-        }
-    }
-
-    private void _updateOverlayStatus(View view) {
-        TextView statusView = view.findViewById(R.id.overlayStatus);
-        MaterialButton permissionBtn = view.findViewById(R.id.overlayPermissionBtn);
-        boolean hasPermission = Settings.canDrawOverlays(requireContext());
-        statusView.setText(hasPermission ? R.string.status_authorized : R.string.status_not_authorized);
-        if (hasPermission) {
-            permissionBtn.setVisibility(View.GONE);
-        } else {
-            permissionBtn.setVisibility(View.VISIBLE);
-            permissionBtn.setOnClickListener(v ->
-                startActivity(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                    Uri.parse("package:" + requireContext().getPackageName()))));
-        }
-    }
-
     private void _showAppSelectionDialog() {
         PackageManager pm = requireContext().getPackageManager();
         Intent intent = new Intent(Intent.ACTION_MAIN);
@@ -262,7 +183,21 @@ public class SettingsFragment extends Fragment {
         List<ResolveInfo> launcherApps = pm.queryIntentActivities(intent, 0);
         launcherApps.sort((a, b) -> a.loadLabel(pm).toString().compareToIgnoreCase(b.loadLabel(pm).toString()));
 
-        _AppListAdapter adapter = new _AppListAdapter(requireContext(), launcherApps, pm);
+        ArrayAdapter<ResolveInfo> adapter = new ArrayAdapter<ResolveInfo>(
+                requireContext(), android.R.layout.simple_list_item_2, android.R.id.text1, launcherApps) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                if (convertView == null) {
+                    convertView = LayoutInflater.from(getContext()).inflate(android.R.layout.simple_list_item_2, parent, false);
+                }
+                ResolveInfo app = getItem(position);
+                if (app != null) {
+                    ((TextView) convertView.findViewById(android.R.id.text1)).setText(app.loadLabel(pm));
+                    ((TextView) convertView.findViewById(android.R.id.text2)).setText(app.activityInfo.packageName);
+                }
+                return convertView;
+            }
+        };
 
         new MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.select_app_title)
@@ -276,8 +211,8 @@ public class SettingsFragment extends Fragment {
                     .apply();
                 View view = getView();
                 if (view != null) {
-                    TextView titleView = view.findViewById(R.id.singleAppTitle);
-                    titleView.setText(getString(R.string.single_app_projection_with_name, name));
+                    ((TextView) view.findViewById(R.id.singleAppTitle))
+                        .setText(getString(R.string.single_app_projection_with_name, name));
                 }
             })
             .show();
@@ -317,9 +252,7 @@ public class SettingsFragment extends Fragment {
             for (int i = 0; i < vg.getChildCount(); i++) {
                 View child = vg.getChildAt(i);
                 child.setEnabled(enabled);
-                if (child instanceof ViewGroup) {
-                    _setAllEnabled((ViewGroup) child, enabled);
-                }
+                if (child instanceof ViewGroup) _setAllEnabled((ViewGroup) child, enabled);
             }
         }
     }
@@ -328,42 +261,23 @@ public class SettingsFragment extends Fragment {
         for (int i = 0; i < vg.getChildCount(); i++) {
             View child = vg.getChildAt(i);
             child.setEnabled(enabled);
-            if (child instanceof ViewGroup) {
-                _setAllEnabled((ViewGroup) child, enabled);
-            }
+            if (child instanceof ViewGroup) _setAllEnabled((ViewGroup) child, enabled);
         }
     }
 
-    private static class _AppListAdapter extends ArrayAdapter<ResolveInfo> {
-        private final PackageManager pm;
-
-        _AppListAdapter(Context context, java.util.List<ResolveInfo> apps, PackageManager pm) {
-            super(context, android.R.layout.simple_list_item_2, android.R.id.text1, apps);
-            this.pm = pm;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            if (convertView == null) {
-                convertView = LayoutInflater.from(getContext()).inflate(
-                        android.R.layout.simple_list_item_2, parent, false);
-            }
-            ResolveInfo app = getItem(position);
-            if (app != null) {
-                TextView text1 = convertView.findViewById(android.R.id.text1);
-                TextView text2 = convertView.findViewById(android.R.id.text2);
-                text1.setText(app.loadLabel(pm));
-                text2.setText(app.activityInfo.packageName);
-                try {
-                    android.graphics.drawable.Drawable icon = app.loadIcon(pm);
-                    float density = getContext().getResources().getDisplayMetrics().density;
-                    int sz = Math.round(36 * density);
-                    icon.setBounds(0, 0, sz, sz);
-                    text1.setCompoundDrawables(icon, null, null, null);
-                    text1.setCompoundDrawablePadding(10);
-                } catch (Exception e) { /* ignore */ }
-            }
-            return convertView;
+    private void _updateOverlayStatus(View view) {
+        TextView statusView = view.findViewById(R.id.overlayStatus);
+        MaterialButton permissionBtn = view.findViewById(R.id.overlayPermissionBtn);
+        boolean hasPermission = Settings.canDrawOverlays(requireContext());
+        statusView.setText(hasPermission ? R.string.status_authorized : R.string.status_not_authorized);
+        if (hasPermission) {
+            permissionBtn.setVisibility(View.GONE);
+        } else {
+            permissionBtn.setVisibility(View.VISIBLE);
+            permissionBtn.setOnClickListener(v ->
+                startActivity(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:" + requireContext().getPackageName()))));
         }
     }
+
 }

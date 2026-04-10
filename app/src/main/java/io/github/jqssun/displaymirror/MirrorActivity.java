@@ -7,7 +7,6 @@ import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.SurfaceTexture;
 import android.hardware.display.DisplayManager;
-import android.hardware.input.IInputManager;
 import android.opengl.EGL14;
 import android.opengl.EGLConfig;
 import android.opengl.EGLDisplay;
@@ -20,7 +19,6 @@ import android.os.HandlerThread;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
-import android.view.MotionEventHidden;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -32,9 +30,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import io.github.jqssun.displaymirror.job.CreateVirtualDisplay;
 import io.github.jqssun.displaymirror.job.ExternalTextureRenderer;
 import io.github.jqssun.displaymirror.job.LandscapeAutoScaler;
-import io.github.jqssun.displaymirror.shizuku.ServiceUtils;
-
-import dev.rikka.tools.refine.Refine;
 
 public class MirrorActivity extends AppCompatActivity {
 
@@ -262,53 +257,7 @@ public class MirrorActivity extends AppCompatActivity {
                                 DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC,
                                 targetSurface, null, renderHandler);
                         State.setMediaProjection(null);
-                        FloatingButtonService.startForMirror();
                         CreateVirtualDisplay.changeAspectRatio(surfaceView.getWidth(), surfaceView.getHeight());
-
-                        IInputManager inputManager = ServiceUtils.getInputManager();
-                        surfaceView.setOnTouchListener((v, event) -> {
-                            Display targetDisplay = displayManager.getDisplay(Display.DEFAULT_DISPLAY);
-                            if (targetDisplay == null)
-                                return true;
-
-                            float x = event.getX();
-                            float y = event.getY();
-
-                            float relativeX = x / v.getWidth();
-                            float relativeY = y / v.getHeight();
-
-                            int rotation = targetDisplay.getRotation();
-                            float targetWidth = targetDisplay.getWidth();
-                            float targetHeight = targetDisplay.getHeight();
-                            Log.d("MirrorActivity", "rotation: " + rotation);
-
-                            float mappedX, mappedY;
-                            switch (rotation) {
-                                case Surface.ROTATION_270:
-                                    mappedX = (1 - relativeX) * targetWidth;
-                                    mappedY = (1 - relativeY) * targetHeight;
-                                    break;
-                                case Surface.ROTATION_180:
-                                    mappedX = relativeY * targetWidth;
-                                    mappedY = (1 - relativeX) * targetHeight;
-                                    break;
-                                case Surface.ROTATION_90:
-                                    mappedX = relativeX * targetWidth;
-                                    mappedY = relativeY * targetHeight;
-                                    break;
-                                default: // Surface.ROTATION_0
-                                    mappedX = (1 - relativeY) * targetWidth;
-                                    mappedY = relativeX * targetHeight;
-                                    break;
-                            }
-                            event.setLocation(mappedX, mappedY);
-
-                            MotionEventHidden motionEventHidden = Refine.unsafeCast(event);
-                            motionEventHidden.setDisplayId(Display.DEFAULT_DISPLAY);
-                            TouchpadActivity.setFocus(inputManager, 0);
-                            inputManager.injectInputEvent(event, 0);
-                            return true;
-                        });
                         CreateVirtualDisplay.powerOffScreen();
                     } else if (State.mirrorVirtualDisplay != null) {
                         boolean isLandscape = SunshineService.instance.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;

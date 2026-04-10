@@ -18,7 +18,6 @@ import android.opengl.EGL14;
 import android.opengl.EGLDisplay;
 import android.opengl.GLES20;
 
-import io.github.jqssun.displaymirror.FloatingButtonService;
 import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.State;
 import io.github.jqssun.displaymirror.SunshineService;
@@ -244,7 +243,6 @@ public class AutoRotateAndScaleForMoonlight {
                         null,
                         null);
                 State.setMediaProjection(null);
-                FloatingButtonService.startForMirror();
             } else if (State.mirrorVirtualDisplay != null) {
                 DisplayMetrics metrics = new DisplayMetrics();
                 display.getRealMetrics(metrics);

@@ -9,7 +9,6 @@ import android.hardware.display.DisplayManager;
 import android.hardware.input.IInputManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.Display;
 import android.view.InputDevice;
 import android.view.MotionEvent;
@@ -79,7 +78,6 @@ public class PureBlackActivity extends AppCompatActivity {
         setContentView(view);
 
         view.setOnGenericMotionListener((v, event) -> {
-            TouchpadActivity.setFocus(inputManager, Display.DEFAULT_DISPLAY);
             view.requestFocus();
             view.requestFocusFromTouch();
             view.requestPointerCapture();
@@ -135,22 +133,6 @@ public class PureBlackActivity extends AppCompatActivity {
         });
        if (ShizukuUtils.hasPermission()) {
            inputManager = ServiceUtils.getInputManager();
-           TouchpadActivity.setFocus(inputManager, State.lastSingleAppDisplay);
-           TouchpadAccessibilityService.startServiceByShizuku(this);
-           new Handler().postDelayed(() -> {
-               TouchpadActivity.setFocus(inputManager, State.lastSingleAppDisplay);
-           }, 500);
-       } else if(TouchpadAccessibilityService.getInstance() != null) {
-           TouchpadActivity.setFocus(null, State.lastSingleAppDisplay);
-           new Handler().postDelayed(() -> {
-               TouchpadActivity.setFocus(null, State.lastSingleAppDisplay);
-           }, 500);
-       } else if (TouchpadAccessibilityService.isAccessibilityServiceEnabled(this)) {
-           Intent serviceIntent = new Intent(this, TouchpadAccessibilityService.class);
-           this.startService(serviceIntent);
-           new Handler().postDelayed(() -> {
-               TouchpadActivity.setFocus(null, State.lastSingleAppDisplay);
-           }, 500);
        }
     }
 

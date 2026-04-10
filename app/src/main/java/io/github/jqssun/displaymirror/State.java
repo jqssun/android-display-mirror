@@ -37,7 +37,6 @@ public class State {
     // WeakReference to avoid leaking the activity
     private static WeakReference<MirrorMainActivity> currentActivity = new WeakReference<>(null);
     public static final MutableLiveData<MirrorUiState> uiState = new MutableLiveData<>(new MirrorUiState());
-    public static FloatingButtonService floatingButtonService;
     public static String serverUuid;
     private static final Map<String, Job> jobs = new HashMap<>();
     // Legacy single-job alias — used by code that doesn't specify a mode
