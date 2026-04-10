@@ -51,24 +51,9 @@
             android:theme="@style/AppTheme" />
 
         <activity
-            android:name=".PureBlackActivity"
-            android:launchMode="singleTask"
+            android:name=".TouchscreenActivity"
             android:exported="false"
             android:theme="@style/AppTheme" />
-
-        <activity
-            android:name=".BridgeActivity"
-            android:launchMode="singleTask"
-            android:exported="false"
-            android:theme="@style/AppTheme" />
-        
-        <receiver 
-            android:name=".PureBlackActivity$ExitReceiver"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="io.github.jqssun.displaymirror.EXIT_PURE_BLACK" />
-            </intent-filter>
-        </receiver>
 
         <provider
             android:name="rikka.shizuku.ShizukuProvider"

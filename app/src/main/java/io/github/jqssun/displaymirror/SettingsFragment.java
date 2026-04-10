@@ -3,26 +3,23 @@ package io.github.jqssun.displaymirror;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
+import android.hardware.display.VirtualDisplay;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.LayoutInflater;
+import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.TextView;
-
-import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+
+import io.github.jqssun.displaymirror.job.CreateVirtualDisplay;
 import com.google.android.material.materialswitch.MaterialSwitch;
 
 import io.github.jqssun.displaymirror.job.AcquireShizuku;
@@ -53,68 +50,44 @@ public class SettingsFragment extends Fragment {
 
         _updateShizukuStatus(view);
         _updateOverlayStatus(view);
+        _updateLiveControls(view);
     }
 
     private void _initSettings(View view) {
+        MaterialSwitch trustedDisplayCheckbox = view.findViewById(R.id.trustedDisplayCheckbox);
         MaterialSwitch autoRotateCheckbox = view.findViewById(R.id.autoRotateCheckbox);
         MaterialSwitch autoScaleCheckbox = view.findViewById(R.id.autoScaleCheckbox);
-        MaterialSwitch autoScreenOffCheckbox = view.findViewById(R.id.autoScreenOffCheckbox);
-        MaterialSwitch useBlackImageCheckbox = view.findViewById(R.id.useBlackImageCheckbox);
-        MaterialSwitch singleAppModeCheckbox = view.findViewById(R.id.singleAppModeCheckbox);
-        MaterialButton selectAppButton = view.findViewById(R.id.selectAppButton);
-        View singleAppContainer = view.findViewById(R.id.singleAppContainer);
-        MaterialSwitch autoBindInputCheckbox = view.findViewById(R.id.autoBindInputCheckbox);
-        MaterialSwitch autoMoveImeCheckbox = view.findViewById(R.id.autoMoveImeCheckbox);
-        TextView dpiValueText = view.findViewById(R.id.dpiValueText);
-        View dpiRow = view.findViewById(R.id.dpiRow);
         MaterialSwitch disableUsbAudioCheckbox = view.findViewById(R.id.disableUsbAudioCheckbox);
+
+        boolean hasShizuku = ShizukuUtils.hasPermission();
+        trustedDisplayCheckbox.setChecked(hasShizuku && Pref.getTrustedDisplay());
+        trustedDisplayCheckbox.setEnabled(hasShizuku);
+        trustedDisplayCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_TRUSTED_DISPLAY, c).apply());
+
+        MaterialSwitch autoRouteKeyboardCheckbox = view.findViewById(R.id.autoRouteKeyboardCheckbox);
 
         autoRotateCheckbox.setChecked(Pref.getAutoRotate());
         autoScaleCheckbox.setChecked(Pref.getAutoScale());
-        autoScreenOffCheckbox.setChecked(Pref.getAutoScreenOff());
-        useBlackImageCheckbox.setChecked(Pref.getUseBlackImage());
         disableUsbAudioCheckbox.setChecked(Pref.getDisableUsbAudio());
 
-        boolean singleAppMode = Pref.getSingleAppMode();
-        singleAppModeCheckbox.setChecked(singleAppMode);
-        autoBindInputCheckbox.setChecked(Pref.getAutoBindInput());
-        autoMoveImeCheckbox.setChecked(Pref.getAutoMoveIme());
-        dpiValueText.setText(getString(R.string.dpi_text_size_value, Pref.getSingleAppDpi()));
-
-        if (ShizukuUtils.hasPermission()) {
-            TextView autoScreenOffDesc = view.findViewById(R.id.autoScreenOffDesc);
-            autoScreenOffDesc.setText(R.string.auto_screen_off_with_warning_desc);
-        }
-
-        String selectedAppName = preferences.getString(Pref.KEY_SELECTED_APP_NAME, "");
-        TextView singleAppTitle = view.findViewById(R.id.singleAppTitle);
-        if (!selectedAppName.isEmpty() && singleAppMode) {
-            singleAppTitle.setText(getString(R.string.single_app_projection_with_name, selectedAppName));
-        }
-
-        boolean hasShizuku = ShizukuUtils.hasPermission();
-        singleAppModeCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            preferences.edit().putBoolean(Pref.KEY_SINGLE_APP_MODE, isChecked).apply();
-            autoScaleCheckbox.setEnabled(!isChecked);
-            _setSingleAppChildrenEnabled(singleAppContainer, isChecked, hasShizuku);
-            if (!isChecked) {
-                singleAppTitle.setText(R.string.single_app_projection);
-            } else if (!selectedAppName.isEmpty()) {
-                singleAppTitle.setText(getString(R.string.single_app_projection_with_name, selectedAppName));
+        // IME toggle — live: applies immediately when toggled
+        VirtualDisplay imeVd = _getActiveVirtualDisplay();
+        autoRouteKeyboardCheckbox.setEnabled(imeVd != null);
+        autoRouteKeyboardCheckbox.setChecked(Pref.getAutoRouteKeyboard());
+        autoRouteKeyboardCheckbox.setOnCheckedChangeListener((b, c) -> {
+            preferences.edit().putBoolean(Pref.KEY_AUTO_ROUTE_KEYBOARD, c).apply();
+            VirtualDisplay vd = _getActiveVirtualDisplay();
+            if (vd != null) {
+                if (c) {
+                    CreateVirtualDisplay.moveImeToDisplay(vd.getDisplay().getDisplayId());
+                } else {
+                    CreateVirtualDisplay.moveImeToDefault();
+                }
             }
         });
-        autoScaleCheckbox.setEnabled(!singleAppMode);
-        _setSingleAppChildrenEnabled(singleAppContainer, singleAppMode, hasShizuku);
 
         autoRotateCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_AUTO_ROTATE, c).apply());
         autoScaleCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_AUTO_SCALE, c).apply());
-        autoScreenOffCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_AUTO_SCREEN_OFF, c).apply());
-        useBlackImageCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_USE_BLACK_IMAGE, c).apply());
-        autoBindInputCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_AUTO_BIND_INPUT, c).apply());
-        autoMoveImeCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_AUTO_MOVE_IME, c).apply());
-
-        selectAppButton.setOnClickListener(v -> _showAppSelectionDialog());
-        dpiRow.setOnClickListener(v -> _showDpiDialog(dpiValueText));
 
         disableUsbAudioCheckbox.setOnCheckedChangeListener((b, isChecked) -> {
             preferences.edit().putBoolean(Pref.KEY_DISABLE_USB_AUDIO, isChecked).apply();
@@ -137,6 +110,7 @@ public class SettingsFragment extends Fragment {
 
         _updateShizukuStatus(view);
         _updateOverlayStatus(view);
+        _updateLiveControls(view);
 
         // About
         TextView versionText = view.findViewById(R.id.versionText);
@@ -176,93 +150,31 @@ public class SettingsFragment extends Fragment {
         }
     }
 
-    private void _showAppSelectionDialog() {
-        PackageManager pm = requireContext().getPackageManager();
-        Intent intent = new Intent(Intent.ACTION_MAIN);
-        intent.addCategory(Intent.CATEGORY_LAUNCHER);
-        List<ResolveInfo> launcherApps = pm.queryIntentActivities(intent, 0);
-        launcherApps.sort((a, b) -> a.loadLabel(pm).toString().compareToIgnoreCase(b.loadLabel(pm).toString()));
+    private void _updateLiveControls(View view) {
+        VirtualDisplay vd = _getActiveVirtualDisplay();
+        boolean active = vd != null;
 
-        ArrayAdapter<ResolveInfo> adapter = new ArrayAdapter<ResolveInfo>(
-                requireContext(), android.R.layout.simple_list_item_2, android.R.id.text1, launcherApps) {
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                if (convertView == null) {
-                    convertView = LayoutInflater.from(getContext()).inflate(android.R.layout.simple_list_item_2, parent, false);
-                }
-                ResolveInfo app = getItem(position);
-                if (app != null) {
-                    ((TextView) convertView.findViewById(android.R.id.text1)).setText(app.loadLabel(pm));
-                    ((TextView) convertView.findViewById(android.R.id.text2)).setText(app.activityInfo.packageName);
-                }
-                return convertView;
-            }
-        };
+        // Touchscreen button
+        MaterialButton btn = view.findViewById(R.id.touchscreenBtn);
+        btn.setEnabled(active);
+        btn.setOnClickListener(v -> {
+            VirtualDisplay d = _getActiveVirtualDisplay();
+            if (d == null) return;
+            Intent intent = new Intent(requireContext(), TouchscreenActivity.class);
+            intent.putExtra("surface", d.getSurface());
+            intent.putExtra("display", d.getDisplay().getDisplayId());
+            startActivity(intent);
+        });
 
-        new MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.select_app_title)
-            .setAdapter(adapter, (dialog, which) -> {
-                ResolveInfo selectedApp = launcherApps.get(which);
-                String pkg = selectedApp.activityInfo.packageName;
-                String name = selectedApp.loadLabel(pm).toString();
-                preferences.edit()
-                    .putString(Pref.KEY_SELECTED_APP_PACKAGE, pkg)
-                    .putString(Pref.KEY_SELECTED_APP_NAME, name)
-                    .apply();
-                View view = getView();
-                if (view != null) {
-                    ((TextView) view.findViewById(R.id.singleAppTitle))
-                        .setText(getString(R.string.single_app_projection_with_name, name));
-                }
-            })
-            .show();
+        // IME toggle
+        MaterialSwitch imeToggle = view.findViewById(R.id.autoRouteKeyboardCheckbox);
+        imeToggle.setEnabled(active);
     }
 
-    private void _showDpiDialog(TextView dpiValueText) {
-        EditText input = new EditText(requireContext());
-        input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
-        input.setText(String.valueOf(Pref.getSingleAppDpi()));
-        input.setSelectAllOnFocus(true);
-        int pad = (int) (16 * getResources().getDisplayMetrics().density);
-        android.widget.FrameLayout container = new android.widget.FrameLayout(requireContext());
-        container.setPadding(pad, pad, pad, 0);
-        container.addView(input);
-
-        new MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.dpi_text_size)
-            .setView(container)
-            .setPositiveButton(R.string.ok, (dialog, which) -> {
-                try {
-                    int dpi = Integer.parseInt(input.getText().toString());
-                    if (dpi < 60) dpi = 60;
-                    if (dpi > 600) dpi = 600;
-                    preferences.edit().putInt(Pref.KEY_SINGLE_APP_DPI, dpi).apply();
-                    dpiValueText.setText(getString(R.string.dpi_text_size_value, dpi));
-                } catch (NumberFormatException ignored) {
-                }
-            })
-            .setNegativeButton(R.string.cancel, null)
-            .show();
-    }
-
-    private void _setSingleAppChildrenEnabled(View container, boolean singleAppOn, boolean hasShizuku) {
-        boolean enabled = singleAppOn && hasShizuku;
-        if (container instanceof ViewGroup) {
-            ViewGroup vg = (ViewGroup) container;
-            for (int i = 0; i < vg.getChildCount(); i++) {
-                View child = vg.getChildAt(i);
-                child.setEnabled(enabled);
-                if (child instanceof ViewGroup) _setAllEnabled((ViewGroup) child, enabled);
-            }
-        }
-    }
-
-    private void _setAllEnabled(ViewGroup vg, boolean enabled) {
-        for (int i = 0; i < vg.getChildCount(); i++) {
-            View child = vg.getChildAt(i);
-            child.setEnabled(enabled);
-            if (child instanceof ViewGroup) _setAllEnabled((ViewGroup) child, enabled);
-        }
+    private VirtualDisplay _getActiveVirtualDisplay() {
+        if (State.mirrorVirtualDisplay != null) return State.mirrorVirtualDisplay;
+        if (State.displaylinkState.getVirtualDisplay() != null) return State.displaylinkState.getVirtualDisplay();
+        return null;
     }
 
     private void _updateOverlayStatus(View view) {

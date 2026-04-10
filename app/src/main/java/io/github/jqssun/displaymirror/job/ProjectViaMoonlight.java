@@ -7,7 +7,6 @@ import android.view.Surface;
 import io.github.jqssun.displaymirror.MirrorMainActivity;
 import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.State;
-import io.github.jqssun.displaymirror.shizuku.ServiceUtils;
 import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
 
 public class ProjectViaMoonlight implements Job {
@@ -46,24 +45,13 @@ public class ProjectViaMoonlight implements Job {
         }
         boolean autoRotate = Pref.getAutoRotate();
         boolean autoScale = Pref.getAutoScale();
-        boolean singleAppMode = Pref.getSingleAppMode();
-        if (singleAppMode) {
-            if (ShizukuUtils.hasPermission()) {
-                int singleAppDpi = Pref.getSingleAppDpi();
-                State.mirrorVirtualDisplay = CreateVirtualDisplay.createVirtualDisplay(new VirtualDisplayArgs("Moonlight",
-                        width, height, frameRate, singleAppDpi, autoRotate), surface);
-                String selectedAppPackage = Pref.getSelectedAppPackage();
-                ServiceUtils.launchPackage(context, selectedAppPackage, State.mirrorVirtualDisplay.getDisplay().getDisplayId());
-                InputRouting.bindAllExternalInputToDisplay(State.mirrorVirtualDisplay.getDisplay().getDisplayId());
-                InputRouting.moveImeToExternal(State.mirrorVirtualDisplay.getDisplay().getDisplayId());
-            } else {
-                State.showErrorStatus("Moonlight single-app projection requires Shizuku permission");
-            }
-        } else if (autoRotate || autoScale) {
+        if (autoRotate || autoScale) {
             SunshineMouse.autoRotateAndScaleForMoonlight = new AutoRotateAndScaleForMoonlight(new VirtualDisplayArgs("Moonlight",
                     width, height, frameRate, 160, false));
             SunshineMouse.autoRotateAndScaleForMoonlight.start(surface);
-            CreateVirtualDisplay.powerOffScreen();
+        } else if (ShizukuUtils.hasPermission() && Pref.getTrustedDisplay()) {
+            State.mirrorVirtualDisplay = CreateVirtualDisplay.createVirtualDisplay(
+                    new VirtualDisplayArgs("Moonlight", width, height, frameRate, 160, false), surface);
         } else {
             State.mirrorVirtualDisplay = State.getMediaProjection().createVirtualDisplay("Moonlight",
                     width,
@@ -72,7 +60,7 @@ public class ProjectViaMoonlight implements Job {
                     DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC,
                     surface, null, null);
             State.setMediaProjection(null);
-            CreateVirtualDisplay.powerOffScreen();
+            CreateVirtualDisplay.moveImeToDisplay(State.mirrorVirtualDisplay.getDisplay().getDisplayId());
         }
     }
 

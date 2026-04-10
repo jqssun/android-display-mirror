@@ -18,11 +18,8 @@ import com.displaylink.manager.display.DisplayMode;
 import io.github.jqssun.displaymirror.ApkImporter;
 import io.github.jqssun.displaymirror.DisplaylinkState;
 import io.github.jqssun.displaymirror.MirrorMainActivity;
-import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.State;
 import io.github.jqssun.displaymirror.SunshineService;
-import io.github.jqssun.displaymirror.shizuku.ServiceUtils;
-import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -77,51 +74,10 @@ public class ProjectViaDisplaylink implements Job {
         if (!_initializeNativeDriver(context, displaylinkState)) {
             return;
         }
-        boolean singleAppMode = Pref.getSingleAppMode();
-        if (singleAppMode) {
-            if (ShizukuUtils.hasPermission()) {
-                String selectedAppPackage = Pref.getSelectedAppPackage();
-                createVirtualDisplay(context, State.displaylinkState, selectedAppPackage);
-            } else {
-                State.showErrorStatus("DisplayLink single-app projection requires Shizuku permission");
-            }
-        } else {
-            if (_requestMediaProjectionPermission(context, displaylinkState)) {
-                displaylinkState.nativeDriver.setMode(displaylinkState.encoderId, new DisplayMode(virtualDisplayArgs.width, virtualDisplayArgs.height, virtualDisplayArgs.refreshRate), virtualDisplayArgs.width * 4, 1);
-                new AutoRotateAndScaleForDisplaylink(virtualDisplayArgs, context);
-            }
+        if (_requestMediaProjectionPermission(context, displaylinkState)) {
+            displaylinkState.nativeDriver.setMode(displaylinkState.encoderId, new DisplayMode(virtualDisplayArgs.width, virtualDisplayArgs.height, virtualDisplayArgs.refreshRate), virtualDisplayArgs.width * 4, 1);
+            new AutoRotateAndScaleForDisplaylink(virtualDisplayArgs, context);
         }
-    }
-
-
-    private void createVirtualDisplay(Context context, DisplaylinkState displaylinkState, String lastPackageName) {
-        int singleAppDpi = Pref.getSingleAppDpi();
-        virtualDisplayArgs.dpi = singleAppDpi;
-        int virtualDisplayWidth = virtualDisplayArgs.width;
-        displaylinkState.imageReader = ImageReader.newInstance(virtualDisplayWidth, virtualDisplayArgs.height, 1, 2);
-        displaylinkState.handlerThread = new HandlerThread("ImageAvailableListenerThread");
-        displaylinkState.handlerThread.start();
-        displaylinkState.handler = new Handler(displaylinkState.handlerThread.getLooper());
-
-        displaylinkState.imageReader.setOnImageAvailableListener(new ListenImageReaderAndPostFrame(virtualDisplayArgs), displaylinkState.handler);
-        Surface surface = displaylinkState.imageReader.getSurface();
-        VirtualDisplay virtualDisplay = State.displaylinkState.getVirtualDisplay();
-        if (virtualDisplay == null) {
-            virtualDisplay = CreateVirtualDisplay.createVirtualDisplay(virtualDisplayArgs, surface);
-            displaylinkState.createdVirtualDisplay(virtualDisplay);
-            if (lastPackageName != null) {
-                ServiceUtils.launchPackage(context, lastPackageName, virtualDisplay.getDisplay().getDisplayId());
-            }
-        } else {
-            State.log("Reusing existing virtual display: " + virtualDisplay.getDisplay().getDisplayId());
-            virtualDisplay.setSurface(surface);
-        }
-        int displayId = virtualDisplay.getDisplay().getDisplayId();
-        InputRouting.moveImeToExternal(displayId);
-        InputRouting.bindAllExternalInputToDisplay(displayId);
-        new Handler().postDelayed(() -> {
-            InputRouting.bindAllExternalInputToDisplay(displayId);
-        }, 5000);
     }
 
     private void _copyFirmwares(Context context) {

@@ -24,10 +24,10 @@ import io.github.jqssun.displaymirror.SunshineService;
 import io.github.jqssun.displaymirror.shizuku.ServiceUtils;
 import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
 
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -48,7 +48,6 @@ public class SunshineMouse {
     private static float landscapeMirrorWidth;
     private static float landscapeMirrorHeight;
     private static boolean autoScale;
-    private static boolean singleAppMode;
     private static boolean autoRotate;
     private static boolean showCursor;
 
@@ -62,7 +61,6 @@ public class SunshineMouse {
         }
         screenWidth = width;
         screenHeight = height;
-        singleAppMode = Pref.getSingleAppMode();
         autoRotate = Pref.getAutoRotate();
         autoScale = Pref.getAutoScale();
         showCursor = Pref.getShowMoonlightCursor();
@@ -72,7 +70,7 @@ public class SunshineMouse {
 
         DisplayManager displayManager = (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
         Display defaultDisplay = displayManager.getDisplay(Display.DEFAULT_DISPLAY);
-        if (!singleAppMode && Pref.getAutoMatchAspectRatio() && ShizukuUtils.hasPermission()) {
+        if (State.mirrorVirtualDisplay == null && Pref.getAutoMatchAspectRatio() && ShizukuUtils.hasPermission()) {
             CreateVirtualDisplay.changeAspectRatio(width, height);
             IWindowManager windowManager = ServiceUtils.getWindowManager();
             android.graphics.Point baseSize = new android.graphics.Point();
@@ -121,7 +119,7 @@ public class SunshineMouse {
 
         State.log("Primary display size defaultDisplayWidth: " + defaultDisplayWidth + " defaultDisplayHeight: " + defaultDisplayHeight);
         State.log("Client screen size screenWidth: " + screenWidth + " screenHeight: " + screenHeight);
-        if (!singleAppMode) {
+        if (State.mirrorVirtualDisplay == null) {
             State.log("Mirror mode portraitMirrorWidth: " + portraitMirrorWidth + " portraitMirrorHeight: " + portraitMirrorHeight + " landscapeMirrorWidth: " + landscapeMirrorWidth + " landscapeMirrorHeight: " + landscapeMirrorHeight);
         }
     }
@@ -135,8 +133,8 @@ public class SunshineMouse {
     private static Map<Integer, Point> pointers = new HashMap<>();
 
     private static Point _translate(float x, float y) {
-        if (singleAppMode) {
-            return _translateSingleAppMode(x, y);
+        if (State.mirrorVirtualDisplay != null) {
+            return _translateVirtualDisplay(x, y);
         } else {
             return _translateMirrorMode(x, y);
         }
@@ -216,7 +214,7 @@ public class SunshineMouse {
         return point;
     }
 
-    private static @NonNull Point _translateSingleAppMode(float x, float y) {
+    private static @NonNull Point _translateVirtualDisplay(float x, float y) {
         int displayRotation = State.mirrorVirtualDisplay.getDisplay().getRotation();
         Point point = new Point();
         switch (displayRotation) {
@@ -393,10 +391,7 @@ public class SunshineMouse {
             autoRotateAndScaleForMoonlight.exitScale();
         }
         if (inputManager != null) {
-            if (singleAppMode) {
-                if (State.mirrorVirtualDisplay == null) {
-                    return;
-                }
+            if (State.mirrorVirtualDisplay != null) {
                 MotionEventHidden motionEventHidden = Refine.unsafeCast(event);
                 motionEventHidden.setDisplayId(State.mirrorVirtualDisplay.getDisplay().getDisplayId());
             }

@@ -21,7 +21,6 @@ import com.google.android.material.materialswitch.MaterialSwitch;
 
 import io.github.jqssun.displaymirror.job.AutoRotateAndScaleForDisplaylink;
 import io.github.jqssun.displaymirror.job.ConnectToClient;
-import io.github.jqssun.displaymirror.job.CreateVirtualDisplay;
 import io.github.jqssun.displaymirror.job.ExitAll;
 import io.github.jqssun.displaymirror.job.SunshineServer;
 import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
@@ -30,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MoonlightFragment extends Fragment {
-    private MaterialButton startBtn, stopBtn, screenOffBtn;
+    private MaterialButton startBtn, stopBtn;
     private ImageView statusIcon;
     private TextView statusTitle, statusDetail;
     private SharedPreferences preferences;
@@ -45,7 +44,6 @@ public class MoonlightFragment extends Fragment {
         statusDetail = view.findViewById(R.id.moonlightStatusDetail);
         startBtn = view.findViewById(R.id.startBtn);
         stopBtn = view.findViewById(R.id.stopBtn);
-        screenOffBtn = view.findViewById(R.id.screenOffBtn);
 
         startBtn.setOnClickListener(v -> ((MirrorMainActivity) requireActivity()).startMirroring());
         stopBtn.setOnClickListener(v -> {
@@ -54,7 +52,6 @@ public class MoonlightFragment extends Fragment {
             }
             ExitAll.execute(requireActivity(), true);
         });
-        screenOffBtn.setOnClickListener(v -> CreateVirtualDisplay.doPowerOffScreen(requireActivity()));
 
         // Moonlight settings
         _initMoonlightSettings(view);
@@ -134,7 +131,6 @@ public class MoonlightFragment extends Fragment {
             statusDetail.setText("");
             startBtn.setVisibility(View.GONE);
             stopBtn.setVisibility(View.GONE);
-            screenOffBtn.setVisibility(View.GONE);
             return;
         }
 
@@ -166,7 +162,6 @@ public class MoonlightFragment extends Fragment {
 
         startBtn.setVisibility(state.startBtnVisibility ? View.VISIBLE : View.GONE);
         stopBtn.setVisibility(state.stopBtnVisibility ? View.VISIBLE : View.GONE);
-        screenOffBtn.setVisibility(state.screenOffBtnVisibility ? View.VISIBLE : View.GONE);
     }
 
     private void _loadClientList(Spinner spinner) {

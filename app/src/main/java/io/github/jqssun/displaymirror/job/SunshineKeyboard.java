@@ -9,7 +9,6 @@ import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.KeyEventHidden;
 
-import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.State;
 import io.github.jqssun.displaymirror.shizuku.ServiceUtils;
 import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
@@ -91,10 +90,9 @@ public class SunshineKeyboard {
     public static final byte MODIFIER_ALT = 0x04;
     public static final byte MODIFIER_META = 0x08;
     private static IInputManager inputManager;
-    private static boolean singleAppMode;
 
     private static int currentMetaState = 0;
-    
+
     private static void _updateMetaState(int keycode, boolean pressed) {
         int mask = 0;
         switch (keycode) {
@@ -123,7 +121,7 @@ public class SunshineKeyboard {
                 mask = KeyEvent.META_META_ON | KeyEvent.META_META_RIGHT_ON;
                 break;
         }
-        
+
         if (pressed) {
             currentMetaState |= mask;
         } else {
@@ -139,7 +137,6 @@ public class SunshineKeyboard {
         if (ShizukuUtils.hasPermission()) {
             inputManager = ServiceUtils.getInputManager();
         }
-        singleAppMode = Pref.getSingleAppMode();
     }
 
     public static void handleKeyboardEvent(int modcode, boolean release, int _notUsed) {
@@ -148,7 +145,7 @@ public class SunshineKeyboard {
         }
         long now = SystemClock.uptimeMillis();
         int androidKeyCode = _translateWindowsVKToAndroidKey(modcode);
-        
+
         _updateMetaState(androidKeyCode, !release);
 
         KeyEvent keyEvent = new KeyEvent(now, now,
@@ -156,10 +153,7 @@ public class SunshineKeyboard {
                 androidKeyCode, 0, currentMetaState,
                 KeyCharacterMap.VIRTUAL_KEYBOARD, 0, 0,
                 InputDevice.SOURCE_KEYBOARD);
-        if (singleAppMode) {
-            if (State.mirrorVirtualDisplay == null) {
-                return;
-            }
+        if (State.mirrorVirtualDisplay != null) {
             KeyEventHidden keyEventHidden = Refine.unsafeCast(keyEvent);
             keyEventHidden.setDisplayId(State.mirrorVirtualDisplay.getDisplay().getDisplayId());
         }

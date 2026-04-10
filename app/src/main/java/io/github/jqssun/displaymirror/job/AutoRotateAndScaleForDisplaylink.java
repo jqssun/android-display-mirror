@@ -302,7 +302,6 @@ public class AutoRotateAndScaleForDisplaylink {
                     DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC,
                     currentSurface, null, displaylinkState.handler));
             State.setMediaProjection(null);
-            CreateVirtualDisplay.powerOffScreen();
         } else if (displaylinkState.getVirtualDisplay() != null) {
             DisplayMetrics metrics = new DisplayMetrics();
             Display defaultDisplay = displayManager.getDisplay(Display.DEFAULT_DISPLAY);

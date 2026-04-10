@@ -66,7 +66,7 @@ public class NativeDriverListener {
                 displaylinkState.monitorInfo = monitorInfo;
                 Context context = State.getContext();
                 if (!State.isJobRunning(State.MODE_DISPLAYLINK) && wasNoMonitor && context != null) {
-                    State.displaylinkState.virtualDisplayArgs = new VirtualDisplayArgs("DisplayLink", Pref.getDisplaylinkWidth(), Pref.getDisplaylinkHeight(), Pref.getDisplaylinkRefreshRate(), Pref.getSingleAppDpi(), Pref.getAutoRotate());
+                    State.displaylinkState.virtualDisplayArgs = new VirtualDisplayArgs("DisplayLink", Pref.getDisplaylinkWidth(), Pref.getDisplaylinkHeight(), Pref.getDisplaylinkRefreshRate(), 160, Pref.getAutoRotate());
                     State.startNewJob(State.MODE_DISPLAYLINK, new ProjectViaDisplaylink(displaylinkState.device, displaylinkState.virtualDisplayArgs));
                 }
             }

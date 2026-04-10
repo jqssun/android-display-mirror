@@ -1,6 +1,5 @@
 package io.github.jqssun.displaymirror;
 
-import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.ServiceConnection;
@@ -48,7 +47,6 @@ public class State {
     public static int lastSingleAppDisplay;
     public static String displaylinkDeviceName;
     public static VirtualDisplay mirrorVirtualDisplay;
-    public static Activity isInPureBlackActivity = null;
     public static volatile IUserService userService;
     public static Set<String> discoveredMirrorClients = new HashSet<>();
 

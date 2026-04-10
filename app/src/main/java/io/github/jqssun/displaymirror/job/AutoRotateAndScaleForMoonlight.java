@@ -21,6 +21,7 @@ import android.opengl.GLES20;
 import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.State;
 import io.github.jqssun.displaymirror.SunshineService;
+import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
 
 public class AutoRotateAndScaleForMoonlight {
 
@@ -233,16 +234,18 @@ public class AutoRotateAndScaleForMoonlight {
                 }
                 android.util.Log.i("AutoRotateAndScaleForMoonlight", "isLandscape: " + isLandscape);
                 Surface targetSurface = isLandscape ? landscapeInputSurface : portraitInputSurface;
-                State.mirrorVirtualDisplay = State.getMediaProjection().createVirtualDisplay(
-                        virtualDisplayArgs.virtualDisplayName,
-                        isLandscape ? virtualDisplayArgs.width : virtualDisplayArgs.height,
-                        isLandscape ? virtualDisplayArgs.height : virtualDisplayArgs.width,
-                        virtualDisplayArgs.dpi,
-                        DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC,
-                        targetSurface,
-                        null,
-                        null);
-                State.setMediaProjection(null);
+                int w = isLandscape ? virtualDisplayArgs.width : virtualDisplayArgs.height;
+                int h = isLandscape ? virtualDisplayArgs.height : virtualDisplayArgs.width;
+                if (ShizukuUtils.hasPermission() && Pref.getTrustedDisplay()) {
+                    State.mirrorVirtualDisplay = CreateVirtualDisplay.createVirtualDisplay(
+                            new VirtualDisplayArgs(virtualDisplayArgs.virtualDisplayName, w, h,
+                                    virtualDisplayArgs.refreshRate, virtualDisplayArgs.dpi, false), targetSurface);
+                } else {
+                    State.mirrorVirtualDisplay = State.getMediaProjection().createVirtualDisplay(
+                            virtualDisplayArgs.virtualDisplayName, w, h, virtualDisplayArgs.dpi,
+                            DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC, targetSurface, null, null);
+                    State.setMediaProjection(null);
+                }
             } else if (State.mirrorVirtualDisplay != null) {
                 DisplayMetrics metrics = new DisplayMetrics();
                 display.getRealMetrics(metrics);

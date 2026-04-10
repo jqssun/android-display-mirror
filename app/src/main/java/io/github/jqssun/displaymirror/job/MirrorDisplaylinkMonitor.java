@@ -72,7 +72,7 @@ public class MirrorDisplaylinkMonitor {
             State.log("Found DisplayLink device: " + device.getProductName());
         }
         if (device.getDeviceName().equals(State.displaylinkDeviceName)) {
-            State.displaylinkState.virtualDisplayArgs = new VirtualDisplayArgs("DisplayLink", Pref.getDisplaylinkWidth(), Pref.getDisplaylinkHeight(), Pref.getDisplaylinkRefreshRate(), Pref.getSingleAppDpi(), Pref.getAutoRotate());
+            State.displaylinkState.virtualDisplayArgs = new VirtualDisplayArgs("DisplayLink", Pref.getDisplaylinkWidth(), Pref.getDisplaylinkHeight(), Pref.getDisplaylinkRefreshRate(), 160, Pref.getAutoRotate());
             State.startNewJob(State.MODE_DISPLAYLINK, new ProjectViaDisplaylink(device, State.displaylinkState.virtualDisplayArgs));
         }
     }
@@ -90,7 +90,6 @@ public class MirrorDisplaylinkMonitor {
             State.displaylinkDeviceName = null;
             State.displaylinkState.device = null;
             CreateVirtualDisplay.powerOnScreen();
-            InputRouting.moveImeToDefault();
         }
     }
 

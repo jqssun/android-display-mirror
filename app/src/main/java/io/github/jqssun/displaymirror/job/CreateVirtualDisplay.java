@@ -1,8 +1,6 @@
 package io.github.jqssun.displaymirror.job;
 
-import android.app.ActivityOptions;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Point;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerGlobal;
@@ -25,7 +23,6 @@ import android.view.Surface;
 import androidx.annotation.NonNull;
 
 import io.github.jqssun.displaymirror.Pref;
-import io.github.jqssun.displaymirror.PureBlackActivity;
 import io.github.jqssun.displaymirror.State;
 import io.github.jqssun.displaymirror.shizuku.ServiceUtils;
 import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
@@ -59,12 +56,12 @@ public class CreateVirtualDisplay {
                 try {
                     VirtualDisplay virtualDisplay = _createByShizuku(virtualDisplayArgs, surface, true, null);
                     android.util.Log.i("CreateVirtualDisplay", "created virtual display: " + virtualDisplay.getDisplay().getDisplayId());
-                    powerOffScreen();
+                    moveImeToDisplay(virtualDisplay.getDisplay().getDisplayId());
                     return virtualDisplay;
                 } catch(Exception e) {
                     VirtualDisplay virtualDisplay = _createByShizuku(virtualDisplayArgs, surface, true, State.getMediaProjection());
                     android.util.Log.i("CreateVirtualDisplay", "created virtual display: " + virtualDisplay.getDisplay().getDisplayId());
-                    powerOffScreen();
+                    moveImeToDisplay(virtualDisplay.getDisplay().getDisplayId());
                     return virtualDisplay;
                 }
             } else {
@@ -75,42 +72,6 @@ public class CreateVirtualDisplay {
             }
         } finally {
             isCreating = false;
-        }
-    }
-
-    public static void powerOffScreen() {
-        Context context = State.getContext();
-        if (context == null) {
-            return;
-        }
-        boolean autoScreenOff = Pref.getAutoScreenOff();
-        if (!autoScreenOff) {
-            return;
-        }
-        doPowerOffScreen(context);
-    }
-
-    public static void doPowerOffScreen(Context context) {
-        boolean singleApp = Pref.getSingleAppMode();
-        if (State.userService != null && !Pref.getUseBlackImage()) {
-            try {
-                State.userService.startListenVolumeKey();
-                if (!State.userService.setScreenPower(SurfaceControl.POWER_MODE_OFF)) {
-                    if (singleApp) {
-                        Intent intent = new Intent(context, PureBlackActivity.class);
-                        ActivityOptions options = ActivityOptions.makeBasic();
-                        context.startActivity(intent, options.toBundle());
-                    }
-                }
-            } catch (RemoteException e2) {
-                State.log("powerOffScreen failed: " + e2.getMessage());
-            }
-        } else if (singleApp) {
-            Intent intent = new Intent(context, PureBlackActivity.class);
-            ActivityOptions options = ActivityOptions.makeBasic();
-            context.startActivity(intent, options.toBundle());
-        } else {
-            State.log("Shizuku permission required for screen-off during mirror projection");
         }
     }
 
@@ -226,18 +187,37 @@ public class CreateVirtualDisplay {
     }
 
     public static void powerOnScreen() {
-        if (State.isInPureBlackActivity != null) {
-            State.isInPureBlackActivity.finish();
-        } else {
-            if (State.userService != null) {
-                try {
-                    State.userService.stopListenVolumeKey();
-                    State.userService.setScreenPower(SurfaceControl.POWER_MODE_NORMAL);
-                } catch (RemoteException e) {
-                    State.log("powerUpScreen failed: " + e.getMessage());
-                }
+        if (State.userService != null) {
+            try {
+                State.userService.stopListenVolumeKey();
+                State.userService.setScreenPower(SurfaceControl.POWER_MODE_NORMAL);
+            } catch (RemoteException e) {
+                State.log("powerUpScreen failed: " + e.getMessage());
             }
         }
+    }
+
+    public static void moveImeToDisplay(int displayId) {
+        if (!Pref.getAutoRouteKeyboard()) return;
+        try {
+            IWindowManager wm = ServiceUtils.getWindowManager();
+            wm.setDisplayImePolicy(Display.DEFAULT_DISPLAY, 1); // FALLBACK
+            try {
+                wm.setDisplayImePolicy(displayId, 0); // LOCAL
+            } catch (Throwable e) {
+                wm.setDisplayImePolicy(Display.DEFAULT_DISPLAY, 0);
+                State.log("failed to set IME on display " + displayId + ": " + e);
+            }
+        } catch (Throwable e) {
+            State.log("failed to move IME: " + e);
+        }
+    }
+
+    public static void moveImeToDefault() {
+        try {
+            IWindowManager wm = ServiceUtils.getWindowManager();
+            wm.setDisplayImePolicy(Display.DEFAULT_DISPLAY, 0);
+        } catch (Throwable ignored) {}
     }
 
     private static boolean _shouldChangeAspectRatio() {

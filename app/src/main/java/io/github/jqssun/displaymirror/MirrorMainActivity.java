@@ -21,7 +21,6 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
 
 import io.github.jqssun.displaymirror.job.AcquireShizuku;
-import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
 
 import org.lsposed.hiddenapibypass.HiddenApiBypass;
 
@@ -260,11 +259,9 @@ public class MirrorMainActivity extends AppCompatActivity {
         if (SunshineService.instance == null) {
             newUiState.mirrorStatusText = getString(R.string.status_idle);
             newUiState.startBtnVisibility = true;
-            newUiState.screenOffBtnVisibility = false;
         } else if (isScreenMirroring) {
             newUiState.mirrorStatusText = getString(R.string.status_projecting);
             newUiState.stopBtnVisibility = true;
-            newUiState.screenOffBtnVisibility = ShizukuUtils.hasPermission();
         } else {
             newUiState.mirrorStatusText = getString(R.string.status_connect_display);
             try {
@@ -276,7 +273,6 @@ public class MirrorMainActivity extends AppCompatActivity {
                 // ignore
             }
             newUiState.stopBtnVisibility = true;
-            newUiState.screenOffBtnVisibility = false;
         }
 
         State.uiState.setValue(newUiState);

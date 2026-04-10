@@ -16,7 +16,7 @@ public class ExitAll {
         }
         boolean wasSunshineStarted = SunshineServer.exitServer();
         CreateVirtualDisplay.restoreAspectRatio();
-        InputRouting.moveImeToDefault();
+        CreateVirtualDisplay.moveImeToDefault();
         SunshineAudio.restoreVolume(context);
         State.unbindUserService();
         if (State.mediaProjectionInUse != null) {

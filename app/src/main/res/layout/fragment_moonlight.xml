@@ -92,16 +92,6 @@
             android:text="@string/stop"
             android:visibility="gone" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/screenOffBtn"
-            style="@style/Widget.Material3.Button.TonalButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp"
-            android:layout_marginBottom="8dp"
-            android:text="@string/screen_off"
-            android:visibility="gone" />
-
         <!-- Moonlight Settings -->
         <TextView
             android:layout_width="wrap_content"

@@ -1,10 +1,5 @@
 <resources>
     <string name="app_name">Mirror</string>
-    <string name="accessibility_service_description">Accessibility service for simulating touch events on the secondary screen</string>
-    <string name="display_off_button">Display off</string>
-    <string name="back_button">Back button</string>
-    <string name="home_button">Home button</string>
-
     <!-- Tabs -->
     <string name="tab_moonlight">Moonlight</string>
     <string name="tab_logs">Logs</string>
@@ -20,8 +15,8 @@
 
     <!-- Settings section headers -->
     <string name="section_permissions">Permissions</string>
-    <string name="section_projection">Projection</string>
-    <string name="section_display">Display</string>
+    <string name="section_display">Streaming</string>
+    <string name="section_virtual_display">Live Controls for Active Display</string>
     <string name="section_audio_input">Audio &amp; Input</string>
     <string name="section_moonlight">Moonlight</string>
     <string name="section_displaylink_libraries">DisplayLink Libraries</string>
@@ -39,38 +34,29 @@
     <string name="moonlight_status_projecting">Moonlight Active</string>
     <string name="moonlight_status_projecting_detail">Streaming to connected client</string>
 
+    <!-- Display interaction -->
+    <string name="touchscreen_control">Touchscreen control</string>
+    <string name="touchscreen_control_desc">Use the phone screen to directly control the external display. Only available while this app owns the virtual display.</string>
+    <string name="auto_route_keyboard">Show keyboard on this display</string>
+    <string name="auto_route_keyboard_desc">Route the on-screen keyboard to the active external display. Only available while this app owns the virtual display.</string>
+    <string name="exit_vertical">Exit</string>
+    <string name="back_vertical">Back</string>
+
     <!-- Common -->
     <string name="exit">Exit</string>
     <string name="authorize">Authorize</string>
     <string name="ok">OK</string>
+    <string name="open">Open</string>
     <string name="cancel">Cancel</string>
     <string name="connect">Connect</string>
-    <string name="screen_off">Turn display off (use volume keys to wake up)</string>
-    <string name="touchscreen">Touchscreen</string>
-    <string name="touchpad">Touchpad</string>
     <string name="width_label">Width</string>
     <string name="height_label">Height</string>
     <string name="refresh_rate_label">Refresh rate</string>
-    <string name="switch_mode">Mode</string>
-    <string name="rotate">Rotate</string>
-    <string name="rotate_cw">Rotate clockwise</string>
-
     <!-- Permission status -->
     <string name="status_not_started">Not started</string>
     <string name="status_started_not_authorized">Unauthorized, started</string>
     <string name="status_authorized">Authorized</string>
     <string name="status_not_authorized">Unauthorized</string>
-
-    <!-- activity_touchpad -->
-    <string name="mode_normal">Normal</string>
-    <string name="mode_cursor_locked">Locked cursor</string>
-    <string name="touchpad_help_cursor_locked">Cursor stays fixed, single-finger gestures only</string>
-    <string name="touchpad_help_move_cursor">Move cursor</string>
-    <string name="touchpad_help_text">Touch this area to control the target screen:\n\n- Single-finger swipe: %s\n- Single-finger tap: Tap on the target screen\n- Multi-finger gesture: Sent to the target screen\n- Back button: Go back on the target screen\n- Home button: Reopen the selected app\n- Display off button: Turn off the main screen to save power\n\nIf a Bluetooth controller cannot control the display, use the display off button to turn off the main screen and shift focus.</string>
-
-    <!-- activity_touchscreen -->
-    <string name="exit_vertical">Exit</string>
-    <string name="back_vertical">Back</string>
 
     <!-- activity_about -->
     <string name="version_format">Version: %1$s (Android %2$s)</string>
@@ -90,43 +76,21 @@
     <string name="port">Port</string>
 
     <!-- activity_mirror_settings -->
-    <string name="accessibility_status">Accessibility permission</string>
     <string name="overlay_status">Overlay permission</string>
-    <string name="use_accessibility">Use Accessibility</string>
-    <string name="use_accessibility_desc">Enable accessibility service for touchpad and input control</string>
-    <string name="single_app_projection">Project an application</string>
-    <string name="single_app_projection_desc">Project launcher apps like Microsoft Launcher</string>
-    <string name="single_app_projection_with_name">Project an application: %s</string>
-    <string name="select_projected_app">Select application to project</string>
-    <string name="auto_move_mouse">Auto-move mouse input</string>
-    <string name="auto_move_mouse_desc">Move mouse to external display. Requires Android 15 with Shizuku. Bluetooth gamepads and keyboards follow system cursor focus. Use the \"Turn display off\" button to transfer focus.</string>
-    <string name="auto_move_ime">Auto-move keyboard</string>
-    <string name="auto_move_ime_desc">Move keyboard input to external display</string>
-    <string name="enable_touchscreen_control">Touch control</string>
-    <string name="enable_touchscreen_control_desc">Use main screen to control extended display</string>
-    <string name="dpi_text_size">DPI and text size</string>
-    <string name="dpi_text_size_value">Current: %d</string>
-    <string name="auto_rotate">Auto rotate</string>
-    <string name="auto_rotate_desc">Automatically rotate display to match orientation</string>
-    <string name="auto_scale_remove_bars">Auto scale</string>
-    <string name="auto_scale_remove_bars_desc">Remove black bars from display</string>
-    <string name="auto_screen_off">Auto screen off</string>
-    <string name="auto_screen_off_desc">Turn off main screen when projecting</string>
-    <string name="auto_screen_off_with_warning_desc">Use volume keys to wake up</string>
-    <string name="use_black_image_screen_off">Black screen</string>
-    <string name="use_black_image_screen_off_desc">Use black image instead of turning off screen</string>
-    <string name="disable_usb_audio">Disable USB audio</string>
-    <string name="disable_usb_audio_desc">Disable automatic USB audio routing</string>
+    <string name="trusted_display">Create trusted virtual display</string>
+    <string name="trusted_display_desc">Create the virtual display as a trusted display. This enables other apps to set keyboard policy and other features. Requires Shizuku.</string>
+    <string name="auto_rotate">Rotate stream with device</string>
+    <string name="auto_rotate_desc">When you rotate your phone, recreate the stream to match the new orientation</string>
+    <string name="auto_scale_remove_bars">Fill stream to remove black bars</string>
+    <string name="auto_scale_remove_bars_desc">Crop and scale the captured screen to fill the stream resolution, removing letterbox bars</string>
+    <string name="disable_usb_audio">Disable USB audio routing</string>
+    <string name="disable_usb_audio_desc">Prevent Android from automatically routing audio to USB devices when connected</string>
     <string name="auto_match_aspect_ratio">Match Moonlight aspect ratio</string>
-    <string name="auto_match_aspect_ratio_desc">Adjust main screen aspect ratio to match external Moonlight display</string>
-    <string name="show_floating_in_mirror_mode">Floating back button</string>
-    <string name="show_floating_in_mirror_mode_desc">Show floating back button in mirror mode</string>
+    <string name="auto_match_aspect_ratio_desc">Adjust main screen aspect ratio to match the external display resolution</string>
     <string name="prevent_auto_lock">Prevent auto-lock</string>
     <string name="prevent_auto_lock_desc">Modifies the system screen timeout setting</string>
     <string name="no_audio_try_no_remote_submix">Disable REMOTE_SUBMIX</string>
     <string name="no_audio_try_no_remote_submix_desc">Fix audio issues in Moonlight</string>
-    <string name="auto_hide_floating_back">Auto-hide floating button</string>
-    <string name="auto_hide_floating_back_desc">Single tap to go back; double tap to return to projected app</string>
     <string name="auto_connect_moonlight">Auto-connect Moonlight (Beta)</string>
     <string name="auto_connect_moonlight_desc">Proactively send a JSON connect request to the Moonlight client. Requires a fork with the autostart listener. Not compatible with standard Moonlight.</string>
     <string name="show_moonlight_cursor">Show cursor location</string>
@@ -144,7 +108,6 @@
     <string name="airplay_manual_ip_hint">IP address (e.g. 192.168.1.100)</string>
     <string name="airplay_manual_port_hint">Port (default 7000)</string>
     <string name="change_displaylink_output_settings">Change DisplayLink Output Settings</string>
-    <string name="select_app_title">Select a launcher app for the best experience</string>
     <string name="displaylink_resolution_title">DisplayLink Output Settings</string>
     <string name="displaylink_output_format">Current output: %1$dx%2$d@%3$dHz</string>
     <string name="quick_presets">Custom</string>
@@ -170,12 +133,6 @@
     <string name="log_file_not_generated">Log file not generated</string>
     <string name="share_log_file">Share log file</string>
     <string name="check_log_file_export">Check if the \'Mirror.log\' file has been exported in the download directory</string>
-
-    <!-- InputRouting Toast -->
-    <string name="need_screen_off_for_touchscreen">Due to Android version limitation, tap \'Turn display off\' to use the touchscreen</string>
-
-    <!-- TouchpadActivity Toast -->
-    <string name="show_cursor_failed">Failed to show mouse cursor</string>
 
     <!-- APK Import -->
     <string name="auto_import_displaylink_libs">Automatically download and import libraries</string>

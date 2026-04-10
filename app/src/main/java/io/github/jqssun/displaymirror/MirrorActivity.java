@@ -258,7 +258,6 @@ public class MirrorActivity extends AppCompatActivity {
                                 targetSurface, null, renderHandler);
                         State.setMediaProjection(null);
                         CreateVirtualDisplay.changeAspectRatio(surfaceView.getWidth(), surfaceView.getHeight());
-                        CreateVirtualDisplay.powerOffScreen();
                     } else if (State.mirrorVirtualDisplay != null) {
                         boolean isLandscape = SunshineService.instance.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
                         Surface targetSurface = isLandscape ? landscapeInputSurface : portraitInputSurface;

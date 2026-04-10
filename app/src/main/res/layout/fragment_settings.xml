@@ -114,6 +114,15 @@
             android:textAppearance="?attr/textAppearanceLabelLarge"
             android:textColor="?colorPrimary" />
 
+        <!-- Trusted display -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingHorizontal="16dp" android:paddingVertical="12dp">
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="16dp" android:orientation="vertical">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/trusted_display" android:textAppearance="?attr/textAppearanceBodyLarge" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/trusted_display_desc" android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="?colorOnSurfaceVariant" />
+            </LinearLayout>
+            <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/trustedDisplayCheckbox" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+        </LinearLayout>
+
         <!-- Auto rotate -->
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingHorizontal="16dp" android:paddingVertical="12dp">
             <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="16dp" android:orientation="vertical">
@@ -132,78 +141,65 @@
             <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/autoScaleCheckbox" android:layout_width="wrap_content" android:layout_height="wrap_content" />
         </LinearLayout>
 
-        <!-- Auto screen off -->
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingHorizontal="16dp" android:paddingVertical="12dp">
-            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="16dp" android:orientation="vertical">
-                <TextView android:id="@+id/autoScreenOffTitle" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/auto_screen_off" android:textAppearance="?attr/textAppearanceBodyLarge" />
-                <TextView android:id="@+id/autoScreenOffDesc" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/auto_screen_off_desc" android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="?colorOnSurfaceVariant" />
-            </LinearLayout>
-            <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/autoScreenOffCheckbox" android:layout_width="wrap_content" android:layout_height="wrap_content" />
-        </LinearLayout>
-
-        <!-- Black image screen off -->
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingHorizontal="16dp" android:paddingVertical="12dp">
-            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="16dp" android:orientation="vertical">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/use_black_image_screen_off" android:textAppearance="?attr/textAppearanceBodyLarge" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/use_black_image_screen_off_desc" android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="?colorOnSurfaceVariant" />
-            </LinearLayout>
-            <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/useBlackImageCheckbox" android:layout_width="wrap_content" android:layout_height="wrap_content" />
-        </LinearLayout>
-
-        <!-- Projection -->
+        <!-- Virtual Display Control -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingHorizontal="16dp"
             android:paddingTop="16dp"
             android:paddingBottom="4dp"
-            android:text="@string/section_projection"
+            android:text="@string/section_virtual_display"
             android:textAppearance="?attr/textAppearanceLabelLarge"
             android:textColor="?colorPrimary" />
 
-        <!-- Single-app mode -->
+        <!-- Route keyboard to display -->
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingHorizontal="16dp" android:paddingVertical="12dp">
             <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="16dp" android:orientation="vertical">
-                <TextView android:id="@+id/singleAppTitle" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/single_app_projection" android:textAppearance="?attr/textAppearanceBodyLarge" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/single_app_projection_desc" android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="?colorOnSurfaceVariant" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/auto_route_keyboard" android:textAppearance="?attr/textAppearanceBodyLarge" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/auto_route_keyboard_desc" android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="?colorOnSurfaceVariant" />
             </LinearLayout>
-            <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/singleAppModeCheckbox" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+            <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/autoRouteKeyboardCheckbox" android:layout_width="wrap_content" android:layout_height="wrap_content" />
         </LinearLayout>
 
-        <LinearLayout android:id="@+id/singleAppContainer" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+        <!-- Touchscreen control -->
+        <LinearLayout
+            android:id="@+id/touchscreenRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="56dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="16dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/touchscreen_control"
+                    android:textAppearance="?attr/textAppearanceBodyLarge" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/touchscreen_control_desc"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="?colorOnSurfaceVariant" />
+            </LinearLayout>
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/selectAppButton"
+                android:id="@+id/touchscreenBtn"
                 style="@style/Widget.Material3.Button.TonalButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginBottom="4dp"
-                android:text="@string/select_projected_app" />
-
-            <!-- Auto-move mouse -->
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingHorizontal="16dp" android:paddingVertical="12dp">
-                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="16dp" android:orientation="vertical">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/auto_move_mouse" android:textAppearance="?attr/textAppearanceBodyLarge" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/auto_move_mouse_desc" android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="?colorOnSurfaceVariant" />
-                </LinearLayout>
-                <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/autoBindInputCheckbox" android:layout_width="wrap_content" android:layout_height="wrap_content" />
-            </LinearLayout>
-
-            <!-- Auto-move keyboard -->
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingHorizontal="16dp" android:paddingVertical="12dp">
-                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="16dp" android:orientation="vertical">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/auto_move_ime" android:textAppearance="?attr/textAppearanceBodyLarge" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/auto_move_ime_desc" android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="?colorOnSurfaceVariant" />
-                </LinearLayout>
-                <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/autoMoveImeCheckbox" android:layout_width="wrap_content" android:layout_height="wrap_content" />
-            </LinearLayout>
-
-            <!-- DPI -->
-            <LinearLayout android:id="@+id/dpiRow" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:orientation="vertical" android:gravity="center_vertical" android:paddingHorizontal="16dp" android:paddingVertical="12dp" android:clickable="true" android:focusable="true" android:background="?attr/selectableItemBackground">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/dpi_text_size" android:textAppearance="?attr/textAppearanceBodyLarge" />
-                <TextView android:id="@+id/dpiValueText" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="?colorOnSurfaceVariant" />
-            </LinearLayout>
+                android:text="@string/open" />
         </LinearLayout>
 
         <!-- Audio & Input -->
