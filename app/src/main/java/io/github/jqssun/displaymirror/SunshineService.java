@@ -27,6 +27,7 @@ import io.github.jqssun.displaymirror.job.MirrorDisplayMonitor;
 import io.github.jqssun.displaymirror.job.MirrorDisplaylinkMonitor;
 import io.github.jqssun.displaymirror.job.SunshineServer;
 import io.github.jqssun.displaymirror.shizuku.PermissionManager;
+import io.github.jqssun.displaymirror.shizuku.ServiceUtils;
 import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
 
 import java.io.File;
@@ -175,6 +176,11 @@ public class SunshineService extends Service {
 
         IntentFilter permissionFilter = new IntentFilter(ACTION_USB_PERMISSION);
         registerReceiver(usbPermissionReceiver, permissionFilter, null, null, Context.RECEIVER_EXPORTED);
+
+        // Pre-cache Shizuku service binders on main thread so they work from render threads
+        if (ShizukuUtils.hasPermission()) {
+            ServiceUtils.ensureInitialized();
+        }
 
         DisplayManager displayManager = (DisplayManager) getSystemService(Context.DISPLAY_SERVICE);
         MirrorDisplayMonitor.init(displayManager);

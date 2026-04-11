@@ -53,17 +53,10 @@ public class CreateVirtualDisplay {
         isCreating = true;
         try {
             if (ShizukuUtils.hasPermission()) {
-                try {
-                    VirtualDisplay virtualDisplay = _createByShizuku(virtualDisplayArgs, surface, true, null);
-                    android.util.Log.i("CreateVirtualDisplay", "created virtual display: " + virtualDisplay.getDisplay().getDisplayId());
-                    moveImeToDisplay(virtualDisplay.getDisplay().getDisplayId());
-                    return virtualDisplay;
-                } catch(Exception e) {
-                    VirtualDisplay virtualDisplay = _createByShizuku(virtualDisplayArgs, surface, true, State.getMediaProjection());
-                    android.util.Log.i("CreateVirtualDisplay", "created virtual display: " + virtualDisplay.getDisplay().getDisplayId());
-                    moveImeToDisplay(virtualDisplay.getDisplay().getDisplayId());
-                    return virtualDisplay;
-                }
+                VirtualDisplay virtualDisplay = _createByShizuku(virtualDisplayArgs, surface, true, State.getMediaProjection());
+                android.util.Log.i("CreateVirtualDisplay", "created virtual display: " + virtualDisplay.getDisplay().getDisplayId());
+                State.setMediaProjection(null);
+                return virtualDisplay;
             } else {
                 new Handler(Looper.getMainLooper()).post(() -> {
                    State.log("Cannot use single-app projection without Shizuku permission");
@@ -195,29 +188,6 @@ public class CreateVirtualDisplay {
                 State.log("powerUpScreen failed: " + e.getMessage());
             }
         }
-    }
-
-    public static void moveImeToDisplay(int displayId) {
-        if (!Pref.getAutoRouteKeyboard()) return;
-        try {
-            IWindowManager wm = ServiceUtils.getWindowManager();
-            wm.setDisplayImePolicy(Display.DEFAULT_DISPLAY, 1); // FALLBACK
-            try {
-                wm.setDisplayImePolicy(displayId, 0); // LOCAL
-            } catch (Throwable e) {
-                wm.setDisplayImePolicy(Display.DEFAULT_DISPLAY, 0);
-                State.log("failed to set IME on display " + displayId + ": " + e);
-            }
-        } catch (Throwable e) {
-            State.log("failed to move IME: " + e);
-        }
-    }
-
-    public static void moveImeToDefault() {
-        try {
-            IWindowManager wm = ServiceUtils.getWindowManager();
-            wm.setDisplayImePolicy(Display.DEFAULT_DISPLAY, 0);
-        } catch (Throwable ignored) {}
     }
 
     private static boolean _shouldChangeAspectRatio() {

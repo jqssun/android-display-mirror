@@ -16,7 +16,7 @@
     <!-- Settings section headers -->
     <string name="section_permissions">Permissions</string>
     <string name="section_display">Streaming</string>
-    <string name="section_virtual_display">Live Controls for Active Display</string>
+
     <string name="section_audio_input">Audio &amp; Input</string>
     <string name="section_moonlight">Moonlight</string>
     <string name="section_displaylink_libraries">DisplayLink Libraries</string>
@@ -37,8 +37,6 @@
     <!-- Display interaction -->
     <string name="touchscreen_control">Touchscreen control</string>
     <string name="touchscreen_control_desc">Use the phone screen to directly control the external display. Only available while this app owns the virtual display.</string>
-    <string name="auto_route_keyboard">Show keyboard on this display</string>
-    <string name="auto_route_keyboard_desc">Route the on-screen keyboard to the active external display. Only available while this app owns the virtual display.</string>
     <string name="exit_vertical">Exit</string>
     <string name="back_vertical">Back</string>
 

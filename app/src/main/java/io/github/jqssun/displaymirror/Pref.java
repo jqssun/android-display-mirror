@@ -11,7 +11,6 @@ public class Pref {
     public static final String KEY_AUTO_ROTATE = "auto_rotate";
     public static final String KEY_AUTO_SCALE = "auto_scale";
     public static final String KEY_DISABLE_USB_AUDIO = "disable_usb_audio";
-    public static final String KEY_AUTO_ROUTE_KEYBOARD = "auto_route_keyboard";
 
     // Moonlight
     public static final String KEY_AUTO_MATCH_ASPECT_RATIO = "auto_match_aspect_ratio";
@@ -34,7 +33,6 @@ public class Pref {
     public static boolean getAutoRotate() { return getBoolean(KEY_AUTO_ROTATE, false); }
     public static boolean getAutoScale() { return getBoolean(KEY_AUTO_SCALE, true); }
     public static boolean getDisableUsbAudio() { return getBoolean(KEY_DISABLE_USB_AUDIO, false); }
-    public static boolean getAutoRouteKeyboard() { return getBoolean(KEY_AUTO_ROUTE_KEYBOARD, true); }
 
     public static boolean getAutoMatchAspectRatio() { return getBoolean(KEY_AUTO_MATCH_ASPECT_RATIO, false); }
     public static boolean getPreventAutoLock() { return getBoolean(KEY_PREVENT_AUTO_LOCK, false); }

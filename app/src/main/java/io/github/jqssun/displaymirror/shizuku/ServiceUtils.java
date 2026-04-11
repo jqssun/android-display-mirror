@@ -31,6 +31,11 @@ public class ServiceUtils {
         activityTaskManager = null;
     }
 
+    /** Pre-cache all binders on the main thread so they work from any thread. */
+    public static void ensureInitialized() {
+        _init();
+    }
+
     private static void _init() {
         if (!ShizukuUtils.hasPermission()) return;
         windowManager = IWindowManager.Stub.asInterface(new ShizukuBinderWrapper(SystemServiceHelper.getSystemService(Context.WINDOW_SERVICE)));

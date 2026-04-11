@@ -237,10 +237,16 @@ public class AutoRotateAndScaleForMoonlight {
                 int w = isLandscape ? virtualDisplayArgs.width : virtualDisplayArgs.height;
                 int h = isLandscape ? virtualDisplayArgs.height : virtualDisplayArgs.width;
                 if (ShizukuUtils.hasPermission() && Pref.getTrustedDisplay()) {
-                    State.mirrorVirtualDisplay = CreateVirtualDisplay.createVirtualDisplay(
-                            new VirtualDisplayArgs(virtualDisplayArgs.virtualDisplayName, w, h,
-                                    virtualDisplayArgs.refreshRate, virtualDisplayArgs.dpi, false), targetSurface);
-                } else {
+                    try {
+                        State.mirrorVirtualDisplay = CreateVirtualDisplay.createVirtualDisplay(
+                                new VirtualDisplayArgs(virtualDisplayArgs.virtualDisplayName, w, h,
+                                        virtualDisplayArgs.refreshRate, virtualDisplayArgs.dpi, false), targetSurface);
+                    } catch (Throwable e) {
+                        android.util.Log.w("AutoRotateAndScaleForMoonlight", "Trusted display creation failed, falling back to untrusted: " + e.getMessage());
+                        State.mirrorVirtualDisplay = null;
+                    }
+                }
+                if (State.mirrorVirtualDisplay == null && State.getMediaProjection() != null) {
                     State.mirrorVirtualDisplay = State.getMediaProjection().createVirtualDisplay(
                             virtualDisplayArgs.virtualDisplayName, w, h, virtualDisplayArgs.dpi,
                             DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC, targetSurface, null, null);

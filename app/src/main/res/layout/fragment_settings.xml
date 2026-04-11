@@ -141,26 +141,6 @@
             <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/autoScaleCheckbox" android:layout_width="wrap_content" android:layout_height="wrap_content" />
         </LinearLayout>
 
-        <!-- Virtual Display Control -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingHorizontal="16dp"
-            android:paddingTop="16dp"
-            android:paddingBottom="4dp"
-            android:text="@string/section_virtual_display"
-            android:textAppearance="?attr/textAppearanceLabelLarge"
-            android:textColor="?colorPrimary" />
-
-        <!-- Route keyboard to display -->
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingHorizontal="16dp" android:paddingVertical="12dp">
-            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="16dp" android:orientation="vertical">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/auto_route_keyboard" android:textAppearance="?attr/textAppearanceBodyLarge" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/auto_route_keyboard_desc" android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="?colorOnSurfaceVariant" />
-            </LinearLayout>
-            <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/autoRouteKeyboardCheckbox" android:layout_width="wrap_content" android:layout_height="wrap_content" />
-        </LinearLayout>
-
         <!-- Touchscreen control -->
         <LinearLayout
             android:id="@+id/touchscreenRow"

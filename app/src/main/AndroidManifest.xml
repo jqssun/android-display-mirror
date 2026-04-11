@@ -85,6 +85,7 @@
             android:enabled="true"
             android:exported="false" />
 
+
     </application>
 
     <queries>

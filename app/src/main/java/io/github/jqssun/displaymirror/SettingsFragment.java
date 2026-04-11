@@ -19,7 +19,6 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.button.MaterialButton;
 
-import io.github.jqssun.displaymirror.job.CreateVirtualDisplay;
 import com.google.android.material.materialswitch.MaterialSwitch;
 
 import io.github.jqssun.displaymirror.job.AcquireShizuku;
@@ -64,27 +63,9 @@ public class SettingsFragment extends Fragment {
         trustedDisplayCheckbox.setEnabled(hasShizuku);
         trustedDisplayCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_TRUSTED_DISPLAY, c).apply());
 
-        MaterialSwitch autoRouteKeyboardCheckbox = view.findViewById(R.id.autoRouteKeyboardCheckbox);
-
         autoRotateCheckbox.setChecked(Pref.getAutoRotate());
         autoScaleCheckbox.setChecked(Pref.getAutoScale());
         disableUsbAudioCheckbox.setChecked(Pref.getDisableUsbAudio());
-
-        // IME toggle — live: applies immediately when toggled
-        VirtualDisplay imeVd = _getActiveVirtualDisplay();
-        autoRouteKeyboardCheckbox.setEnabled(imeVd != null);
-        autoRouteKeyboardCheckbox.setChecked(Pref.getAutoRouteKeyboard());
-        autoRouteKeyboardCheckbox.setOnCheckedChangeListener((b, c) -> {
-            preferences.edit().putBoolean(Pref.KEY_AUTO_ROUTE_KEYBOARD, c).apply();
-            VirtualDisplay vd = _getActiveVirtualDisplay();
-            if (vd != null) {
-                if (c) {
-                    CreateVirtualDisplay.moveImeToDisplay(vd.getDisplay().getDisplayId());
-                } else {
-                    CreateVirtualDisplay.moveImeToDefault();
-                }
-            }
-        });
 
         autoRotateCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_AUTO_ROTATE, c).apply());
         autoScaleCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_AUTO_SCALE, c).apply());
@@ -166,9 +147,6 @@ public class SettingsFragment extends Fragment {
             startActivity(intent);
         });
 
-        // IME toggle
-        MaterialSwitch imeToggle = view.findViewById(R.id.autoRouteKeyboardCheckbox);
-        imeToggle.setEnabled(active);
     }
 
     private VirtualDisplay _getActiveVirtualDisplay() {
