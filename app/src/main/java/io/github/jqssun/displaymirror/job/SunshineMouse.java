@@ -51,6 +51,12 @@ public class SunshineMouse {
     private static boolean autoRotate;
     private static boolean showCursor;
 
+    public static void setShowCursor(boolean show) {
+        showCursor = show;
+        if (show) MoonlightCursorOverlay.show();
+        else MoonlightCursorOverlay.hide();
+    }
+
     public static void initialize(int width, int height) {
         Context context = State.getContext();
         if (context == null) {
@@ -239,12 +245,15 @@ public class SunshineMouse {
     }
 
     private static Point singlePoint = null;
-    // cursor position in device coordinates for relative mouse
+    // cursor position in normalized 0-1 coordinates for relative mouse
     private static Point cursorPos = null;
 
     public static void handleAbsMouseMovePacket(float x, float y, float width, float height) {
         x = x / width;
         y = y / height;
+        if (cursorPos == null) cursorPos = new Point();
+        cursorPos.x = x;
+        cursorPos.y = y;
         Point point = _translate(x, y);
         if (singlePoint != null) {
             singlePoint = point;
@@ -252,41 +261,45 @@ public class SunshineMouse {
         } else {
             singlePoint = point;
         }
-        cursorPos = point;
-        if (showCursor) MoonlightCursorOverlay.update(point.x, point.y);
+        if (showCursor) {
+            Point cursorPoint = _translateMirrorMode(x, y);
+            MoonlightCursorOverlay.update(cursorPoint.x, cursorPoint.y);
+        }
     }
 
     public static void handleRelMouseMovePacket(short deltaX, short deltaY) {
         if (cursorPos == null) {
             cursorPos = new Point();
-            cursorPos.x = defaultDisplayHeight / 2;
-            cursorPos.y = defaultDisplayWidth / 2;
+            cursorPos.x = 0.5f;
+            cursorPos.y = 0.5f;
         }
-        cursorPos.x += deltaX;
-        cursorPos.y += deltaY;
-        // clamp
-        cursorPos.x = Math.max(0, Math.min(cursorPos.x, defaultDisplayHeight));
-        cursorPos.y = Math.max(0, Math.min(cursorPos.y, defaultDisplayWidth));
+        cursorPos.x += deltaX / screenWidth;
+        cursorPos.y += deltaY / screenHeight;
+        cursorPos.x = Math.max(0, Math.min(cursorPos.x, 1));
+        cursorPos.y = Math.max(0, Math.min(cursorPos.y, 1));
 
+        Point injPoint = _translate(cursorPos.x, cursorPos.y);
         if (singlePoint != null) {
-            singlePoint = cursorPos;
+            singlePoint = injPoint;
             _handleTouchEventMove(0, singlePoint.x, singlePoint.y);
         }
-        if (showCursor) MoonlightCursorOverlay.update(cursorPos.x, cursorPos.y);
+        if (showCursor) {
+            Point cursorScreenPoint = _translateMirrorMode(cursorPos.x, cursorPos.y);
+            MoonlightCursorOverlay.update(cursorScreenPoint.x, cursorScreenPoint.y);
+        }
     }
 
     public static void handleLeftMouseButton(boolean release) {
-        if (singlePoint == null && cursorPos == null) {
+        if (cursorPos == null) {
             return;
         }
-        if (singlePoint == null) {
-            singlePoint = cursorPos;
-        }
+        Point injPoint = _translate(cursorPos.x, cursorPos.y);
         if (release) {
-            _handleTouchEventUp(0, singlePoint.x, singlePoint.y, false);
+            _handleTouchEventUp(0, injPoint.x, injPoint.y, false);
             singlePoint = null;
         } else {
-            _handleTouchEventDown(0, singlePoint.x, singlePoint.y);
+            singlePoint = injPoint;
+            _handleTouchEventDown(0, injPoint.x, injPoint.y);
         }
     }
 

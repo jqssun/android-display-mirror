@@ -52,9 +52,11 @@
     <string name="refresh_rate_label">Refresh rate</string>
     <!-- Permission status -->
     <string name="status_not_started">Not started</string>
-    <string name="status_started_not_authorized">Unauthorized, started</string>
+    <string name="status_started_not_authorized_server">Unauthorized (UID: %d)</string>
+    <string name="status_authorized_server">Authorized (UID: %d)</string>
     <string name="status_authorized">Authorized</string>
     <string name="status_not_authorized">Unauthorized</string>
+    <string name="shizuku_uid_dropped">Shizuku started as root. Using UID %d for compatibility.</string>
 
     <!-- activity_about -->
     <string name="version_format">Version: %1$s (Android %2$s)</string>
@@ -121,8 +123,9 @@
     <string name="sunshine_service_running">Sunshine service is running</string>
 
     <!-- SunshineServer PIN dialog -->
-    <string name="enter_pin_title">Enter PIN code</string>
-    <string name="enter_pin_message">Enter 4-digit PIN code</string>
+    <string name="enter_pin_title">Enter 4-digit PIN code</string>
+    <string name="enter_pin_hint">PIN code</string>
+    <string name="enter_pin_error">Enter a 4-digit PIN</string>
     <string name="encoder_error_title">Failed to configure encoder</string>
 
     <!-- FetchLogAndShare -->

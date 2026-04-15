@@ -7,10 +7,13 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PixelFormat;
+import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.Display;
+import android.view.Gravity;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
@@ -19,6 +22,8 @@ public class MoonlightCursorOverlay {
     private static ImageView cursorView;
     private static WindowManager.LayoutParams cursorParams;
     private static WindowManager wm;
+    private static int halfScreenWidth;
+    private static int halfScreenHeight;
     private static final Handler handler = new Handler(Looper.getMainLooper());
 
     public static void show() {
@@ -26,6 +31,12 @@ public class MoonlightCursorOverlay {
             if (cursorView != null) return;
             Context context = State.getContext();
             if (context == null) return;
+
+            wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+            Point realSize = new Point();
+            wm.getDefaultDisplay().getRealSize(realSize);
+            halfScreenWidth = realSize.x / 2;
+            halfScreenHeight = realSize.y / 2;
 
             cursorParams = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.WRAP_CONTENT,
@@ -36,13 +47,13 @@ public class MoonlightCursorOverlay {
                 WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
                 PixelFormat.TRANSLUCENT
             );
+            cursorParams.gravity = Gravity.CENTER;
             cursorParams.x = 0;
             cursorParams.y = 0;
 
             cursorView = new ImageView(context);
             cursorView.setImageDrawable(new BitmapDrawable(context.getResources(), _createCursorBitmap()));
 
-            wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
             try {
                 wm.addView(cursorView, cursorParams);
             } catch (Exception e) {
@@ -56,10 +67,8 @@ public class MoonlightCursorOverlay {
         if (cursorView == null || cursorParams == null || wm == null) return;
         handler.post(() -> {
             if (cursorView == null) return;
-            // LayoutParams x/y are offsets from center of screen
-            android.util.DisplayMetrics dm = cursorView.getResources().getDisplayMetrics();
-            cursorParams.x = (int) x - dm.widthPixels / 2;
-            cursorParams.y = (int) y - dm.heightPixels / 2;
+            cursorParams.x = (int) x - halfScreenWidth;
+            cursorParams.y = (int) y - halfScreenHeight;
             try {
                 wm.updateViewLayout(cursorView, cursorParams);
             } catch (Exception e) {

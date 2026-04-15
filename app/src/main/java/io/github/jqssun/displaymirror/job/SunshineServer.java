@@ -40,6 +40,7 @@ public class SunshineServer {
             }
             
             com.google.android.material.textfield.TextInputLayout inputLayout = new com.google.android.material.textfield.TextInputLayout(context, null, com.google.android.material.R.attr.textInputOutlinedStyle);
+            inputLayout.setHint(R.string.enter_pin_hint);
             com.google.android.material.textfield.TextInputEditText input = new com.google.android.material.textfield.TextInputEditText(inputLayout.getContext());
             input.setInputType(InputType.TYPE_CLASS_NUMBER);
             input.setText(pinCandidate);
@@ -47,7 +48,7 @@ public class SunshineServer {
             inputLayout.addView(input);
             int pad = (int)(16 * context.getResources().getDisplayMetrics().density);
             FrameLayout container = new FrameLayout(context);
-            container.setPadding(pad, 0, pad, 0);
+            container.setPadding(pad, pad / 2, pad, 0);
             container.addView(inputLayout);
 
             if (suppressPin != null) {
@@ -55,14 +56,13 @@ public class SunshineServer {
             } else {
                 new MaterialAlertDialogBuilder(context)
                         .setTitle(R.string.enter_pin_title)
-                        .setMessage(context.getString(R.string.enter_pin_message))
                         .setView(container)
                         .setPositiveButton(R.string.ok, (dialog, which) -> {
                             String pin = input.getText().toString();
                             if (pin.length() == 4) {
                                 submitPin(pin);
                             } else {
-                                Toast.makeText(context, R.string.enter_pin_message, Toast.LENGTH_SHORT).show();
+                                inputLayout.setError(context.getString(R.string.enter_pin_error));
                             }
                         })
                         .setNegativeButton(R.string.cancel, (dialog, which) -> dialog.cancel())

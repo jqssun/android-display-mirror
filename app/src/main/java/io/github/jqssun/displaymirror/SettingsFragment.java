@@ -123,10 +123,10 @@ public class SettingsFragment extends Fragment {
             statusView.setText(R.string.status_not_started);
             permissionBtn.setVisibility(View.GONE);
         } else if (!hasPermission) {
-            statusView.setText(R.string.status_started_not_authorized);
+            statusView.setText(getString(R.string.status_started_not_authorized_server, ShizukuUtils.getServerUid()));
             permissionBtn.setVisibility(View.VISIBLE);
         } else {
-            statusView.setText(R.string.status_authorized);
+            statusView.setText(getString(R.string.status_authorized_server, ShizukuUtils.getServerUid()));
             permissionBtn.setVisibility(View.GONE);
         }
     }

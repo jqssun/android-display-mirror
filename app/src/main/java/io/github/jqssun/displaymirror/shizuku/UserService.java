@@ -9,6 +9,7 @@ import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.IBinder;
+import android.system.Os;
 import android.util.Log;
 
 import android.os.RemoteException;
@@ -32,13 +33,27 @@ public class UserService extends IUserService.Stub  {
     private float[] buffer;
 
     public UserService() {
+        _dropToShellIfRoot();
         Ln.i("Start UserService without context: " + android.os.Process.myUid());
     }
 
     @Keep
     public UserService(Context context) {
         this.context = context;
+        _dropToShellIfRoot();
         Ln.i("Start UserService with context: " + android.os.Process.myUid());
+    }
+
+    private void _dropToShellIfRoot() {
+        int uid = android.os.Process.myUid();
+        if (uid != 0) return;
+        int shellUid = android.os.Process.SHELL_UID;
+        try {
+            Os.setuid(shellUid);
+            Ln.i("Dropped root to shell UID " + shellUid + " for trusted display compatibility");
+        } catch (Exception e) {
+            Ln.e("Failed to drop root to shell UID " + shellUid, e);
+        }
     }
 
     /**
@@ -250,7 +265,7 @@ public class UserService extends IUserService.Stub  {
 
     @Override
     public boolean isRooted() throws RemoteException {
-        return android.os.Process.myUid() == 0;
+        return Os.getuid() == 0;
     }
 
     @Override

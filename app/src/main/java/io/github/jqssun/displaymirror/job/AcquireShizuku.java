@@ -1,16 +1,10 @@
 package io.github.jqssun.displaymirror.job;
 
-import android.content.SharedPreferences;
-import android.os.Handler;
-import android.os.Looper;
-import android.util.Log;
+import android.widget.Toast;
 
-import io.github.jqssun.displaymirror.BuildConfig;
-import io.github.jqssun.displaymirror.Pref;
+import io.github.jqssun.displaymirror.R;
 import io.github.jqssun.displaymirror.State;
 import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
-import io.github.jqssun.displaymirror.shizuku.UserService;
-import com.topjohnwu.superuser.Shell;
 
 import rikka.shizuku.Shizuku;
 
@@ -28,7 +22,7 @@ public class AcquireShizuku implements Job {
             State.log("Shizuku permission already granted");
             acquired = true;
             if (hasRequestedPermission) {
-                fixRootShizuku();
+                _notifyIfUidDropped();
                 State.bindUserService();
             }
         } else {
@@ -42,30 +36,22 @@ public class AcquireShizuku implements Job {
         }
     }
 
-    public static void fixRootShizuku() {
-        if (ShizukuUtils.hasPermission() && Shizuku.getUid() == 0) {
-            State.log("Detected Shizuku started as root, attempting to restart Shizuku as adb");
-            new Thread(() -> {
-                try {
-                    Thread.sleep(2000);
-                    boolean success = Shell.getShell().newJob()
-                            .add("/data/adb/magisk/busybox killall shizuku_server")
-                            .add("su 2000")
-                            .add("/data/local/tmp/shizuku_starter")
-                            .exec()
-                            .isSuccess();
-                    Log.e("State", "kill shizuku " + success);
-                    new Handler(Looper.getMainLooper()).post(() -> {
-                        if (success) {
-                            State.log("Shizuku restarted as adb, please restart the app");
-                        } else {
-                            State.log("Failed to restart Shizuku");
-                        }
-                    });
-                } catch (Throwable e) {
-                    // ignore
-                }
-            }).start();
+    public static void notifyIfUidDropped() {
+        _notifyIfUidDropped();
+    }
+
+    private static void _notifyIfUidDropped() {
+        if (!ShizukuUtils.hasPermission() || Shizuku.getUid() != 0) return;
+        android.content.Context context = State.getContext();
+        int shellUid = android.os.Process.SHELL_UID;
+        String msg = context != null
+                ? context.getString(R.string.shizuku_uid_dropped, shellUid)
+                : "Shizuku root dropped to UID " + shellUid;
+        State.log(msg);
+        if (context != null) {
+            new android.os.Handler(android.os.Looper.getMainLooper()).post(() ->
+                Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+            );
         }
     }
 }

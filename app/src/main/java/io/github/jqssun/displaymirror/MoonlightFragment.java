@@ -22,6 +22,7 @@ import com.google.android.material.materialswitch.MaterialSwitch;
 import io.github.jqssun.displaymirror.job.AutoRotateAndScaleForDisplaylink;
 import io.github.jqssun.displaymirror.job.ConnectToClient;
 import io.github.jqssun.displaymirror.job.ExitAll;
+import io.github.jqssun.displaymirror.job.SunshineMouse;
 import io.github.jqssun.displaymirror.job.SunshineServer;
 import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
 
@@ -81,7 +82,10 @@ public class MoonlightFragment extends Fragment {
         MaterialSwitch disableRemoteSubmixCheckbox = view.findViewById(R.id.disableRemoteSubmixCheckbox);
 
         showCursorCheckbox.setChecked(Pref.getShowMoonlightCursor());
-        showCursorCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_SHOW_MOONLIGHT_CURSOR, c).apply());
+        showCursorCheckbox.setOnCheckedChangeListener((b, c) -> {
+            preferences.edit().putBoolean(Pref.KEY_SHOW_MOONLIGHT_CURSOR, c).apply();
+            SunshineMouse.setShowCursor(c);
+        });
 
         boolean autoConnect = Pref.getAutoConnectClient();
         autoConnectCheckbox.setChecked(autoConnect);

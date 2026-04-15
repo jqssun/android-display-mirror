@@ -108,15 +108,6 @@ public class CreateVirtualDisplay {
         }
         int displayId = -1;
         String packageName = "com.android.shell";
-        try {
-            if (State.userService != null && State.userService.isRooted()) {
-                new Handler(Looper.getMainLooper()).post(() -> {
-                    State.log("Shizuku started with root may not support single-app projection, consider restarting with adb instead");
-                });
-            }
-        } catch (Throwable e) {
-            // ignore;
-        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             displayId = displayManager.createVirtualDisplay(config, callback, projection, packageName);
         } else {

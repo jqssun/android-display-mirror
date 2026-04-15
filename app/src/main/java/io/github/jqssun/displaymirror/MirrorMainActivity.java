@@ -205,7 +205,7 @@ public class MirrorMainActivity extends AppCompatActivity {
     }
 
     public void startMirroring() {
-        AcquireShizuku.fixRootShizuku();
+        AcquireShizuku.notifyIfUidDropped();
         if (SunshineService.instance == null) {
             startMediaProjectionService();
         } else {
