@@ -2,7 +2,16 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/moonlight_fragment">
+    app:startDestination="@id/overview_fragment">
+
+    <fragment
+        android:id="@+id/overview_fragment"
+        android:name="io.github.jqssun.displaymirror.OverviewFragment"
+        android:label="@string/overview">
+        <action android:id="@+id/action_overview_to_moonlight" app:destination="@id/moonlight_fragment" />
+        <action android:id="@+id/action_overview_to_airplay" app:destination="@id/airplay_fragment" />
+        <action android:id="@+id/action_overview_to_displaylink" app:destination="@id/displaylink_fragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/moonlight_fragment"

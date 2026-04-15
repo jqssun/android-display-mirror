@@ -34,6 +34,13 @@ public class AirPlayFragment extends Fragment {
     private TextInputEditText manualIp, manualPort;
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setEnterTransition(new com.google.android.material.transition.MaterialSharedAxis(com.google.android.material.transition.MaterialSharedAxis.X, true));
+        setReturnTransition(new com.google.android.material.transition.MaterialSharedAxis(com.google.android.material.transition.MaterialSharedAxis.X, false));
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_airplay, container, false);
 
@@ -150,18 +157,19 @@ public class AirPlayFragment extends Fragment {
     }
 
     private void _showPinDialog(AirPlayService.AirPlayDevice dev) {
-        EditText pinInput = new EditText(requireContext());
+        com.google.android.material.textfield.TextInputLayout inputLayout = new com.google.android.material.textfield.TextInputLayout(requireContext(), null, com.google.android.material.R.attr.textInputOutlinedStyle);
+        inputLayout.setHint(R.string.airplay_pin_hint);
+        com.google.android.material.textfield.TextInputEditText pinInput = new com.google.android.material.textfield.TextInputEditText(inputLayout.getContext());
         pinInput.setInputType(InputType.TYPE_CLASS_NUMBER);
-        pinInput.setHint("Leave empty for PIN-less");
         pinInput.setFilters(new InputFilter[]{new InputFilter.LengthFilter(4)});
+        inputLayout.addView(pinInput);
         int pad = (int) (16 * getResources().getDisplayMetrics().density);
         FrameLayout container = new FrameLayout(requireContext());
-        container.setPadding(pad, pad, pad, 0);
-        container.addView(pinInput);
+        container.setPadding(pad, pad / 2, pad, 0);
+        container.addView(inputLayout);
 
         new MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Connect to " + dev.name)
-            .setMessage("Enter the 4-digit PIN if shown on the receiver, or leave empty.")
+            .setTitle(getString(R.string.airplay_connect_title, dev.name))
             .setView(container)
             .setPositiveButton(R.string.connect, (dialog, which) -> {
                 String pin = pinInput.getText().toString().trim();

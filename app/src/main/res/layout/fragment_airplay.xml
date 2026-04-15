@@ -18,7 +18,7 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
             android:layout_marginTop="8dp"
-            app:cardBackgroundColor="?attr/colorPrimary">
+            app:cardBackgroundColor="?attr/colorPrimaryContainer">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -33,7 +33,8 @@
                     android:layout_height="48dp"
                     android:layout_marginEnd="16dp"
                     android:src="@drawable/ic_error"
-                    app:tint="?attr/colorOnPrimary" />
+                    android:contentDescription="@null"
+                    app:tint="?attr/colorOnPrimaryContainer" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -47,7 +48,7 @@
                         android:layout_height="wrap_content"
                         android:text="@string/airplay_no_devices"
                         android:textAppearance="?attr/textAppearanceTitleMedium"
-                        android:textColor="?attr/colorOnPrimary" />
+                        android:textColor="?attr/colorOnPrimaryContainer" />
 
                     <TextView
                         android:id="@+id/airplayStatusDetail"
@@ -56,7 +57,7 @@
                         android:layout_marginTop="4dp"
                         android:text="@string/airplay_no_devices_detail"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="?attr/colorOnPrimary" />
+                        android:textColor="?attr/colorOnPrimaryContainer" />
                 </LinearLayout>
 
             </LinearLayout>

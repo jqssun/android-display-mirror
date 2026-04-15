@@ -21,6 +21,7 @@
     <application
      android:requestLegacyExternalStorage="true"
         android:allowBackup="true"
+        android:enableOnBackInvokedCallback="true"
         android:label="@string/mirror_app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">

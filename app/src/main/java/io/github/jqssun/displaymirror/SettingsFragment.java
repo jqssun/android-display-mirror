@@ -8,7 +8,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.LayoutInflater;
-import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -18,10 +17,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.button.MaterialButton;
-
 import com.google.android.material.materialswitch.MaterialSwitch;
 
-import io.github.jqssun.displaymirror.job.AcquireShizuku;
 import io.github.jqssun.displaymirror.shizuku.PermissionManager;
 import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
 
@@ -47,8 +44,6 @@ public class SettingsFragment extends Fragment {
         View view = getView();
         if (view == null) return;
 
-        _updateShizukuStatus(view);
-        _updateOverlayStatus(view);
         _updateLiveControls(view);
     }
 
@@ -85,12 +80,6 @@ public class SettingsFragment extends Fragment {
         });
         if (!ShizukuUtils.hasPermission()) disableUsbAudioCheckbox.setEnabled(false);
 
-        // Permissions
-        MaterialButton shizukuPermissionBtn = view.findViewById(R.id.shizukuPermissionBtn);
-        shizukuPermissionBtn.setOnClickListener(v -> State.startNewJob(new AcquireShizuku()));
-
-        _updateShizukuStatus(view);
-        _updateOverlayStatus(view);
         _updateLiveControls(view);
 
         // About
@@ -112,23 +101,6 @@ public class SettingsFragment extends Fragment {
             io.github.jqssun.displaymirror.job.AutoRotateAndScaleForDisplaylink.instance = null;
             io.github.jqssun.displaymirror.job.ExitAll.execute(requireActivity(), false);
         });
-    }
-
-    private void _updateShizukuStatus(View view) {
-        TextView statusView = view.findViewById(R.id.shizukuStatus);
-        MaterialButton permissionBtn = view.findViewById(R.id.shizukuPermissionBtn);
-        boolean started = ShizukuUtils.hasShizukuStarted();
-        boolean hasPermission = ShizukuUtils.hasPermission();
-        if (!started) {
-            statusView.setText(R.string.status_not_started);
-            permissionBtn.setVisibility(View.GONE);
-        } else if (!hasPermission) {
-            statusView.setText(getString(R.string.status_started_not_authorized_server, ShizukuUtils.getServerUid()));
-            permissionBtn.setVisibility(View.VISIBLE);
-        } else {
-            statusView.setText(getString(R.string.status_authorized_server, ShizukuUtils.getServerUid()));
-            permissionBtn.setVisibility(View.GONE);
-        }
     }
 
     private void _updateLiveControls(View view) {
@@ -153,21 +125,6 @@ public class SettingsFragment extends Fragment {
         if (State.mirrorVirtualDisplay != null) return State.mirrorVirtualDisplay;
         if (State.displaylinkState.getVirtualDisplay() != null) return State.displaylinkState.getVirtualDisplay();
         return null;
-    }
-
-    private void _updateOverlayStatus(View view) {
-        TextView statusView = view.findViewById(R.id.overlayStatus);
-        MaterialButton permissionBtn = view.findViewById(R.id.overlayPermissionBtn);
-        boolean hasPermission = Settings.canDrawOverlays(requireContext());
-        statusView.setText(hasPermission ? R.string.status_authorized : R.string.status_not_authorized);
-        if (hasPermission) {
-            permissionBtn.setVisibility(View.GONE);
-        } else {
-            permissionBtn.setVisibility(View.VISIBLE);
-            permissionBtn.setOnClickListener(v ->
-                startActivity(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                    Uri.parse("package:" + requireContext().getPackageName()))));
-        }
     }
 
 }

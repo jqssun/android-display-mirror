@@ -11,12 +11,16 @@ import android.os.Build;
 import android.os.Bundle;
 import android.widget.Toast;
 
-import androidx.annotation.Nullable;
+import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
+import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
 
@@ -37,13 +41,72 @@ public class MirrorMainActivity extends AppCompatActivity {
                 .setTimeout(10));
     }
 
-    public static final int REQUEST_CODE_MEDIA_PROJECTION = 1001;
     public static final int REQUEST_RECORD_AUDIO_PERMISSION = 1002;
-    public static final int REQUEST_IMPORT_APK = 1003;
-    public static final int REQUEST_AIRPLAY_PROJECTION = 1004;
     public static final String TAG = "MirrorMainActivity";
 
     private long lastCheckTime = 0;
+
+    private final ActivityResultLauncher<Intent> mediaProjectionLauncher = registerForActivityResult(
+        new ActivityResultContracts.StartActivityForResult(), result -> {
+            if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                Intent data = result.getData();
+                State.log("User granted screen projection permission");
+                lastCheckTime = System.currentTimeMillis();
+                if (SunshineService.instance == null) {
+                    Intent svc = new Intent(this, SunshineService.class);
+                    svc.putExtra("data", data);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) startForegroundService(svc);
+                    else startService(svc);
+                    State.log("Starting SunshineService");
+                } else {
+                    MediaProjectionManager mpm = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+                    if (mpm == null) return;
+                    State.setMediaProjection(mpm.getMediaProjection(RESULT_OK, data));
+                    if (State.getMediaProjection() == null) { State.resumeJob(); return; }
+                    State.getMediaProjection().registerCallback(new MediaProjection.Callback() {
+                        @Override public void onStop() { super.onStop(); State.log("MediaProjection onStop callback"); }
+                    }, null);
+                    State.resumeJob();
+                }
+            } else {
+                State.log("User denied screen projection permission");
+                refresh();
+                State.resumeJob();
+            }
+        });
+
+    private final ActivityResultLauncher<Intent> airplayProjectionLauncher = registerForActivityResult(
+        new ActivityResultContracts.StartActivityForResult(), result -> {
+            if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                Intent svc = new Intent(this, AirPlayForegroundService.class);
+                svc.putExtra("data", result.getData());
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) startForegroundService(svc);
+                else startService(svc);
+            }
+        });
+
+    private final ActivityResultLauncher<Intent> importApkLauncher = registerForActivityResult(
+        new ActivityResultContracts.StartActivityForResult(), result -> {
+            if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                Uri uri = result.getData().getData();
+                if (uri != null) {
+                    try {
+                        String err = ApkImporter.importFromApk(this, uri);
+                        if (err == null) {
+                            Toast.makeText(this, R.string.import_success, Toast.LENGTH_SHORT).show();
+                            State.log("DisplayLink APK imported successfully");
+                        } else {
+                            Toast.makeText(this, getString(R.string.import_failed, err), Toast.LENGTH_LONG).show();
+                            State.log("APK import error: " + err);
+                        }
+                    } catch (Exception e) {
+                        Toast.makeText(this, getString(R.string.import_failed, e.getMessage()), Toast.LENGTH_LONG).show();
+                        State.log("APK import exception: " + e.getMessage());
+                    }
+                    refresh();
+                }
+            }
+        });
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
@@ -81,6 +144,7 @@ public class MirrorMainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        EdgeToEdge.enable(this);
         super.onCreate(savedInstanceState);
         State.setCurrentActivity(this);
         getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -96,14 +160,29 @@ public class MirrorMainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
-        // Setup bottom navigation
+        // Setup navigation
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.nav_host_fragment);
         NavController navController = navHostFragment.getNavController();
         BottomNavigationView bottomNav = findViewById(R.id.bottom_nav);
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        AppBarConfiguration appBarConfig = new AppBarConfiguration.Builder(
+                R.id.overview_fragment, R.id.logs_fragment, R.id.settings_fragment).build();
+        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfig);
         NavigationUI.setupWithNavController(bottomNav, navController);
 
         State.uiState.observe(this, state -> {});
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.nav_host_fragment);
+        return NavigationUI.navigateUp(navHostFragment.getNavController(),
+                new AppBarConfiguration.Builder(
+                    R.id.overview_fragment, R.id.logs_fragment, R.id.settings_fragment).build())
+                || super.onSupportNavigateUp();
     }
 
     @Override
@@ -131,78 +210,6 @@ public class MirrorMainActivity extends AppCompatActivity {
         State.setCurrentActivity(null);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == REQUEST_IMPORT_APK) {
-            if (resultCode == RESULT_OK && data != null) {
-                Uri uri = data.getData();
-                if (uri != null) {
-                    try {
-                        String err = ApkImporter.importFromApk(this, uri);
-                        if (err == null) {
-                            Toast.makeText(this, R.string.import_success, Toast.LENGTH_SHORT).show();
-                            State.log("DisplayLink APK imported successfully");
-                        } else {
-                            Toast.makeText(this, getString(R.string.import_failed, err), Toast.LENGTH_LONG).show();
-                            State.log("APK import error: " + err);
-                        }
-                    } catch (Exception e) {
-                        Toast.makeText(this, getString(R.string.import_failed, e.getMessage()), Toast.LENGTH_LONG).show();
-                        State.log("APK import exception: " + e.getMessage());
-                    }
-                    refresh();
-                }
-            }
-            return;
-        }
-        if (requestCode == REQUEST_AIRPLAY_PROJECTION) {
-            if (resultCode == RESULT_OK && data != null) {
-                Intent svc = new Intent(this, AirPlayForegroundService.class);
-                svc.putExtra("data", data);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    startForegroundService(svc);
-                } else {
-                    startService(svc);
-                }
-            }
-            return;
-        }
-        if (requestCode == REQUEST_CODE_MEDIA_PROJECTION) {
-            if (resultCode == RESULT_OK && data != null) {
-                State.log("User granted screen projection permission");
-                lastCheckTime = System.currentTimeMillis();
-                if (SunshineService.instance == null) {
-                    Intent sunshineServiceIntent = new Intent(this, SunshineService.class);
-                    sunshineServiceIntent.putExtra("data", data);
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        startForegroundService(sunshineServiceIntent);
-                    } else {
-                        startService(sunshineServiceIntent);
-                    }
-                    State.log("Starting SunshineService");
-                } else {
-                    MediaProjectionManager mediaProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
-                    if (mediaProjectionManager == null) return;
-                    State.setMediaProjection(mediaProjectionManager.getMediaProjection(RESULT_OK, data));
-                    if (State.getMediaProjection() == null) { State.resumeJob(); return; }
-                    State.getMediaProjection().registerCallback(new MediaProjection.Callback() {
-                        @Override
-                        public void onStop() {
-                            super.onStop();
-                            State.log("MediaProjection onStop callback");
-                        }
-                    }, null);
-                    State.resumeJob();
-                }
-            } else {
-                State.log("User denied screen projection permission");
-                refresh();
-                State.resumeJob();
-            }
-        }
-    }
 
     public void startMirroring() {
         AcquireShizuku.notifyIfUidDropped();
@@ -218,28 +225,25 @@ public class MirrorMainActivity extends AppCompatActivity {
         MediaProjectionManager mpm = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
         if (mpm != null) {
             Intent captureIntent;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                 captureIntent = mpm.createScreenCaptureIntent(MediaProjectionConfig.createConfigForDefaultDisplay());
             } else {
                 captureIntent = mpm.createScreenCaptureIntent();
             }
-            startActivityForResult(captureIntent, REQUEST_AIRPLAY_PROJECTION);
+            airplayProjectionLauncher.launch(captureIntent);
         }
     }
 
     public void startMediaProjectionService() {
-        MediaProjectionManager mediaProjectionManager = (MediaProjectionManager) this.getSystemService(Context.MEDIA_PROJECTION_SERVICE);
-        if (mediaProjectionManager != null) {
+        MediaProjectionManager mpm = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+        if (mpm != null) {
             Intent captureIntent;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                captureIntent = mediaProjectionManager.createScreenCaptureIntent(MediaProjectionConfig.createConfigForDefaultDisplay());
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                captureIntent = mpm.createScreenCaptureIntent(MediaProjectionConfig.createConfigForDefaultDisplay());
             } else {
-                captureIntent = mediaProjectionManager.createScreenCaptureIntent();
+                captureIntent = mpm.createScreenCaptureIntent();
             }
-            MirrorMainActivity mirrorMainActivity = State.getCurrentActivity();
-            if (mirrorMainActivity != null) {
-                mirrorMainActivity.startActivityForResult(captureIntent, MirrorMainActivity.REQUEST_CODE_MEDIA_PROJECTION);
-            }
+            mediaProjectionLauncher.launch(captureIntent);
         } else {
             throw new RuntimeException("Failed to get MediaProjectionManager service");
         }
@@ -313,6 +317,6 @@ public class MirrorMainActivity extends AppCompatActivity {
         Intent pick = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         pick.setType("application/vnd.android.package-archive");
         pick.addCategory(Intent.CATEGORY_OPENABLE);
-        startActivityForResult(pick, REQUEST_IMPORT_APK);
+        importApkLauncher.launch(pick);
     }
 }

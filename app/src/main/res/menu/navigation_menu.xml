@@ -1,17 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/moonlight_fragment"
-        android:icon="@drawable/ic_moonlight"
-        android:title="@string/tab_moonlight" />
-    <item
-        android:id="@+id/airplay_fragment"
-        android:icon="@drawable/ic_airplay"
-        android:title="@string/tab_airplay" />
-    <item
-        android:id="@+id/displaylink_fragment"
-        android:icon="@drawable/ic_displaylink"
-        android:title="@string/tab_displaylink" />
+        android:id="@+id/overview_fragment"
+        android:icon="@drawable/ic_overview"
+        android:title="@string/overview" />
     <item
         android:id="@+id/logs_fragment"
         android:icon="@drawable/ic_logs"

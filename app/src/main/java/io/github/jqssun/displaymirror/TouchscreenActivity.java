@@ -68,15 +68,15 @@ public class TouchscreenActivity extends AppCompatActivity {
         exitText.setId(View.generateViewId());
         exitText.setPadding(32, 32, 32, 32);
         exitText.setText(R.string.exit_vertical);
-        exitText.setBackgroundColor(0x80888888);
-        exitText.setTextColor(0xFFFFFFFF);
+        exitText.setBackgroundColor(com.google.android.material.color.MaterialColors.getColor(exitText, com.google.android.material.R.attr.colorSurfaceVariant));
+        exitText.setTextColor(com.google.android.material.color.MaterialColors.getColor(exitText, com.google.android.material.R.attr.colorOnSurfaceVariant));
 
         TextView backText = new TextView(this);
         backText.setId(View.generateViewId());
         backText.setPadding(32, 32, 32, 32);
         backText.setText(R.string.back_vertical);
-        backText.setBackgroundColor(0x80888888);
-        backText.setTextColor(0xFFFFFFFF);
+        backText.setBackgroundColor(com.google.android.material.color.MaterialColors.getColor(backText, com.google.android.material.R.attr.colorSurfaceVariant));
+        backText.setTextColor(com.google.android.material.color.MaterialColors.getColor(backText, com.google.android.material.R.attr.colorOnSurfaceVariant));
 
         android.widget.LinearLayout.LayoutParams backParams = new android.widget.LinearLayout.LayoutParams(
                 android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
