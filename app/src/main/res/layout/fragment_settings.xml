@@ -48,68 +48,6 @@
             <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/autoScaleCheckbox" android:layout_width="wrap_content" android:layout_height="wrap_content" />
         </LinearLayout>
 
-        <!-- Touchscreen control -->
-        <LinearLayout
-            android:id="@+id/touchscreenRow"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minHeight="56dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="12dp">
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginEnd="16dp"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/touchscreen_control"
-                    android:textAppearance="?attr/textAppearanceBodyLarge" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:text="@string/touchscreen_control_desc"
-                    android:textAppearance="?attr/textAppearanceBodyMedium"
-                    android:textColor="?colorOnSurfaceVariant" />
-            </LinearLayout>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/touchscreenBtn"
-                style="@style/Widget.Material3.Button.TonalButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/open" />
-        </LinearLayout>
-
-        <!-- Audio & Input -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingHorizontal="16dp"
-            android:paddingTop="16dp"
-            android:paddingBottom="4dp"
-            android:text="@string/section_audio_input"
-            android:textAppearance="?attr/textAppearanceLabelLarge"
-            android:textColor="?colorPrimary" />
-
-        <!-- Disable USB audio -->
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingHorizontal="16dp" android:paddingVertical="12dp">
-            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="16dp" android:orientation="vertical">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/disable_usb_audio" android:textAppearance="?attr/textAppearanceBodyLarge" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/disable_usb_audio_desc" android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="?colorOnSurfaceVariant" />
-            </LinearLayout>
-            <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/disableUsbAudioCheckbox" android:layout_width="wrap_content" android:layout_height="wrap_content" />
-        </LinearLayout>
-
-
         <!-- About -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/aboutCard"

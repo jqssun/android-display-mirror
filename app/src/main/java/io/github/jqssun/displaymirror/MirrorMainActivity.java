@@ -264,7 +264,7 @@ public class MirrorMainActivity extends AppCompatActivity {
             newUiState.mirrorStatusText = getString(R.string.status_idle);
             newUiState.startBtnVisibility = true;
         } else if (isScreenMirroring) {
-            newUiState.mirrorStatusText = getString(R.string.status_projecting);
+            newUiState.mirrorStatusText = getString(R.string.status_casting);
             newUiState.stopBtnVisibility = true;
         } else {
             newUiState.mirrorStatusText = getString(R.string.status_connect_display);

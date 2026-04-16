@@ -51,6 +51,17 @@ public class OverviewFragment extends Fragment {
         view.findViewById(R.id.displaylinkCard).setOnClickListener(v ->
             Navigation.findNavController(v).navigate(R.id.action_overview_to_displaylink));
 
+        view.findViewById(R.id.touchscreenRow).setOnClickListener(v -> {
+            android.hardware.display.VirtualDisplay vd = State.mirrorVirtualDisplay;
+            if (vd == null) vd = State.displaylinkState.getVirtualDisplay();
+            if (vd != null) {
+                android.content.Intent intent = new android.content.Intent(requireContext(), TouchscreenActivity.class);
+                intent.putExtra("surface", vd.getSurface());
+                intent.putExtra("display", vd.getDisplay().getDisplayId());
+                startActivity(intent);
+            }
+        });
+
         State.uiState.observe(getViewLifecycleOwner(), state -> _updateStatus(view));
     }
 
@@ -115,7 +126,7 @@ public class OverviewFragment extends Fragment {
                 State.displaylinkState.getVirtualDisplay() != null ||
                 State.lastSingleAppDisplay != 0);
         if (moonlightProjecting) {
-            moonlightStatus.setText(R.string.moonlight_status_projecting);
+            moonlightStatus.setText(R.string.moonlight_status_casting);
         } else if (moonlightActive) {
             moonlightStatus.setText(R.string.moonlight_status_waiting);
         } else {

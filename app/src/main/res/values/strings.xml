@@ -2,7 +2,7 @@
     <string name="app_name">Mirror</string>
     <!-- Tabs -->
     <string name="overview">Overview</string>
-    <string name="tab_moonlight">Moonlight</string>
+    <string name="tab_moonlight">Moonlight (Sunshine)</string>
     <string name="tab_logs">Logs</string>
     <string name="logs">Logs</string>
     <string name="export">Export</string>
@@ -19,7 +19,7 @@
     <string name="section_permissions">Permissions</string>
     <string name="section_display">Streaming</string>
 
-    <string name="section_audio_input">Audio &amp; Input</string>
+    <string name="section_input">Input</string>
     <string name="section_moonlight">Moonlight</string>
     <string name="section_displaylink_libraries">DisplayLink Libraries</string>
 
@@ -33,12 +33,12 @@
     <string name="moonlight_status_idle_detail">Tap Start to begin streaming</string>
     <string name="moonlight_status_waiting">Waiting for Connection</string>
     <string name="moonlight_status_waiting_detail">Connect from Moonlight client</string>
-    <string name="moonlight_status_projecting">Moonlight Active</string>
-    <string name="moonlight_status_projecting_detail">Streaming to connected client</string>
+    <string name="moonlight_status_casting">Moonlight Active</string>
+    <string name="moonlight_status_casting_detail">Streaming to connected client</string>
 
     <!-- Display interaction -->
-    <string name="touchscreen_control">Touchscreen control</string>
-    <string name="touchscreen_control_desc">Use the phone screen to directly control the external display. Only available while this app owns the virtual display.</string>
+    <string name="touchscreen_control">Touchscreen</string>
+    <string name="touchscreen_control_desc">Use the touchscreen on this device as an input for the virtual display. Content on the virtual display will be mirrored to this device. Only available while this app owns the virtual display.</string>
     <string name="exit_vertical">Exit</string>
     <string name="back_vertical">Back</string>
 
@@ -64,13 +64,13 @@
     <string name="version_format">Version: %1$s (Android %2$s)</string>
     <string name="version_unknown">Version: Unknown</string>
     <string name="export_log_needs_shizuku">Exporting log files requires Shizuku permission</string>
-    <string name="website_label">Source: github.com/jqssun/android-screen-mirror</string>
+    <string name="website_label">Source: github.com/jqssun/android-display-mirror</string>
 
     <!-- fragment_home -->
     <string name="shizuku_permission_status">Shizuku</string>
 
     <!-- dialog_resolution_settings -->
-    <string name="resolution_explanation">This only controls the output resolution of the DisplayLink chip in the adapter. For USB-C DisplayPort connections, the resolution is determined by Android automatically. For Sunshine/Moonlight connections, resolution and bitrate can be changed on client side.</string>
+    <string name="resolution_explanation">This only controls the output resolution of the DisplayLink chip in the adapter. For USB-C DisplayPort connections, the resolution is determined by Android automatically. For Sunshine/Moonlight, resolution and bitrate can be changed on client side.</string>
     <string name="preset_resolution">Preset</string>
 
     <!-- dialog_manual_client_input -->
@@ -79,24 +79,24 @@
 
     <!-- activity_mirror_settings -->
     <string name="overlay_status">Display over other apps</string>
-    <string name="trusted_display">Create trusted virtual display</string>
+    <string name="trusted_display">Create as trusted virtual display</string>
     <string name="trusted_display_desc">Create the virtual display as a trusted display. This enables other apps to set keyboard policy and other features. Requires Shizuku.</string>
     <string name="auto_rotate">Rotate stream with device</string>
-    <string name="auto_rotate_desc">When you rotate your phone, recreate the stream to match the new orientation</string>
+    <string name="auto_rotate_desc">When the device is rotated, recreate the stream to match the new orientation.</string>
     <string name="auto_scale_remove_bars">Fill stream to remove black bars</string>
-    <string name="auto_scale_remove_bars_desc">Crop and scale the captured screen to fill the stream resolution, removing letterbox bars</string>
+    <string name="auto_scale_remove_bars_desc">Crop and scale the captured screen to fill the stream resolution, removing letterbox bars.</string>
     <string name="disable_usb_audio">Disable USB audio routing</string>
-    <string name="disable_usb_audio_desc">Prevent Android from automatically routing audio to USB devices when connected</string>
+    <string name="disable_usb_audio_desc">Prevent Android from automatically routing audio to USB devices when connected.</string>
     <string name="auto_match_aspect_ratio">Match Moonlight aspect ratio</string>
-    <string name="auto_match_aspect_ratio_desc">Adjust main screen aspect ratio to match the external display resolution</string>
+    <string name="auto_match_aspect_ratio_desc">Adjust main screen aspect ratio to match the external display resolution.</string>
     <string name="prevent_auto_lock">Prevent auto-lock</string>
-    <string name="prevent_auto_lock_desc">Modifies the system screen timeout setting</string>
+    <string name="prevent_auto_lock_desc">Modifies the system screen timeout setting.</string>
     <string name="no_audio_try_no_remote_submix">Disable REMOTE_SUBMIX</string>
-    <string name="no_audio_try_no_remote_submix_desc">Fix audio issues in Moonlight</string>
+    <string name="no_audio_try_no_remote_submix_desc">Fix audio issues in Moonlight.</string>
     <string name="auto_connect_moonlight">Auto-connect Moonlight (Beta)</string>
     <string name="auto_connect_moonlight_desc">Proactively send a JSON connect request to the Moonlight client. Requires a fork with the autostart listener. Not compatible with standard Moonlight.</string>
     <string name="show_moonlight_cursor">Show cursor location</string>
-    <string name="show_moonlight_cursor_desc">Show a cursor overlay on the device screen for Moonlight mouse input</string>
+    <string name="show_moonlight_cursor_desc">Show a cursor overlay on the device screen for Moonlight mouse input.</string>
     <string name="section_airplay_connections">AirPlay Connections (Beta)</string>
     <string name="airplay_discover">Scan for AirPlay servers</string>
     <string name="airplay_no_devices">AirPlay Devices Not Found</string>
@@ -119,8 +119,8 @@
     <string name="manual_input_client_title">Manual input client</string>
 
     <!-- MirrorMainActivity status -->
-    <string name="status_projecting">Projecting. Please disable battery optimization for this app in Settings, and lock the task in Recent Apps to prevent it from being killed. Touch will not work without Shizuku permission.</string>
-    <string name="status_connect_display">Please connect a display. Devices with USB 2 should use Moonlight wireless projection or a DisplayLink compatible dock.</string>
+    <string name="status_casting">Casting. Please disable battery optimization for this app in Settings, and lock the task in Recent Apps to prevent it from being killed. Touch will not work without Shizuku permission.</string>
+    <string name="status_connect_display">Please connect a display. Devices with USB 2 should use Moonlight wireless casting or a DisplayLink compatible dock.</string>
 
     <!-- SunshineService notification -->
     <string name="mirror_app_name">Mirror</string>
@@ -147,6 +147,6 @@
     <string name="import_failed">Import failed: %s</string>
     <string name="downloading_displaylink">Downloading DisplayLink libraries...</string>
     <string name="displaylink_apk_url_label">Custom DisplayLink Presenter app download URL</string>
-    <string name="about_displaylink_legal_notice">This app uses publicly available drivers to support DisplayLink\u00ae devices. Users should comply with the relevant licensing terms of Synaptics when using DisplayLink\u00ae related features. This app has no official association with Synaptics.</string>
+    <string name="about_displaylink_legal_notice">This app uses publicly available drivers to support DisplayLink\u00ae devices. Users should comply with the relevant licensing terms of Synaptics when using DisplayLink\u00ae related features. This app is not affiliated with Synaptics.</string>
 
 </resources>

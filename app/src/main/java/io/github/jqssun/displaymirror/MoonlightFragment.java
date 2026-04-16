@@ -156,8 +156,8 @@ public class MoonlightFragment extends Fragment {
                     State.lastSingleAppDisplay != 0;
             if (isProjecting) {
                 statusIcon.setImageResource(R.drawable.ic_check_circle);
-                statusTitle.setText(R.string.moonlight_status_projecting);
-                statusDetail.setText(R.string.moonlight_status_projecting_detail);
+                statusTitle.setText(R.string.moonlight_status_casting);
+                statusDetail.setText(R.string.moonlight_status_casting_detail);
             } else {
                 statusIcon.setImageResource(R.drawable.ic_sync);
                 statusTitle.setText(R.string.moonlight_status_waiting);

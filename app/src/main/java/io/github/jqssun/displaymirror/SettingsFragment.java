@@ -3,10 +3,8 @@ package io.github.jqssun.displaymirror;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.hardware.display.VirtualDisplay;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +17,6 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.materialswitch.MaterialSwitch;
 
-import io.github.jqssun.displaymirror.shizuku.PermissionManager;
 import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
 
 public class SettingsFragment extends Fragment {
@@ -41,17 +38,12 @@ public class SettingsFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        View view = getView();
-        if (view == null) return;
-
-        _updateLiveControls(view);
     }
 
     private void _initSettings(View view) {
         MaterialSwitch trustedDisplayCheckbox = view.findViewById(R.id.trustedDisplayCheckbox);
         MaterialSwitch autoRotateCheckbox = view.findViewById(R.id.autoRotateCheckbox);
         MaterialSwitch autoScaleCheckbox = view.findViewById(R.id.autoScaleCheckbox);
-        MaterialSwitch disableUsbAudioCheckbox = view.findViewById(R.id.disableUsbAudioCheckbox);
 
         boolean hasShizuku = ShizukuUtils.hasPermission();
         trustedDisplayCheckbox.setChecked(hasShizuku && Pref.getTrustedDisplay());
@@ -60,27 +52,9 @@ public class SettingsFragment extends Fragment {
 
         autoRotateCheckbox.setChecked(Pref.getAutoRotate());
         autoScaleCheckbox.setChecked(Pref.getAutoScale());
-        disableUsbAudioCheckbox.setChecked(Pref.getDisableUsbAudio());
 
         autoRotateCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_AUTO_ROTATE, c).apply());
         autoScaleCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_AUTO_SCALE, c).apply());
-
-        disableUsbAudioCheckbox.setOnCheckedChangeListener((b, isChecked) -> {
-            preferences.edit().putBoolean(Pref.KEY_DISABLE_USB_AUDIO, isChecked).apply();
-            if (ShizukuUtils.hasPermission()) {
-                if (PermissionManager.grant("android.permission.WRITE_SECURE_SETTINGS")) {
-                    try {
-                        Settings.Secure.putInt(requireContext().getContentResolver(),
-                                "usb_audio_automatic_routing_disabled", isChecked ? 1 : 0);
-                    } catch (SecurityException e) {
-                        State.log("failed to set usb_audio_automatic_routing_disabled: " + e);
-                    }
-                }
-            }
-        });
-        if (!ShizukuUtils.hasPermission()) disableUsbAudioCheckbox.setEnabled(false);
-
-        _updateLiveControls(view);
 
         // About
         TextView versionText = view.findViewById(R.id.versionText);
@@ -92,7 +66,7 @@ public class SettingsFragment extends Fragment {
             versionText.setText(R.string.version_unknown);
         }
         view.findViewById(R.id.websiteLink).setOnClickListener(v ->
-            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/jqssun/android-screen-mirror"))));
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/jqssun/android-display-mirror"))));
 
         view.findViewById(R.id.shizukuBtn).setOnClickListener(v ->
             startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/rikkaapps/shizuku"))));
@@ -103,28 +77,6 @@ public class SettingsFragment extends Fragment {
         });
     }
 
-    private void _updateLiveControls(View view) {
-        VirtualDisplay vd = _getActiveVirtualDisplay();
-        boolean active = vd != null;
 
-        // Touchscreen button
-        MaterialButton btn = view.findViewById(R.id.touchscreenBtn);
-        btn.setEnabled(active);
-        btn.setOnClickListener(v -> {
-            VirtualDisplay d = _getActiveVirtualDisplay();
-            if (d == null) return;
-            Intent intent = new Intent(requireContext(), TouchscreenActivity.class);
-            intent.putExtra("surface", d.getSurface());
-            intent.putExtra("display", d.getDisplay().getDisplayId());
-            startActivity(intent);
-        });
-
-    }
-
-    private VirtualDisplay _getActiveVirtualDisplay() {
-        if (State.mirrorVirtualDisplay != null) return State.mirrorVirtualDisplay;
-        if (State.displaylinkState.getVirtualDisplay() != null) return State.displaylinkState.getVirtualDisplay();
-        return null;
-    }
 
 }
