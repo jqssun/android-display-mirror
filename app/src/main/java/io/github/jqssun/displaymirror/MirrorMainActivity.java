@@ -60,7 +60,6 @@ public class MirrorMainActivity extends AppCompatActivity {
     }
 
     public static final int REQUEST_RECORD_AUDIO_PERMISSION = 1002;
-    public static final String TAG = "MirrorMainActivity";
 
     private NavController navController;
     private BottomNavigationView bottomNav;
@@ -77,8 +76,7 @@ public class MirrorMainActivity extends AppCompatActivity {
                 if (SunshineService.instance == null) {
                     Intent svc = new Intent(this, SunshineService.class);
                     svc.putExtra("data", data);
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) startForegroundService(svc);
-                    else startService(svc);
+                    startForegroundService(svc);
                     State.log("Starting SunshineService");
                 } else {
                     MediaProjectionManager mpm = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
@@ -102,8 +100,7 @@ public class MirrorMainActivity extends AppCompatActivity {
             if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                 Intent svc = new Intent(this, AirPlayForegroundService.class);
                 svc.putExtra("data", result.getData());
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) startForegroundService(svc);
-                else startService(svc);
+                startForegroundService(svc);
             }
         });
 
@@ -155,12 +152,10 @@ public class MirrorMainActivity extends AppCompatActivity {
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            try {
-                HiddenApiBypass.addHiddenApiExemptions("");
-            } catch (Exception e) {
-                android.util.Log.e("MainActivity", "Failed to add hidden API exemption: " + e.getMessage());
-            }
+        try {
+            HiddenApiBypass.addHiddenApiExemptions("");
+        } catch (Exception e) {
+            android.util.Log.e("MainActivity", "Failed to add hidden API exemption: " + e.getMessage());
         }
     }
 
@@ -327,21 +322,10 @@ public class MirrorMainActivity extends AppCompatActivity {
         MirrorUiState newUiState = new MirrorUiState();
 
         if (SunshineService.instance == null) {
-            newUiState.mirrorStatusText = getString(R.string.status_idle);
             newUiState.startBtnVisibility = true;
         } else if (isScreenMirroring) {
-            newUiState.mirrorStatusText = getString(R.string.status_casting);
             newUiState.stopBtnVisibility = true;
         } else {
-            newUiState.mirrorStatusText = getString(R.string.status_connect_display);
-            try {
-                for (String ip : SunshineService.getAllWifiIpAddresses(this)) {
-                    newUiState.mirrorStatusText += "\n\nIP: ";
-                    newUiState.mirrorStatusText += ip;
-                }
-            } catch(Throwable e) {
-                // ignore
-            }
             newUiState.stopBtnVisibility = true;
         }
 

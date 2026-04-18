@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class ProjectViaDisplaylink implements Job {
-    private final AcquireShizuku acquireShizuku = new AcquireShizuku();
     private boolean usbRequested = false;
     private boolean device2UsbRequested = false;
     private boolean mediaProjectionRequested = false;
@@ -198,7 +197,7 @@ public class ProjectViaDisplaylink implements Job {
         }
         if (displaylinkState.nativeDriver == null) {
             displaylinkState.nativeDriver = new NativeDriver();
-            displaylinkState.nativeDriverListener = new NativeDriverListener(deviceName);
+            displaylinkState.nativeDriverListener = new NativeDriverListener();
             displaylinkState.nativeDriver.destroy();
             int resultCode = displaylinkState.nativeDriver.create(displaylinkState.nativeDriverListener, context.getFilesDir().toString(), true);
             if (resultCode != 0) {

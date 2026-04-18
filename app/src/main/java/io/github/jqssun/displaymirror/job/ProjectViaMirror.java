@@ -13,8 +13,6 @@ import io.github.jqssun.displaymirror.MirrorMainActivity;
 import io.github.jqssun.displaymirror.State;
 
 public class ProjectViaMirror implements Job {
-    private static int TYPE_WIFI = 3;
-    private Thread waitThread;
     private final Display mirrorDisplay;
     private boolean mediaProjectionRequested;
 
@@ -24,15 +22,11 @@ public class ProjectViaMirror implements Job {
 
     @Override
     public void start() throws YieldException {
-        if (waitThread != null) {
-            waitThread.interrupt();
-            waitThread = null;
-        }
         Context context = State.getContext();
         if (context == null) {
             return;
         }
-        if (_requestMediaProjectionPermission(State.getCurrentActivity())) {
+        if (_requestMediaProjectionPermission()) {
             Intent intent = new Intent(context, MirrorActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             ActivityOptions options = ActivityOptions.makeBasic();
@@ -49,7 +43,7 @@ public class ProjectViaMirror implements Job {
         }
     }
 
-    private boolean _requestMediaProjectionPermission(Context context) throws YieldException {
+    private boolean _requestMediaProjectionPermission() throws YieldException {
         if (State.mirrorVirtualDisplay != null) {
             return true;
         }

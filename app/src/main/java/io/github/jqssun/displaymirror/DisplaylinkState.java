@@ -1,5 +1,6 @@
 package io.github.jqssun.displaymirror;
 
+import android.graphics.PixelFormat;
 import android.hardware.display.VirtualDisplay;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
@@ -26,7 +27,6 @@ public class DisplaylinkState {
     private VirtualDisplay virtualDisplay;
     public HandlerThread handlerThread;
     public Handler handler;
-    public float frameDuration = -1;
 
     public void stopHandlerThread() {
         if (handlerThread != null) {
@@ -70,7 +70,7 @@ public class DisplaylinkState {
             return;
         }
         if (virtualDisplay != null) {
-            ImageReader dummy = ImageReader.newInstance(1920, 1080, 1, 2);
+            ImageReader dummy = ImageReader.newInstance(1920, 1080, PixelFormat.RGBA_8888, 2);
             virtualDisplay.setSurface(dummy.getSurface());
             dummy.close();
             stopVirtualDisplay();

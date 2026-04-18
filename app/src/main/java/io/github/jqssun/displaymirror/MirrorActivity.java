@@ -32,8 +32,6 @@ import io.github.jqssun.displaymirror.job.ExternalTextureRenderer;
 import io.github.jqssun.displaymirror.job.LandscapeAutoScaler;
 
 public class MirrorActivity extends AppCompatActivity {
-
-    private static MirrorActivity instance;
     private SurfaceView surfaceView;
     private int portraitInputTextureId = -1;
     private SurfaceTexture portraitInputSurfaceTexture = null;
@@ -55,16 +53,6 @@ public class MirrorActivity extends AppCompatActivity {
     private boolean autoRotate;
     private boolean autoScale;
     private OrientationChangeCallback orientationChangeCallback;
-    private boolean singleAppMode;
-    private int singleAppDpi;
-
-    public static void stopVirtualDisplay() {
-        State.stopMirrorVirtualDisplay();
-    }
-
-    public static MirrorActivity getInstance() {
-        return instance;
-    }
 
     private class OrientationChangeCallback implements DisplayManager.DisplayListener {
         @Override
@@ -96,7 +84,6 @@ public class MirrorActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        instance = this;
 
         autoRotate = Pref.getAutoRotate();
         autoScale = Pref.getAutoScale();
@@ -245,7 +232,7 @@ public class MirrorActivity extends AppCompatActivity {
                     landscapeInputSurface = new Surface(landscapeInputSurfaceTexture);
 
                     if (State.mirrorVirtualDisplay == null && State.getMediaProjection() != null) {
-                        stopVirtualDisplay();
+                        State.stopMirrorVirtualDisplay();
                         boolean isLandscape = SunshineService.instance.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
                         if (!autoRotate) {
                             isLandscape = true;
@@ -343,7 +330,6 @@ public class MirrorActivity extends AppCompatActivity {
         super.onDestroy();
         CreateVirtualDisplay.restoreAspectRatio();
         CreateVirtualDisplay.powerOnScreen();
-        instance = null;
         if (orientationChangeCallback != null) {
             DisplayManager displayManager = (DisplayManager) getSystemService(Context.DISPLAY_SERVICE);
             displayManager.unregisterDisplayListener(orientationChangeCallback);

@@ -27,6 +27,7 @@ import android.widget.TextView;
 import android.graphics.Rect;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.lang.reflect.Field;
@@ -146,23 +147,17 @@ public class TouchscreenActivity extends AppCompatActivity {
         exitText.setOnClickListener(v -> finished = true);
 
         backText.setOnClickListener(v -> {
-            long now = SystemClock.uptimeMillis();
-            _injectKeyEvent(KeyEvent.KEYCODE_BACK, now, now, KeyEvent.ACTION_DOWN);
-            _injectKeyEvent(KeyEvent.KEYCODE_BACK, now, now + 10, KeyEvent.ACTION_UP);
+            _sendBackToRemoteDisplay();
         });
 
         captureFromSurface();
 
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
-                    android.window.OnBackInvokedDispatcher.PRIORITY_DEFAULT,
-                    () -> {
-                        long now = SystemClock.uptimeMillis();
-                        _injectKeyEvent(KeyEvent.KEYCODE_BACK, now, now, KeyEvent.ACTION_DOWN);
-                        _injectKeyEvent(KeyEvent.KEYCODE_BACK, now, now + 10, KeyEvent.ACTION_UP);
-                    }
-            );
-        }
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                _sendBackToRemoteDisplay();
+            }
+        });
     }
 
     private void _updateImage(Bitmap bitmap) {
@@ -270,8 +265,7 @@ public class TouchscreenActivity extends AppCompatActivity {
         inputManager.injectInputEvent(event, 0);
     }
 
-    @Override
-    public void onBackPressed() {
+    private void _sendBackToRemoteDisplay() {
         long now = SystemClock.uptimeMillis();
         _injectKeyEvent(KeyEvent.KEYCODE_BACK, now, now, KeyEvent.ACTION_DOWN);
         _injectKeyEvent(KeyEvent.KEYCODE_BACK, now, now + 10, KeyEvent.ACTION_UP);

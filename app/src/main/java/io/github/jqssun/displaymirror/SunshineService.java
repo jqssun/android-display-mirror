@@ -225,15 +225,13 @@ public class SunshineService extends Service {
     }
 
     private void createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel serviceChannel = new NotificationChannel(
-                CHANNEL_ID,
-                "Sunshine Service Channel",
-                NotificationManager.IMPORTANCE_LOW
-            );
-            NotificationManager manager = getSystemService(NotificationManager.class);
-            manager.createNotificationChannel(serviceChannel);
-        }
+        NotificationChannel serviceChannel = new NotificationChannel(
+            CHANNEL_ID,
+            "Sunshine Service Channel",
+            NotificationManager.IMPORTANCE_LOW
+        );
+        NotificationManager manager = getSystemService(NotificationManager.class);
+        manager.createNotificationChannel(serviceChannel);
     }
 
     private Notification createNotification() {
@@ -248,7 +246,7 @@ public class SunshineService extends Service {
         try {
             android.media.MediaCodecList codecList = new android.media.MediaCodecList(android.media.MediaCodecList.REGULAR_CODECS);
             for (android.media.MediaCodecInfo codecInfo : codecList.getCodecInfos()) {
-                if (!codecInfo.isHardwareAccelerated()) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !codecInfo.isHardwareAccelerated()) {
                     continue;
                 }
                 if (!codecInfo.isEncoder()) {

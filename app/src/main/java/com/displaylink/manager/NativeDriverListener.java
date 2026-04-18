@@ -1,13 +1,11 @@
 package com.displaylink.manager;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
 import io.github.jqssun.displaymirror.Pref;
-import io.github.jqssun.displaymirror.ProjectionMode;
 import com.displaylink.manager.display.MonitorInfo;
 import io.github.jqssun.displaymirror.State;
 import io.github.jqssun.displaymirror.DisplaylinkState;
@@ -15,10 +13,7 @@ import io.github.jqssun.displaymirror.job.ProjectViaDisplaylink;
 import io.github.jqssun.displaymirror.job.VirtualDisplayArgs;
 
 public class NativeDriverListener {
-    private final String usbDeviceName;
-
-    public NativeDriverListener(String usbDeviceName) {
-        this.usbDeviceName = usbDeviceName;
+    public NativeDriverListener() {
     }
 
     public void onDisplayConnected(long encoderId) {

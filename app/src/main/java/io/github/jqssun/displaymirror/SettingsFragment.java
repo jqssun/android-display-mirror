@@ -35,11 +35,6 @@ public class SettingsFragment extends Fragment {
         _initSettings(view);
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-    }
-
     private void _initSettings(View view) {
         MaterialSwitch trustedDisplayCheckbox = view.findViewById(R.id.trustedDisplayCheckbox);
         MaterialSwitch autoRotateCheckbox = view.findViewById(R.id.autoRotateCheckbox);

@@ -23,12 +23,9 @@ public class SunshineKeyboard {
     public static final int VK_A = 65;
     public static final int VK_Z = 90;
     public static final int VK_NUMPAD0 = 96;
-    public static final int VK_BACK_SLASH = 92;
     public static final int VK_CAPS_LOCK = 20;
     public static final int VK_CLEAR = 12;
-    public static final int VK_COMMA = 44;
     public static final int VK_BACK_SPACE = 8;
-    public static final int VK_EQUALS = 61;
     public static final int VK_ESCAPE = 27;
     public static final int VK_F1 = 112;
     public static final int VK_F12 = 123;
@@ -38,11 +35,7 @@ public class SunshineKeyboard {
     public static final int VK_NUM_LOCK = 144;
     public static final int VK_PAGE_UP = 33;
     public static final int VK_PAGE_DOWN = 34;
-    public static final int VK_PLUS = 521;
-    public static final int VK_CLOSE_BRACKET = 93;
     public static final int VK_SCROLL_LOCK = 145;
-    public static final int VK_SEMICOLON = 59;
-    public static final int VK_SLASH = 47;
     public static final int VK_SPACE = 32;
     public static final int VK_PRINTSCREEN = 154;
     public static final int VK_TAB = 9;
@@ -51,44 +44,7 @@ public class SunshineKeyboard {
     public static final int VK_UP = 38;
     public static final int VK_DOWN = 40;
     public static final int VK_BACK_QUOTE = 192;
-    public static final int VK_QUOTE = 222;
     public static final int VK_PAUSE = 19;
-
-    public static final int VK_B = 66;
-
-    public static final int VK_C = 67;
-    public static final int VK_D = 68;
-    public static final int VK_G = 71;
-    public static final int VK_V = 86;
-    public static final int VK_Q = 81;
-
-    public static final int VK_S = 83;
-
-    public static final int VK_U = 85;
-
-    public static final int VK_X = 88;
-    public static final int VK_R = 82;
-
-    public static final int VK_I = 73;
-
-    public static final int VK_F11 = 122;
-    public static final int VK_LWIN = 91;
-    public static final int VK_LSHIFT = 160;
-    public static final int VK_LCONTROL = 162;
-
-    //Left ALT key
-    public static final int VK_LMENU = 164;
-    //ENTER key
-    public static final int VK_RETURN = 13;
-
-    public static final int VK_F4 = 115;
-
-    public static final int VK_P = 80;
-
-    public static final byte MODIFIER_SHIFT = 0x01;
-    public static final byte MODIFIER_CTRL = 0x02;
-    public static final byte MODIFIER_ALT = 0x04;
-    public static final byte MODIFIER_META = 0x08;
     private static IInputManager inputManager;
 
     private static int currentMetaState = 0;

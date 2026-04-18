@@ -1,5 +1,6 @@
 package io.github.jqssun.displaymirror.job;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Point;
 import android.hardware.display.DisplayManager;
@@ -39,13 +40,10 @@ public class CreateVirtualDisplay {
     private static final int VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY = android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
     private static final int VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH = 1 << 6;
     private static final int VIRTUAL_DISPLAY_FLAG_ROTATES_WITH_CONTENT = 1 << 7;
-    private static final int VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL = 1 << 8;
-    private static final int VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS = 1 << 9;
     private static final int VIRTUAL_DISPLAY_FLAG_TRUSTED = 1 << 10;
     private static final int VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP = 1 << 11;
     private static final int VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED = 1 << 12;
     private static final int VIRTUAL_DISPLAY_FLAG_TOUCH_FEEDBACK_DISABLED = 1 << 13;
-    private static final int VIRTUAL_DISPLAY_FLAG_OWN_FOCUS = 1 << 14;
     private static final int VIRTUAL_DISPLAY_FLAG_DEVICE_DISPLAY_GROUP = 1 << 15;
     public static boolean isCreating = false;
 
@@ -68,35 +66,17 @@ public class CreateVirtualDisplay {
         }
     }
 
-    private static VirtualDisplay _createByMediaProjection(VirtualDisplayArgs virtualDisplayArgs, Surface surface) {
-        VirtualDisplay virtualDisplay = State.getMediaProjection().createVirtualDisplay(virtualDisplayArgs.virtualDisplayName,
-                virtualDisplayArgs.width, virtualDisplayArgs.height, virtualDisplayArgs.dpi,
-                DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC,
-                surface, null, null);
-        State.setMediaProjection(null);
-        return virtualDisplay;
-    }
-
     private static @NonNull VirtualDisplay _createByShizuku(VirtualDisplayArgs virtualDisplayArgs, Surface surface, boolean ownContentOnly, MediaProjection mediaProjection) {
         int virtualDisplayWidth = virtualDisplayArgs.width;
         IDisplayManager displayManager = ServiceUtils.getDisplayManager();
         int flags = getFlags(ownContentOnly, virtualDisplayArgs.rotatesWithContent);
         VirtualDisplayConfig config = null;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            config = new VirtualDisplayConfig.Builder(
-                    virtualDisplayArgs.virtualDisplayName,
-                    virtualDisplayWidth, virtualDisplayArgs.height, virtualDisplayArgs.dpi)
-                    .setSurface(surface)
-                    .setFlags(flags)
-                    .setRequestedRefreshRate(virtualDisplayArgs.refreshRate)
-                    .build();
+            config = buildVirtualDisplayConfig(
+                    virtualDisplayArgs, surface, flags, virtualDisplayWidth, true);
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            config = new VirtualDisplayConfig.Builder(
-                    virtualDisplayArgs.virtualDisplayName,
-                    virtualDisplayWidth, virtualDisplayArgs.height, virtualDisplayArgs.dpi)
-                    .setSurface(surface)
-                    .setFlags(flags)
-                    .build();
+            config = buildVirtualDisplayConfig(
+                    virtualDisplayArgs, surface, flags, virtualDisplayWidth, false);
         } else {
             // config = null
         }
@@ -146,10 +126,29 @@ public class CreateVirtualDisplay {
         return virtualDisplay;
     }
 
+    @SuppressLint("NewApi")
+    private static VirtualDisplayConfig buildVirtualDisplayConfig(
+            VirtualDisplayArgs virtualDisplayArgs,
+            Surface surface,
+            int flags,
+            int virtualDisplayWidth,
+            boolean includeRefreshRate) {
+        VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(
+                virtualDisplayArgs.virtualDisplayName,
+                virtualDisplayWidth,
+                virtualDisplayArgs.height,
+                virtualDisplayArgs.dpi)
+                .setSurface(surface)
+                .setFlags(flags);
+        if (includeRefreshRate) {
+            builder.setRequestedRefreshRate(virtualDisplayArgs.refreshRate);
+        }
+        return builder.build();
+    }
+
     public static int getFlags(boolean ownContentOnly, boolean rotatesWithContent) {
         int flags = VIRTUAL_DISPLAY_FLAG_PUBLIC
                 | VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH;
-        //    | VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL;
         if (ownContentOnly) {
             flags |= VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
         }
@@ -163,8 +162,6 @@ public class CreateVirtualDisplay {
                     | VIRTUAL_DISPLAY_FLAG_TOUCH_FEEDBACK_DISABLED;
             if (Build.VERSION.SDK_INT >= AndroidVersions.API_34_ANDROID_14) {
                 flags |= VIRTUAL_DISPLAY_FLAG_DEVICE_DISPLAY_GROUP;
-                //    flags |= VIRTUAL_DISPLAY_FLAG_OWN_FOCUS
-                //            | VIRTUAL_DISPLAY_FLAG_DEVICE_DISPLAY_GROUP;
             }
         }
         return flags;

@@ -215,11 +215,7 @@ public class UserService extends IUserService.Stub  {
                     reader.close();
                     if (listenVolumeKeyProcess != null) {
                         listenVolumeKeyProcess.waitFor();
-                        if (android.os.Build.VERSION.SDK_INT >= 26) {
-                            listenVolumeKeyProcess.destroyForcibly();
-                        } else {
-                            listenVolumeKeyProcess.destroy();
-                        }
+                        listenVolumeKeyProcess.destroyForcibly();
                     }
                 } catch (Exception e) {
                     Ln.e("Listen volume key failed", e);
@@ -239,11 +235,7 @@ public class UserService extends IUserService.Stub  {
     public void stopListenVolumeKey() {
         listenVolumeKey = false;
         if (listenVolumeKeyProcess != null) {
-            if (android.os.Build.VERSION.SDK_INT >= 26) {
-                listenVolumeKeyProcess.destroyForcibly();
-            } else {
-                listenVolumeKeyProcess.destroy();
-            }
+            listenVolumeKeyProcess.destroyForcibly();
             listenVolumeKeyProcess = null;
         }
         if (volumeKeyThread != null) {

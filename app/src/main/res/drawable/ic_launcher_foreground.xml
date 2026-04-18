@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="960"
+    android:viewportHeight="960">
+    <group
+        android:pivotX="480"
+        android:pivotY="480"
+        android:scaleX="0.5"
+        android:scaleY="0.5">
+        <!-- shadow layer -->
+        <group
+            android:translateX="16"
+            android:translateY="16">
+            <group android:translateY="960">
+                <path
+                    android:fillColor="#C0C0C0"
+                    android:fillType="evenOdd"
+                    android:pathData="M320,-400h80v-80q0,-17 11.5,-28.5T440,-520h80v80l120,-120 -120,-120v80h-80q-50,0 -85,35t-35,85v80ZM160,-240q-33,0 -56.5,-23.5T80,-320v-440q0,-33 23.5,-56.5T160,-840h640q33,0 56.5,23.5T880,-760v440q0,33 -23.5,56.5T800,-240H160Zm0,-80h640v-440H160v440Zm0,0v-440 440ZM40,-120v-80h880v80H40Z" />
+            </group>
+        </group>
+        <!-- middle layer -->
+        <group
+            android:translateX="12"
+            android:translateY="12">
+            <group android:translateY="960">
+                <path
+                    android:fillColor="#9E9E9E"
+                    android:fillType="evenOdd"
+                    android:pathData="M320,-400h80v-80q0,-17 11.5,-28.5T440,-520h80v80l120,-120 -120,-120v80h-80q-50,0 -85,35t-35,85v80ZM160,-240q-33,0 -56.5,-23.5T80,-320v-440q0,-33 23.5,-56.5T160,-840h640q33,0 56.5,23.5T880,-760v440q0,33 -23.5,56.5T800,-240H160Zm0,-80h640v-440H160v440Zm0,0v-440 440ZM40,-120v-80h880v80H40Z" />
+            </group>
+        </group>
+        <!-- main layer -->
+        <group android:translateY="960">
+            <path
+                android:fillColor="#424242"
+                android:fillType="evenOdd"
+                android:pathData="M320,-400h80v-80q0,-17 11.5,-28.5T440,-520h80v80l120,-120 -120,-120v80h-80q-50,0 -85,35t-35,85v80ZM160,-240q-33,0 -56.5,-23.5T80,-320v-440q0,-33 23.5,-56.5T160,-840h640q33,0 56.5,23.5T880,-760v440q0,33 -23.5,56.5T800,-240H160Zm0,-80h640v-440H160v440Zm0,0v-440 440ZM40,-120v-80h880v80H40Z" />
+        </group>
+    </group>
+</vector>
