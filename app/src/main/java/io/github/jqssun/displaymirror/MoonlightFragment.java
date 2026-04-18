@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MoonlightFragment extends Fragment {
-    private MaterialButton startBtn, stopBtn;
+    private MaterialButton startBtn, stopBtn, manageDisplayBtn;
     private ImageView statusIcon;
     private TextView statusTitle, statusDetail;
     private SharedPreferences preferences;
@@ -52,6 +52,7 @@ public class MoonlightFragment extends Fragment {
         statusDetail = view.findViewById(R.id.moonlightStatusDetail);
         startBtn = view.findViewById(R.id.startBtn);
         stopBtn = view.findViewById(R.id.stopBtn);
+        manageDisplayBtn = view.findViewById(R.id.manageDisplayBtn);
 
         startBtn.setOnClickListener(v -> ((MirrorMainActivity) requireActivity()).startMirroring());
         stopBtn.setOnClickListener(v -> {
@@ -60,6 +61,10 @@ public class MoonlightFragment extends Fragment {
             }
             ExitAll.execute(requireActivity(), true);
         });
+        manageDisplayBtn.setOnClickListener(v ->
+                ((MirrorMainActivity) requireActivity()).manageDisplayInExtend(
+                        State.getMoonlightManagedDisplayId(),
+                        MirrorMainActivity.SCREEN_MOONLIGHT));
 
         // Moonlight settings
         _initMoonlightSettings(view);
@@ -173,6 +178,8 @@ public class MoonlightFragment extends Fragment {
 
         startBtn.setVisibility(state.startBtnVisibility ? View.VISIBLE : View.GONE);
         stopBtn.setVisibility(state.stopBtnVisibility ? View.VISIBLE : View.GONE);
+        int managedDisplayId = State.getMoonlightManagedDisplayId();
+        manageDisplayBtn.setVisibility(managedDisplayId > 0 ? View.VISIBLE : View.GONE);
     }
 
     private void _loadClientList(Spinner spinner) {

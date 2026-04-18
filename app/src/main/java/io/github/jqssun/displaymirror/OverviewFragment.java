@@ -52,13 +52,9 @@ public class OverviewFragment extends Fragment {
             Navigation.findNavController(v).navigate(R.id.action_overview_to_displaylink));
 
         view.findViewById(R.id.touchscreenRow).setOnClickListener(v -> {
-            android.hardware.display.VirtualDisplay vd = State.mirrorVirtualDisplay;
-            if (vd == null) vd = State.displaylinkState.getVirtualDisplay();
-            if (vd != null) {
-                android.content.Intent intent = new android.content.Intent(requireContext(), TouchscreenActivity.class);
-                intent.putExtra("surface", vd.getSurface());
-                intent.putExtra("display", vd.getDisplay().getDisplayId());
-                startActivity(intent);
+            MirrorTouchscreenBridge.TargetInfo target = MirrorTouchscreenBridge.getDefaultTarget();
+            if (target != null) {
+                startActivity(MirrorTouchscreenBridge.createInternalIntent(requireContext(), target));
             }
         });
 

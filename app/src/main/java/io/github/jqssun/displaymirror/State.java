@@ -8,6 +8,7 @@ import android.hardware.display.VirtualDisplay;
 import android.media.projection.MediaProjection;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.Surface;
 
 import androidx.lifecycle.MutableLiveData;
 
@@ -45,6 +46,8 @@ public class State {
     private static MediaProjection mediaProjection;
     public static MediaProjection mediaProjectionInUse;
     public static int lastSingleAppDisplay;
+    private static int airPlayVirtualDisplayId = -1;
+    private static Surface airPlaySurface;
     public static String displaylinkDeviceName;
     public static VirtualDisplay mirrorVirtualDisplay;
     public static volatile IUserService userService;
@@ -235,10 +238,68 @@ public class State {
         return displaylinkState.getVirtualDisplay().getDisplay().getDisplayId();
     }
 
+    public static int getAirPlayVirtualDisplayId() {
+        return airPlayVirtualDisplayId;
+    }
+
+    public static Surface getAirPlaySurface() {
+        return airPlaySurface;
+    }
+
+    public static void setAirPlayTouchTarget(int displayId, Surface surface) {
+        boolean changed = airPlayVirtualDisplayId != displayId || airPlaySurface != surface;
+        airPlayVirtualDisplayId = displayId;
+        airPlaySurface = surface;
+        if (changed) {
+            refreshMainActivity();
+        }
+    }
+
+    public static void clearAirPlayTouchTarget() {
+        setAirPlayTouchTarget(-1, null);
+    }
+
+    public static void setAirPlayVirtualDisplayId(int displayId) {
+        if (airPlayVirtualDisplayId == displayId) {
+            return;
+        }
+        airPlayVirtualDisplayId = displayId;
+        refreshMainActivity();
+    }
+
+    public static int getMoonlightManagedDisplayId() {
+        int mirrorDisplayId = getMirrorVirtualDisplayId();
+        if (mirrorDisplayId > 0) {
+            return mirrorDisplayId;
+        }
+        return lastSingleAppDisplay > 0 ? lastSingleAppDisplay : -1;
+    }
+
+    public static void setLastSingleAppDisplay(int displayId) {
+        if (lastSingleAppDisplay == displayId) {
+            return;
+        }
+        lastSingleAppDisplay = displayId;
+        refreshMainActivity();
+    }
+
+    public static void clearLastSingleAppDisplay() {
+        setLastSingleAppDisplay(0);
+    }
+
+    public static void setMirrorVirtualDisplay(VirtualDisplay virtualDisplay) {
+        if (mirrorVirtualDisplay == virtualDisplay) {
+            return;
+        }
+        mirrorVirtualDisplay = virtualDisplay;
+        refreshMainActivity();
+    }
+
     public static void stopMirrorVirtualDisplay() {
         if (mirrorVirtualDisplay != null) {
             mirrorVirtualDisplay.release();
             mirrorVirtualDisplay = null;
+            refreshMainActivity();
         }
     }
 

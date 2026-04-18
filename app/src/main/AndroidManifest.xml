@@ -40,6 +40,14 @@
                 <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"/>
                 <action android:name="android.hardware.usb.action.USB_DEVICE_DETACHED"/>
             </intent-filter>
+            <intent-filter>
+                <action android:name="io.github.jqssun.displaymirror.action.OPEN_OVERVIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="io.github.jqssun.displaymirror.action.OPEN_SCREEN" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
             <meta-data
                 android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
                 android:resource="@xml/device_filter"/>
@@ -53,8 +61,13 @@
 
         <activity
             android:name=".TouchscreenActivity"
-            android:exported="false"
-            android:theme="@style/AppTheme" />
+            android:exported="true"
+            android:theme="@style/AppTheme" >
+            <intent-filter>
+                <action android:name="io.github.jqssun.displaymirror.action.OPEN_TOUCHSCREEN" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
 
         <provider
             android:name="rikka.shizuku.ShizukuProvider"
@@ -73,6 +86,11 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+
+        <provider
+            android:name=".MirrorTouchscreenProvider"
+            android:authorities="${applicationId}.touchscreen"
+            android:exported="true" />
         
         <service
             android:name=".SunshineService"

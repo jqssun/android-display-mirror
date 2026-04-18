@@ -25,6 +25,7 @@ import android.view.Surface;
 import android.view.View;
 import android.widget.TextView;
 import android.graphics.Rect;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -122,12 +123,25 @@ public class TouchscreenActivity extends AppCompatActivity {
 
         if (getIntent().hasExtra("display")) {
             displayId = getIntent().getIntExtra("display", -1);
-            drawView.setDisplayId(displayId);
         }
-
         if (getIntent().hasExtra("surface")) {
             surface = getIntent().getParcelableExtra("surface");
         }
+        if ((displayId <= 0 || surface == null || !surface.isValid())
+                && MirrorTouchscreenBridge.ACTION_OPEN_TOUCHSCREEN.equals(getIntent().getAction())) {
+            MirrorTouchscreenBridge.TargetInfo target =
+                    MirrorTouchscreenBridge.findTarget(getIntent().getIntExtra(MirrorTouchscreenBridge.EXTRA_DISPLAY_ID, -1));
+            if (target != null) {
+                displayId = target.displayId;
+                surface = target.surface;
+            }
+        }
+        if (displayId <= 0 || surface == null || !surface.isValid()) {
+            Toast.makeText(this, R.string.touchscreen_unavailable, Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+        drawView.setDisplayId(displayId);
 
         exitText.setOnClickListener(v -> finished = true);
 

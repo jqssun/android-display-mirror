@@ -29,7 +29,7 @@ public class AirPlayFragment extends Fragment {
     private TextView statusTitle, statusDetail;
     private ImageView statusIcon;
     private Spinner deviceSpinner;
-    private MaterialButton scanBtn, connectBtn;
+    private MaterialButton scanBtn, connectBtn, manageDisplayBtn;
     private LinearLayout manualLayout;
     private TextInputEditText manualIp, manualPort;
 
@@ -50,12 +50,17 @@ public class AirPlayFragment extends Fragment {
         scanBtn = view.findViewById(R.id.airplayScanBtn);
         deviceSpinner = view.findViewById(R.id.airplayDeviceSpinner);
         connectBtn = view.findViewById(R.id.airplayConnectBtn);
+        manageDisplayBtn = view.findViewById(R.id.manageDisplayBtn);
 
         manualLayout = view.findViewById(R.id.airplayManualLayout);
         manualIp = view.findViewById(R.id.airplayManualIp);
         manualPort = view.findViewById(R.id.airplayManualPort);
         MaterialButton manualBtn = view.findViewById(R.id.airplayManualBtn);
         MaterialButton manualConnectBtn = view.findViewById(R.id.airplayManualConnectBtn);
+        manageDisplayBtn.setOnClickListener(v ->
+                ((MirrorMainActivity) requireActivity()).manageDisplayInExtend(
+                        State.getAirPlayVirtualDisplayId(),
+                        MirrorMainActivity.SCREEN_AIRPLAY));
 
         manualBtn.setOnClickListener(v -> {
             boolean show = manualLayout.getVisibility() != View.VISIBLE;
@@ -87,6 +92,7 @@ public class AirPlayFragment extends Fragment {
                 connectBtn.setText(R.string.stop);
                 connectBtn.setVisibility(View.VISIBLE);
                 manualLayout.setVisibility(View.GONE);
+                _updateManageDisplayButton();
             }
 
             @Override
@@ -97,6 +103,7 @@ public class AirPlayFragment extends Fragment {
                     connectBtn.setVisibility(View.GONE);
                     deviceSpinner.setVisibility(View.GONE);
                 }
+                _updateManageDisplayButton();
             }
 
             @Override
@@ -139,6 +146,8 @@ public class AirPlayFragment extends Fragment {
             connectBtn.setText(R.string.stop);
             connectBtn.setVisibility(View.VISIBLE);
         }
+        State.uiState.observe(getViewLifecycleOwner(), state -> _updateManageDisplayButton());
+        _updateManageDisplayButton();
 
         return view;
     }
@@ -192,5 +201,12 @@ public class AirPlayFragment extends Fragment {
             return (AirPlayService.AirPlayDevice) item;
         }
         return null;
+    }
+
+    private void _updateManageDisplayButton() {
+        if (manageDisplayBtn == null) {
+            return;
+        }
+        manageDisplayBtn.setVisibility(State.getAirPlayVirtualDisplayId() > 0 ? View.VISIBLE : View.GONE);
     }
 }

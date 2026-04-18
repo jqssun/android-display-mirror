@@ -35,6 +35,8 @@ public class ExitAll {
         }
 
         State.stopMirrorVirtualDisplay();
+        State.clearLastSingleAppDisplay();
+        State.setAirPlayVirtualDisplayId(-1);
         State.displaylinkState.destroy();
 
         if (context != null) {

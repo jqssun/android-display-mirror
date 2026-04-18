@@ -51,8 +51,9 @@ public class ProjectViaMoonlight implements Job {
             SunshineMouse.autoRotateAndScaleForMoonlight.start(surface);
         } else if (ShizukuUtils.hasPermission() && Pref.getTrustedDisplay()) {
             try {
-                State.mirrorVirtualDisplay = CreateVirtualDisplay.createVirtualDisplay(
-                        new VirtualDisplayArgs("Moonlight", width, height, frameRate, 160, false), surface);
+                State.setMirrorVirtualDisplay(CreateVirtualDisplay.createVirtualDisplay(
+                        new VirtualDisplayArgs("Moonlight", width, height, frameRate, 160, false), surface));
+                State.clearLastSingleAppDisplay();
             } catch (Throwable e) {
                 State.log("Trusted display creation failed, falling back to untrusted: " + e.getMessage());
                 _createUntrustedDisplay();
@@ -63,10 +64,11 @@ public class ProjectViaMoonlight implements Job {
     }
 
     private void _createUntrustedDisplay() {
-        State.mirrorVirtualDisplay = State.getMediaProjection().createVirtualDisplay("Moonlight",
+        State.setMirrorVirtualDisplay(State.getMediaProjection().createVirtualDisplay("Moonlight",
                 width, height, 160,
                 DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC,
-                surface, null, null);
+                surface, null, null));
+        State.clearLastSingleAppDisplay();
         State.setMediaProjection(null);
     }
 

@@ -251,11 +251,12 @@ public class MirrorActivity extends AppCompatActivity {
                             isLandscape = true;
                         }
                         Surface targetSurface = isLandscape ? landscapeInputSurface : portraitInputSurface;
-                        State.mirrorVirtualDisplay = State.getMediaProjection().createVirtualDisplay("Mirror",
+                        State.setMirrorVirtualDisplay(State.getMediaProjection().createVirtualDisplay("Mirror",
                                 isLandscape ? surfaceView.getWidth() : surfaceView.getHeight(),
                                 isLandscape ? surfaceView.getHeight() : surfaceView.getWidth(), 160,
                                 DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC,
-                                targetSurface, null, renderHandler);
+                                targetSurface, null, renderHandler));
+                        State.clearLastSingleAppDisplay();
                         State.setMediaProjection(null);
                         CreateVirtualDisplay.changeAspectRatio(surfaceView.getWidth(), surfaceView.getHeight());
                     } else if (State.mirrorVirtualDisplay != null) {

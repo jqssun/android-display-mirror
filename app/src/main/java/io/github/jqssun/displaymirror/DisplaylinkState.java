@@ -50,6 +50,7 @@ public class DisplaylinkState {
 
     public void createdVirtualDisplay(VirtualDisplay virtualDisplay) {
         this.virtualDisplay = virtualDisplay;
+        State.refreshMainActivity();
     }
 
     public VirtualDisplay getVirtualDisplay() {
@@ -60,6 +61,7 @@ public class DisplaylinkState {
         if (virtualDisplay != null) {
             virtualDisplay.release();
             virtualDisplay = null;
+            State.refreshMainActivity();
         }
     }
 
@@ -71,6 +73,7 @@ public class DisplaylinkState {
             ImageReader dummy = ImageReader.newInstance(1920, 1080, 1, 2);
             virtualDisplay.setSurface(dummy.getSurface());
             dummy.close();
+            stopVirtualDisplay();
         }
         monitorInfo = null;
         encoderId = 0;

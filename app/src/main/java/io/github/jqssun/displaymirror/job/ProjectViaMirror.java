@@ -45,6 +45,7 @@ public class ProjectViaMirror implements Job {
                 }
             }
             context.startActivity(intent, options.toBundle());
+            State.setLastSingleAppDisplay(mirrorDisplay.getDisplayId());
         }
     }
 

@@ -45,10 +45,13 @@ public class MirrorDisplayMonitor {
                     if (SunshineService.instance == null) {
                         return;
                     }
+                    String targetScreen = _resolveTargetScreen(displayId);
                     if (State.getCurrentActivity() != null) {
                         State.getCurrentActivity().finish();
                     }
                     Intent intent = new Intent(SunshineService.instance, MirrorMainActivity.class);
+                    intent.setAction(MirrorMainActivity.ACTION_OPEN_SCREEN);
+                    intent.putExtra(MirrorMainActivity.EXTRA_SCREEN, targetScreen);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     ActivityOptions options = ActivityOptions.makeBasic();
                     options.setLaunchDisplayId(Display.DEFAULT_DISPLAY);
@@ -59,6 +62,9 @@ public class MirrorDisplayMonitor {
             @Override
             public void onDisplayRemoved(int displayId) {
                 State.log("Display removed, displayId: " + displayId);
+                if (displayId == State.lastSingleAppDisplay) {
+                    State.clearLastSingleAppDisplay();
+                }
             }
 
             @Override
@@ -95,6 +101,29 @@ public class MirrorDisplayMonitor {
         }
         State.startNewJob(State.MODE_MIRROR, new ProjectViaMirror(display));
         _handleDisableUsbAudio(context);
+    }
+
+    private static String _resolveTargetScreen(int displayId) {
+        MirrorMainActivity currentActivity = State.getCurrentActivity();
+        if (currentActivity != null) {
+            String currentScreen = currentActivity.getCurrentScreen();
+            if (MirrorMainActivity.SCREEN_MOONLIGHT.equals(currentScreen)
+                    || MirrorMainActivity.SCREEN_AIRPLAY.equals(currentScreen)
+                    || MirrorMainActivity.SCREEN_DISPLAYLINK.equals(currentScreen)) {
+                return currentScreen;
+            }
+        }
+
+        if (displayId == State.getDisplaylinkVirtualDisplayId()) {
+            return MirrorMainActivity.SCREEN_DISPLAYLINK;
+        }
+        if (displayId == State.getAirPlayVirtualDisplayId()) {
+            return MirrorMainActivity.SCREEN_AIRPLAY;
+        }
+        if (displayId == State.getMirrorVirtualDisplayId() || displayId == State.lastSingleAppDisplay) {
+            return MirrorMainActivity.SCREEN_MOONLIGHT;
+        }
+        return MirrorMainActivity.SCREEN_MOONLIGHT;
     }
     
     private static void _handleDisableUsbAudio(Context context) {

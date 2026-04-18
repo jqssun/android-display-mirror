@@ -75,6 +75,7 @@ public class AirPlayEncoder {
                 DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC,
                 inputSurface, null, null
             );
+            State.setAirPlayTouchTarget(virtualDisplay.getDisplay().getDisplayId(), inputSurface);
 
             encodeThread = new Thread(this::_encodeLoop, "AirPlayEncode");
             encodeThread.start();
@@ -82,6 +83,7 @@ public class AirPlayEncoder {
         } catch (Exception e) {
             Log.e(TAG, "start failed", e);
             State.log("AirPlay encoder failed: " + e.getMessage());
+            State.clearAirPlayTouchTarget();
             running = false;
         }
     }
@@ -92,6 +94,7 @@ public class AirPlayEncoder {
             virtualDisplay.release();
             virtualDisplay = null;
         }
+        State.clearAirPlayTouchTarget();
         if (codec != null) {
             try { codec.stop(); } catch (Exception ignored) {}
             try { codec.release(); } catch (Exception ignored) {}

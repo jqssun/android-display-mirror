@@ -8,7 +8,7 @@
     <string name="export">Export</string>
     <string name="clear">Clear</string>
     <string name="tab_settings">Settings</string>
-    <string name="tab_airplay">AirPlay</string>
+    <string name="tab_airplay">AirPlay (Beta)</string>
     <string name="tab_displaylink">DisplayLink</string>
     <string name="displaylink_libs_status_imported">Libraries Imported</string>
     <string name="displaylink_libs_status_missing">Libraries Not Found</string>
@@ -52,6 +52,9 @@
     <string name="width_label">Width</string>
     <string name="height_label">Height</string>
     <string name="refresh_rate_label">Refresh rate</string>
+    <string name="manage_this_display">Manage This Display</string>
+    <string name="extend_app_not_installed">Install the Extend app to proceed</string>
+    <string name="touchscreen_unavailable">Touchscreen control is no longer available for this display.</string>
     <!-- Permission status -->
     <string name="status_not_started">Not started</string>
     <string name="status_started_not_authorized_server">Unauthorized (UID: %d)</string>
@@ -97,7 +100,7 @@
     <string name="auto_connect_moonlight_desc">Proactively send a JSON connect request to the Moonlight client. Requires a fork with the autostart listener. Not compatible with standard Moonlight.</string>
     <string name="show_moonlight_cursor">Show cursor location</string>
     <string name="show_moonlight_cursor_desc">Show a cursor overlay on the device screen for Moonlight mouse input.</string>
-    <string name="section_airplay_connections">AirPlay Connections (Beta)</string>
+    <string name="section_airplay_connections">AirPlay Connections</string>
     <string name="airplay_discover">Scan for AirPlay servers</string>
     <string name="airplay_no_devices">AirPlay Devices Not Found</string>
     <string name="airplay_no_devices_detail">Search for receivers on your network</string>

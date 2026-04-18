@@ -23,6 +23,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 public class DisplayLinkFragment extends Fragment {
     private SharedPreferences preferences;
+    private MaterialButton manageDisplayBtn;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -41,7 +42,9 @@ public class DisplayLinkFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         preferences = requireContext().getSharedPreferences(Pref.PREF_NAME, Context.MODE_PRIVATE);
+        manageDisplayBtn = view.findViewById(R.id.manageDisplayBtn);
         _init(view);
+        State.uiState.observe(getViewLifecycleOwner(), state -> _updateManageDisplayButton());
     }
 
     @Override
@@ -54,9 +57,14 @@ public class DisplayLinkFragment extends Fragment {
     private void _init(View view) {
         _updateLibStatus(view);
         State.logVersion.observe(getViewLifecycleOwner(), v -> _updateLibStatus(view));
+        _updateManageDisplayButton();
 
         MaterialButton downloadApkBtn = view.findViewById(R.id.downloadApkBtn);
         MaterialButton importApkBtn = view.findViewById(R.id.importApkBtn);
+        manageDisplayBtn.setOnClickListener(v ->
+                ((MirrorMainActivity) requireActivity()).manageDisplayInExtend(
+                        State.getDisplaylinkVirtualDisplayId(),
+                        MirrorMainActivity.SCREEN_DISPLAYLINK));
 
         downloadApkBtn.setOnClickListener(v ->
             ((MirrorMainActivity) requireActivity()).downloadDisplayLink(downloadApkBtn));
@@ -93,6 +101,7 @@ public class DisplayLinkFragment extends Fragment {
         title.setText(imported ? R.string.displaylink_libs_status_imported : R.string.displaylink_libs_status_missing);
         detail.setText(imported ? R.string.displaylink_libs_detail_imported : R.string.import_displaylink_libs_prompt);
         icon.setImageResource(imported ? R.drawable.ic_check_circle : R.drawable.ic_error);
+        _updateManageDisplayButton();
     }
 
     private void _updateResolutionText(TextView textView) {
@@ -147,5 +156,12 @@ public class DisplayLinkFragment extends Fragment {
             })
             .setNegativeButton(R.string.cancel, null)
             .show();
+    }
+
+    private void _updateManageDisplayButton() {
+        if (manageDisplayBtn == null) {
+            return;
+        }
+        manageDisplayBtn.setVisibility(State.getDisplaylinkVirtualDisplayId() > 0 ? View.VISIBLE : View.GONE);
     }
 }
