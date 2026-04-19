@@ -41,6 +41,8 @@ public class MirrorMainActivity extends AppCompatActivity {
             "io.github.jqssun.displayextend.action.OPEN_OVERVIEW";
     public static final String ACTION_OPEN_EXTEND_DISPLAY_DETAIL =
             "io.github.jqssun.displayextend.action.OPEN_DISPLAY_DETAIL";
+    public static final String ACTION_OPEN_EXTEND_SETTINGS =
+            "io.github.jqssun.displayextend.action.OPEN_SETTINGS";
     public static final String EXTRA_DISPLAY_ID = "display_id";
     public static final String EXTRA_SCREEN = "screen";
     public static final String EXTRA_SOURCE_SCREEN = "source_screen";
@@ -48,6 +50,7 @@ public class MirrorMainActivity extends AppCompatActivity {
     public static final String SCREEN_MOONLIGHT = "moonlight";
     public static final String SCREEN_AIRPLAY = "airplay";
     public static final String SCREEN_DISPLAYLINK = "displaylink";
+    public static final String SCREEN_SETTINGS = "settings";
     public static final String SOURCE_EXTEND_OVERVIEW = "extend_overview";
     private static final Uri EXTEND_PROJECT_URI =
             Uri.parse("https://github.com/jqssun/android-display-extend");
@@ -380,14 +383,15 @@ public class MirrorMainActivity extends AppCompatActivity {
         intent.addCategory(Intent.CATEGORY_DEFAULT);
         intent.putExtra(EXTRA_DISPLAY_ID, displayId);
         intent.putExtra(EXTRA_SOURCE_SCREEN, sourceScreen);
+        _startExtendIntentOrFallback(intent);
+    }
 
-        if (intent.resolveActivity(getPackageManager()) == null) {
-            Toast.makeText(this, R.string.extend_app_not_installed, Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(Intent.ACTION_VIEW, EXTEND_PROJECT_URI));
-            return;
-        }
-
-        startActivity(intent);
+    public void openExtendSettings() {
+        Intent intent = new Intent(ACTION_OPEN_EXTEND_SETTINGS);
+        intent.setPackage(EXTEND_PACKAGE_NAME);
+        intent.addCategory(Intent.CATEGORY_DEFAULT);
+        intent.putExtra(EXTRA_SOURCE_SCREEN, SCREEN_SETTINGS);
+        _startExtendIntentOrFallback(intent);
     }
 
     private void _navigateToOverview() {
@@ -400,10 +404,24 @@ public class MirrorMainActivity extends AppCompatActivity {
         }
     }
 
+    private void _navigateToSettings() {
+        if (bottomNav != null && bottomNav.getSelectedItemId() != R.id.settings_fragment) {
+            bottomNav.setSelectedItemId(R.id.settings_fragment);
+        } else if (navController != null
+                && navController.getCurrentDestination() != null
+                && navController.getCurrentDestination().getId() != R.id.settings_fragment) {
+            navController.popBackStack(R.id.settings_fragment, false);
+        }
+    }
+
     private void _openMirrorScreen(String screen) {
         String normalizedScreen = _normalizeMirrorScreen(screen);
         if (SCREEN_OVERVIEW.equals(normalizedScreen)) {
             _navigateToOverview();
+            return;
+        }
+        if (SCREEN_SETTINGS.equals(normalizedScreen)) {
+            _navigateToSettings();
             return;
         }
         if (_isOnMirrorScreen(normalizedScreen)) {
@@ -424,7 +442,8 @@ public class MirrorMainActivity extends AppCompatActivity {
     private String _normalizeMirrorScreen(String screen) {
         if (SCREEN_MOONLIGHT.equals(screen)
                 || SCREEN_AIRPLAY.equals(screen)
-                || SCREEN_DISPLAYLINK.equals(screen)) {
+                || SCREEN_DISPLAYLINK.equals(screen)
+                || SCREEN_SETTINGS.equals(screen)) {
             return screen;
         }
         return SCREEN_OVERVIEW;
@@ -438,6 +457,8 @@ public class MirrorMainActivity extends AppCompatActivity {
                 return R.id.airplay_fragment;
             case SCREEN_DISPLAYLINK:
                 return R.id.displaylink_fragment;
+            case SCREEN_SETTINGS:
+                return R.id.settings_fragment;
             case SCREEN_OVERVIEW:
                 return R.id.overview_fragment;
             default:
@@ -476,6 +497,15 @@ public class MirrorMainActivity extends AppCompatActivity {
         moveTaskToBack(true);
     }
 
+    private void _startExtendIntentOrFallback(Intent intent) {
+        if (intent.resolveActivity(getPackageManager()) == null) {
+            Toast.makeText(this, R.string.extend_app_not_installed, Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(Intent.ACTION_VIEW, EXTEND_PROJECT_URI));
+            return;
+        }
+        startActivity(intent);
+    }
+
     public String getCurrentScreen() {
         if (navController == null || navController.getCurrentDestination() == null) {
             return SCREEN_OVERVIEW;
@@ -489,6 +519,9 @@ public class MirrorMainActivity extends AppCompatActivity {
         }
         if (destinationId == R.id.displaylink_fragment) {
             return SCREEN_DISPLAYLINK;
+        }
+        if (destinationId == R.id.settings_fragment) {
+            return SCREEN_SETTINGS;
         }
         return SCREEN_OVERVIEW;
     }

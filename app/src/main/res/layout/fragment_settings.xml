@@ -49,6 +49,14 @@
             <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/autoScaleCheckbox" android:layout_width="wrap_content" android:layout_height="wrap_content" />
         </LinearLayout>
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/manageSystemDisplaySettingsBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/manage_system_display_settings" />
+
         <!-- About -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/aboutCard"

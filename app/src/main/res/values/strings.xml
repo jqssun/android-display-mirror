@@ -48,6 +48,7 @@
     <string name="height_label">Height</string>
     <string name="refresh_rate_label">Refresh rate</string>
     <string name="manage_this_display">Manage This Display</string>
+    <string name="manage_system_display_settings">Manage System Display Settings</string>
     <string name="extend_app_not_installed">Install the Extend app to proceed</string>
     <string name="touchscreen_unavailable">Touchscreen control is no longer available for this display.</string>
     <!-- Permission status -->

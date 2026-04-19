@@ -39,6 +39,8 @@ public class SettingsFragment extends Fragment {
         MaterialSwitch trustedDisplayCheckbox = view.findViewById(R.id.trustedDisplayCheckbox);
         MaterialSwitch autoRotateCheckbox = view.findViewById(R.id.autoRotateCheckbox);
         MaterialSwitch autoScaleCheckbox = view.findViewById(R.id.autoScaleCheckbox);
+        MaterialButton manageSystemDisplaySettingsBtn =
+                view.findViewById(R.id.manageSystemDisplaySettingsBtn);
 
         boolean hasShizuku = ShizukuUtils.hasPermission();
         trustedDisplayCheckbox.setChecked(hasShizuku && Pref.getTrustedDisplay());
@@ -50,6 +52,8 @@ public class SettingsFragment extends Fragment {
 
         autoRotateCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_AUTO_ROTATE, c).apply());
         autoScaleCheckbox.setOnCheckedChangeListener((b, c) -> preferences.edit().putBoolean(Pref.KEY_AUTO_SCALE, c).apply());
+        manageSystemDisplaySettingsBtn.setOnClickListener(v ->
+                ((MirrorMainActivity) requireActivity()).openExtendSettings());
 
         // About
         TextView versionText = view.findViewById(R.id.versionText);
