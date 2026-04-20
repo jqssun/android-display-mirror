@@ -45,6 +45,11 @@ func NewSession(handler EventHandler) *Session {
 	return &Session{handler: handler}
 }
 
+// SetAppleReceiver toggles the Apple receiver key-derivation path.
+func SetAppleReceiver(enabled bool) {
+	airplay.AppleReceiver = enabled
+}
+
 // Discover scans the network for AirPlay devices for the given duration (ms).
 func (s *Session) Discover(durationMs int) {
 	go func() {

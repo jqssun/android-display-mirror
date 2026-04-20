@@ -20,6 +20,9 @@ public class Pref {
     public static final String KEY_SELECTED_CLIENT = "selected_client";
     public static final String KEY_DISABLE_REMOTE_SUBMIX = "disable_remote_submix";
 
+    // AirPlay
+    public static final String KEY_AIRPLAY_APPLE_RECEIVER = "airplay_apple_receiver";
+
     // DisplayLink
     public static final String KEY_DISPLAYLINK_WIDTH = "displaylink_width";
     public static final String KEY_DISPLAYLINK_HEIGHT = "displaylink_height";
@@ -40,6 +43,8 @@ public class Pref {
     public static boolean getAutoConnectClient() { return getBoolean(KEY_AUTO_CONNECT_CLIENT, false); }
     public static String getSelectedClient() { return getString(KEY_SELECTED_CLIENT, ""); }
     public static boolean getDisableRemoteSubmix() { return getBoolean(KEY_DISABLE_REMOTE_SUBMIX, false); }
+
+    public static boolean getAirPlayAppleReceiver() { return getBoolean(KEY_AIRPLAY_APPLE_RECEIVER, true); }
 
     public static int getDisplaylinkWidth() { return getInt(KEY_DISPLAYLINK_WIDTH, 1920); }
     public static int getDisplaylinkHeight() { return getInt(KEY_DISPLAYLINK_HEIGHT, 1080); }

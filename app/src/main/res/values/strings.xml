@@ -6,7 +6,7 @@
     <string name="export">Export</string>
     <string name="clear">Clear</string>
     <string name="tab_settings">Settings</string>
-    <string name="tab_airplay">AirPlay (Beta)</string>
+    <string name="tab_airplay">AirPlay</string>
     <string name="tab_displaylink">DisplayLink</string>
     <string name="displaylink_libs_status_imported">Libraries Imported</string>
     <string name="displaylink_libs_status_missing">Libraries Not Found</string>
@@ -18,7 +18,7 @@
     <string name="section_display">Streaming</string>
 
     <string name="section_input">Input</string>
-    <string name="section_moonlight">Moonlight</string>
+    <string name="section_moonlight">Moonlight Settings</string>
     <string name="section_displaylink_libraries">DisplayLink Libraries</string>
 
     <string name="section_moonlight_controls">Controls</string>
@@ -94,9 +94,12 @@
     <string name="auto_connect_moonlight_desc">Proactively send a JSON connect request to the Moonlight client. Requires a fork with the autostart listener. Not compatible with standard Moonlight.</string>
     <string name="show_moonlight_cursor">Show cursor location</string>
     <string name="show_moonlight_cursor_desc">Show a cursor overlay on the device screen for Moonlight mouse input.</string>
-    <string name="section_airplay_connections">AirPlay Receivers</string>
-    <string name="airplay_discover">Scan for AirPlay servers</string>
-    <string name="airplay_no_devices">AirPlay Devices Not Found</string>
+    <string name="section_airplay_controls">Controls</string>
+    <string name="section_airplay">AirPlay Settings</string>
+    <string name="airplay_apple_receiver">Apple receiver (Beta)</string>
+    <string name="airplay_apple_receiver_desc">Enable if used with Apple TV, Mac, or other first-party receivers. Leave off for UxPlay or other third-party receivers. Enabling allows this client to work with real FairPlay SAP when audio is disabled.</string>
+    <string name="airplay_discover">Scan for AirPlay receivers</string>
+    <string name="airplay_no_devices">AirPlay Receivers Not Found</string>
     <string name="airplay_no_devices_detail">Search for receivers on your network</string>
     <string name="airplay_connecting">Connecting to AirPlay…</string>
     <string name="airplay_connecting_detail">Searching for receivers on your network</string>

@@ -7,6 +7,7 @@ import android.os.Looper;
 import android.util.Log;
 
 import io.github.jqssun.displaymirror.MirrorMainActivity;
+import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.State;
 
 import java.net.InetAddress;
@@ -211,6 +212,7 @@ public class AirPlayService {
         }
         State.log("AirPlay: connecting to " + host + ":" + port + " (" + pendingWidth + "x" + pendingHeight + ")");
 
+        airplaylib.Airplaylib.setAppleReceiver(Pref.getAirPlayAppleReceiver());
         _ensureSession();
         session.connect(host, port, pin, pendingWidth, pendingHeight, pendingFps);
     }

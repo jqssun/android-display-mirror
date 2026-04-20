@@ -19,6 +19,7 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.android.material.textfield.TextInputEditText;
 
 import io.github.jqssun.displaymirror.job.AirPlayService;
@@ -57,6 +58,14 @@ public class AirPlayFragment extends Fragment {
         manualPort = view.findViewById(R.id.airplayManualPort);
         MaterialButton manualBtn = view.findViewById(R.id.airplayManualBtn);
         MaterialButton manualConnectBtn = view.findViewById(R.id.airplayManualConnectBtn);
+
+        MaterialSwitch appleReceiverSwitch = view.findViewById(R.id.airplayAppleReceiverSwitch);
+        appleReceiverSwitch.setChecked(Pref.getAirPlayAppleReceiver());
+        airplaylib.Airplaylib.setAppleReceiver(Pref.getAirPlayAppleReceiver());
+        appleReceiverSwitch.setOnCheckedChangeListener((b, c) -> {
+            Pref.getPreferences().edit().putBoolean(Pref.KEY_AIRPLAY_APPLE_RECEIVER, c).apply();
+            airplaylib.Airplaylib.setAppleReceiver(c);
+        });
         manageDisplayBtn.setOnClickListener(v ->
                 ((MirrorMainActivity) requireActivity()).manageDisplayInExtend(
                         State.getAirPlayVirtualDisplayId(),
