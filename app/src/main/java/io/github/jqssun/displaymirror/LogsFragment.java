@@ -31,12 +31,6 @@ public class LogsFragment extends Fragment {
         logAdapter = new LogAdapter(State.logs);
         logRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         logRecyclerView.setAdapter(logAdapter);
-        logRecyclerView.setClipToPadding(false);
-        androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(logRecyclerView, (v, insets) -> {
-            int bottom = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars()).bottom;
-            v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), bottom);
-            return insets;
-        });
         _scrollToBottom();
 
         State.logVersion.observe(getViewLifecycleOwner(), version -> {

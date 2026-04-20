@@ -9,6 +9,7 @@ import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
@@ -16,6 +17,8 @@ import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -180,6 +183,22 @@ public class MirrorMainActivity extends AppCompatActivity {
                 .findFragmentById(R.id.nav_host_fragment);
         navController = navHostFragment.getNavController();
         bottomNav = findViewById(R.id.bottom_nav);
+        View navHost = findViewById(R.id.nav_host_fragment);
+        ViewCompat.setOnApplyWindowInsetsListener(bottomNav, (v, insets) -> {
+            int navBarBottom = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom;
+            v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), navBarBottom);
+            return insets;
+        });
+        bottomNav.getViewTreeObserver().addOnGlobalLayoutListener(() -> {
+            int h = bottomNav.getHeight();
+            if (navHost.getPaddingBottom() != h) {
+                navHost.setPadding(
+                        navHost.getPaddingLeft(),
+                        navHost.getPaddingTop(),
+                        navHost.getPaddingRight(),
+                        h);
+            }
+        });
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         AppBarConfiguration appBarConfig = new AppBarConfiguration.Builder(

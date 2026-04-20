@@ -27,6 +27,7 @@ type EventHandler interface {
 	OnDisconnected(err string)
 	OnPinRequired()
 	OnError(err string)
+	OnLog(msg string)
 }
 
 // Session manages an AirPlay mirroring connection.
@@ -43,6 +44,10 @@ type Session struct {
 // NewSession creates a new AirPlay session.
 func NewSession(handler EventHandler) *Session {
 	return &Session{handler: handler}
+}
+
+func (s *Session) logf(format string, args ...interface{}) {
+	s.handler.OnLog(fmt.Sprintf(format, args...))
 }
 
 // SetAppleReceiver toggles the Apple receiver key-derivation path.
@@ -99,16 +104,20 @@ func (s *Session) Connect(host string, port int, pin string, width int, height i
 		}
 
 		if err := client.Pair(ctx, pin); err != nil {
-			s.handler.OnError("pair: " + err.Error())
+			s.logf("[AIRPLAY] pairing failed: %v", err)
+			if pinErr := client.StartPINDisplay(); pinErr != nil {
+				s.logf("[AIRPLAY] StartPINDisplay failed: %v", pinErr)
+			}
 			client.Close()
+			s.handler.OnPinRequired()
 			return
 		}
-		fmt.Println("[AIRPLAY] pairing succeeded")
+		s.logf("[AIRPLAY] pairing succeeded")
 
 		if err := client.FairPlaySetup(ctx); err != nil {
-			fmt.Printf("[AIRPLAY] FairPlay setup FAILED: %v\n", err)
+			s.logf("[AIRPLAY] FairPlay setup FAILED: %v", err)
 		} else {
-			fmt.Println("[AIRPLAY] FairPlay setup succeeded")
+			s.logf("[AIRPLAY] FairPlay setup succeeded")
 		}
 
 		cfg := airplay.StreamConfig{
@@ -117,14 +126,14 @@ func (s *Session) Connect(host string, port int, pin string, width int, height i
 			FPS:     fps,
 			NoAudio: true,
 		}
-		fmt.Printf("[AIRPLAY] setting up mirror session %dx%d@%d\n", width, height, fps)
+		s.logf("[AIRPLAY] setting up mirror session %dx%d@%d", width, height, fps)
 		mirror, err := client.SetupMirror(ctx, cfg)
 		if err != nil {
 			s.handler.OnError("setup_mirror: " + err.Error())
 			client.Close()
 			return
 		}
-		fmt.Printf("[AIRPLAY] mirror session ready, data port=%d\n", mirror.DataPort)
+		s.logf("[AIRPLAY] mirror session ready, data port=%d", mirror.DataPort)
 
 		// Create pipe: Java writes Annex-B → StreamFrames reads & processes
 		pipeR, pipeW := io.Pipe()
@@ -138,7 +147,7 @@ func (s *Session) Connect(host string, port int, pin string, width int, height i
 		go func() {
 			err := mirror.StreamFrames(ctx, pipeR, 0)
 			if err != nil {
-				fmt.Printf("[AIRPLAY] StreamFrames ended: %v\n", err)
+				s.logf("[AIRPLAY] StreamFrames ended: %v", err)
 			}
 			s.handler.OnDisconnected(fmt.Sprintf("%v", err))
 		}()
@@ -159,7 +168,7 @@ func (s *Session) SendFrame(annexBData []byte, isKeyframe bool) {
 	// AVCC conversion, codec frame generation, and encryption.
 	_, err := w.Write(annexBData)
 	if err != nil {
-		fmt.Printf("[AIRPLAY] pipe write error: %v\n", err)
+		s.logf("[AIRPLAY] pipe write error: %v", err)
 	}
 }
 

@@ -53,9 +53,7 @@ public class OverviewFragment extends Fragment {
 
         view.findViewById(R.id.touchscreenRow).setOnClickListener(v -> {
             MirrorTouchscreenBridge.TargetInfo target = MirrorTouchscreenBridge.getDefaultTarget();
-            if (target != null) {
-                startActivity(MirrorTouchscreenBridge.createInternalIntent(requireContext(), target));
-            }
+            startActivity(MirrorTouchscreenBridge.createInternalIntent(requireContext(), target));
         });
 
         State.uiState.observe(getViewLifecycleOwner(), state -> _updateStatus(view));
@@ -155,5 +153,15 @@ public class OverviewFragment extends Fragment {
             displaylinkStatus.setText(R.string.displaylink_libs_status_missing);
         }
         displaylinkIcon.setImageTintList(ColorStateList.valueOf(displaylinkActive ? activeColor : inactiveColor));
+
+        // Touchscreen
+        View touchscreenRow = view.findViewById(R.id.touchscreenRow);
+        TextView touchscreenStatus = view.findViewById(R.id.touchscreenStatus);
+        boolean touchscreenAvailable = MirrorTouchscreenBridge.getDefaultTarget() != null;
+        touchscreenStatus.setText(touchscreenAvailable
+                ? R.string.touchscreen_control_desc
+                : R.string.touchscreen_control_desc_unavailable);
+        touchscreenRow.setEnabled(touchscreenAvailable);
+        touchscreenRow.setAlpha(touchscreenAvailable ? 1f : 0.38f);
     }
 }

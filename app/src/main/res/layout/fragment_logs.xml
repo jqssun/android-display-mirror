@@ -9,9 +9,7 @@
         android:id="@+id/logRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clipToPadding="false"
         android:paddingHorizontal="8dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="@dimen/bottom_nav_content_padding" />
+        android:paddingTop="8dp" />
 
 </LinearLayout>

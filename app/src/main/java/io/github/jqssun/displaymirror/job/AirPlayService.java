@@ -30,6 +30,7 @@ public class AirPlayService {
         void onConnected();
         void onDisconnected(String error);
         void onError(String error);
+        void onPinRequired();
     }
 
     private airplaylib.Session session;
@@ -115,6 +116,10 @@ public class AirPlayService {
             @Override
             public void onPinRequired() {
                 State.log("AirPlay PIN required");
+                session = null;
+                mainHandler.post(() -> {
+                    if (listener != null) listener.onPinRequired();
+                });
             }
 
             @Override
@@ -127,6 +132,11 @@ public class AirPlayService {
                     if (listener != null) listener.onError(err);
                 });
                 State.log("AirPlay error: " + err);
+            }
+
+            @Override
+            public void onLog(String msg) {
+                State.log(msg);
             }
         });
         session = s;

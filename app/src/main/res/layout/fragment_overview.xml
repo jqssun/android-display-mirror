@@ -8,8 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingTop="8dp"
-        android:paddingBottom="@dimen/bottom_nav_content_padding">
+        android:paddingTop="8dp">
 
         <!-- Permissions -->
         <TextView
@@ -317,6 +316,7 @@
                     android:textAppearance="?attr/textAppearanceBodyLarge" />
 
                 <TextView
+                    android:id="@+id/touchscreenStatus"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"

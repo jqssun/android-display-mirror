@@ -1,13 +1,10 @@
 package io.github.jqssun.displaymirror;
 
 import android.os.Bundle;
-import android.text.InputFilter;
-import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -33,6 +30,7 @@ public class AirPlayFragment extends Fragment {
     private MaterialButton scanBtn, connectBtn, manageDisplayBtn;
     private LinearLayout manualLayout;
     private TextInputEditText manualIp, manualPort;
+    private AirPlayService.AirPlayDevice _pendingDevice;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -86,7 +84,9 @@ public class AirPlayFragment extends Fragment {
             }
             String portStr = manualPort.getText() != null ? manualPort.getText().toString().trim() : "";
             int port = portStr.isEmpty() ? 7000 : Integer.parseInt(portStr);
-            _showPinDialog(new AirPlayService.AirPlayDevice("Manual (" + ip + ")", ip, port));
+            _pendingDevice = new AirPlayService.AirPlayDevice("Manual (" + ip + ")", ip, port);
+            _updateStatus(R.drawable.ic_sync, R.string.airplay_connecting, R.string.airplay_connecting_detail);
+            AirPlayService.getInstance().connect(_pendingDevice.ip, _pendingDevice.port, "", 0, 0, 30);
         });
 
         airplay.setListener(new AirPlayService.AirPlayListener() {
@@ -97,6 +97,7 @@ public class AirPlayFragment extends Fragment {
 
             @Override
             public void onConnected() {
+                _pendingDevice = null;
                 _updateStatus(R.drawable.ic_check_circle, R.string.airplay_connected, R.string.airplay_connected_detail);
                 connectBtn.setText(R.string.stop);
                 connectBtn.setVisibility(View.VISIBLE);
@@ -106,6 +107,7 @@ public class AirPlayFragment extends Fragment {
 
             @Override
             public void onDisconnected(String error) {
+                _pendingDevice = null;
                 _updateStatus(R.drawable.ic_error, R.string.airplay_no_devices, R.string.airplay_no_devices_detail);
                 connectBtn.setText(R.string.connect);
                 if (airplay.getDevices().isEmpty()) {
@@ -118,6 +120,12 @@ public class AirPlayFragment extends Fragment {
             @Override
             public void onError(String error) {
                 Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onPinRequired() {
+                if (_pendingDevice == null) return;
+                _showPinDialog(_pendingDevice);
             }
         });
 
@@ -143,7 +151,9 @@ public class AirPlayFragment extends Fragment {
             }
             AirPlayService.AirPlayDevice dev = _getSelectedDevice();
             if (dev == null) return;
-            _showPinDialog(dev);
+            _pendingDevice = dev;
+            _updateStatus(R.drawable.ic_sync, R.string.airplay_connecting, R.string.airplay_connecting_detail);
+            airplay.connect(dev.ip, dev.port, "", 0, 0, 30);
         });
 
         // Restore state if devices already discovered
@@ -178,8 +188,6 @@ public class AirPlayFragment extends Fragment {
         com.google.android.material.textfield.TextInputLayout inputLayout = new com.google.android.material.textfield.TextInputLayout(requireContext(), null, com.google.android.material.R.attr.textInputOutlinedStyle);
         inputLayout.setHint(R.string.airplay_pin_hint);
         com.google.android.material.textfield.TextInputEditText pinInput = new com.google.android.material.textfield.TextInputEditText(inputLayout.getContext());
-        pinInput.setInputType(InputType.TYPE_CLASS_NUMBER);
-        pinInput.setFilters(new InputFilter[]{new InputFilter.LengthFilter(4)});
         inputLayout.addView(pinInput);
         int pad = (int) (16 * getResources().getDisplayMetrics().density);
         FrameLayout container = new FrameLayout(requireContext());
@@ -191,6 +199,7 @@ public class AirPlayFragment extends Fragment {
             .setView(container)
             .setPositiveButton(R.string.connect, (dialog, which) -> {
                 String pin = pinInput.getText().toString().trim();
+                _pendingDevice = dev;
                 _updateStatus(R.drawable.ic_sync, R.string.airplay_connecting, R.string.airplay_connecting_detail);
                 AirPlayService.getInstance().connect(dev.ip, dev.port, pin, 0, 0, 30);
             })
