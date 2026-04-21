@@ -22,6 +22,7 @@ public class Pref {
 
     // AirPlay
     public static final String KEY_AIRPLAY_APPLE_RECEIVER = "airplay_apple_receiver";
+    public static final String KEY_AIRPLAY1_MODE = "airplay1_mode";
 
     // DisplayLink
     public static final String KEY_DISPLAYLINK_WIDTH = "displaylink_width";
@@ -45,6 +46,7 @@ public class Pref {
     public static boolean getDisableRemoteSubmix() { return getBoolean(KEY_DISABLE_REMOTE_SUBMIX, false); }
 
     public static boolean getAirPlayAppleReceiver() { return getBoolean(KEY_AIRPLAY_APPLE_RECEIVER, true); }
+    public static boolean getAirPlay1Mode() { return getBoolean(KEY_AIRPLAY1_MODE, false); }
 
     public static int getDisplaylinkWidth() { return getInt(KEY_DISPLAYLINK_WIDTH, 1920); }
     public static int getDisplaylinkHeight() { return getInt(KEY_DISPLAYLINK_HEIGHT, 1080); }

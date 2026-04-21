@@ -242,6 +242,9 @@ public class AirPlayService {
         encoder = new AirPlayEncoder();
         encoder.start(pendingProjection, pendingFps);
         pendingProjection = null;
+        if (session != null && encoder.screenWidth > 0 && encoder.screenHeight > 0) {
+            session.setAirPlay1FrameSize(encoder.screenWidth, encoder.screenHeight);
+        }
     }
 
     public void sendFrame(byte[] annexBData, boolean isKeyframe) {

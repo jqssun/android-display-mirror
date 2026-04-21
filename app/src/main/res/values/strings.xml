@@ -98,7 +98,9 @@
     <string name="section_airplay_controls">Controls</string>
     <string name="section_airplay">AirPlay Settings</string>
     <string name="airplay_apple_receiver">Support Apple receivers (Beta)</string>
-    <string name="airplay_apple_receiver_desc">Enable if used with Apple TV, Mac, or other first-party receivers. Leave off for UxPlay or other third-party receivers. Enabling allows this client to work with real FairPlay SAP when audio is disabled.</string>
+    <string name="airplay_apple_receiver_desc">Enable if used with Apple TV, Mac, or other first-party receivers. Leave off for UxPlay or other third-party receivers. Enabling allows this client to work with real FairPlay SAP when audio is disabled. Approval is required on macOS at initial pairing.</string>
+    <string name="airplay1_mode">Use legacy AirPlay instead</string>
+    <string name="airplay1_mode_desc">Use the legacy AirPlay 1 protocol. Enable for legacy third-party receivers that do not respond well to the modern AirPlay 2 protocol.</string>
     <string name="airplay_discover">Scan for AirPlay receivers</string>
     <string name="airplay_no_devices">AirPlay receiver not connected</string>
     <string name="airplay_no_devices_detail">Search for receivers on your network</string>

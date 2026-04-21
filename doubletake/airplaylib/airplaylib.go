@@ -1,9 +1,10 @@
-// Package airplaylib provides Android gomobile bindings for AirPlay 2 screen mirroring.
+// provides gomobile bindings for doubletake
 package airplaylib
 
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"sync"
@@ -12,7 +13,7 @@ import (
 	"doubletake/internal/airplay"
 )
 
-// Device represents a discovered AirPlay receiver.
+// airplay receiver
 type Device struct {
 	Name     string
 	IP       string
@@ -20,7 +21,7 @@ type Device struct {
 	DeviceID string
 }
 
-// EventHandler receives callbacks from the AirPlay session.
+// airplay session
 type EventHandler interface {
 	OnDeviceFound(deviceJSON string)
 	OnConnected()
@@ -30,7 +31,7 @@ type EventHandler interface {
 	OnLog(msg string)
 }
 
-// Session manages an AirPlay mirroring connection.
+// airplay connection
 type Session struct {
 	mu      sync.Mutex
 	client  *airplay.AirPlayClient
@@ -38,10 +39,15 @@ type Session struct {
 	handler EventHandler
 	cancel  context.CancelFunc
 
-	pipeW *io.PipeWriter
+	pipeW        *io.PipeWriter
+	firstSendLog bool
+	sessionStart time.Time
+
+	airplay1Stored bool
+	airplay1Width  int
+	airplay1Height int
 }
 
-// NewSession creates a new AirPlay session.
 func NewSession(handler EventHandler) *Session {
 	return &Session{handler: handler}
 }
@@ -50,12 +56,6 @@ func (s *Session) logf(format string, args ...interface{}) {
 	s.handler.OnLog(fmt.Sprintf(format, args...))
 }
 
-// SetAppleReceiver toggles the Apple receiver key-derivation path.
-func SetAppleReceiver(enabled bool) {
-	airplay.AppleReceiver = enabled
-}
-
-// Discover scans the network for AirPlay devices for the given duration (ms).
 func (s *Session) Discover(durationMs int) {
 	go func() {
 		timeout := time.Duration(durationMs) * time.Millisecond
@@ -75,7 +75,6 @@ func (s *Session) Discover(durationMs int) {
 	}()
 }
 
-// Connect establishes connection and sets up mirroring.
 func (s *Session) Connect(host string, port int, pin string, width int, height int, fps int) {
 	go func() {
 		s.mu.Lock()
@@ -97,27 +96,12 @@ func (s *Session) Connect(host string, port int, pin string, width int, height i
 		s.client = client
 		s.mu.Unlock()
 
-		if _, err := client.GetInfo(); err != nil {
-			s.handler.OnError("getinfo: " + err.Error())
-			client.Close()
-			return
-		}
-
-		if err := client.Pair(ctx, pin); err != nil {
-			s.logf("[AIRPLAY] pairing failed: %v", err)
-			if pinErr := client.StartPINDisplay(); pinErr != nil {
-				s.logf("[AIRPLAY] StartPINDisplay failed: %v", pinErr)
-			}
-			client.Close()
-			s.handler.OnPinRequired()
-			return
-		}
-		s.logf("[AIRPLAY] pairing succeeded")
-
-		if err := client.FairPlaySetup(ctx); err != nil {
-			s.logf("[AIRPLAY] FairPlay setup FAILED: %v", err)
+		if airplay.AirPlay1Mode {
+			airplay.AirPlay1Password = pin
 		} else {
-			s.logf("[AIRPLAY] FairPlay setup succeeded")
+			if err := s.setupAirPlay2(ctx, client, pin); err != nil {
+				return
+			}
 		}
 
 		cfg := airplay.StreamConfig{
@@ -126,53 +110,89 @@ func (s *Session) Connect(host string, port int, pin string, width int, height i
 			FPS:     fps,
 			NoAudio: true,
 		}
-		s.logf("[AIRPLAY] setting up mirror session %dx%d@%d", width, height, fps)
-		mirror, err := client.SetupMirror(ctx, cfg)
-		if err != nil {
-			s.handler.OnError("setup_mirror: " + err.Error())
+		s.logf("[AIRPLAY] setting up mirror session %dx%d@%d (airplay1=%v)", width, height, fps, airplay.AirPlay1Mode)
+		var mirror *airplay.MirrorSession
+		var setupErr error
+		if airplay.AirPlay1Mode {
+			mirror, setupErr = client.SetupMirrorAirPlay1(ctx, cfg)
+		} else {
+			mirror, setupErr = client.SetupMirror(ctx, cfg)
+		}
+		if setupErr != nil {
+			if errors.Is(setupErr, airplay.ErrAirPlay1PasswordRequired) {
+				s.logf("[AIRPLAY] receiver requires password")
+				client.Close()
+				s.handler.OnPinRequired()
+				return
+			}
+			s.handler.OnError("setup_mirror: " + setupErr.Error())
 			client.Close()
 			return
 		}
 		s.logf("[AIRPLAY] mirror session ready, data port=%d", mirror.DataPort)
 
-		// Create pipe: Java writes Annex-B → StreamFrames reads & processes
 		pipeR, pipeW := io.Pipe()
 
 		s.mu.Lock()
 		s.mirror = mirror
 		s.pipeW = pipeW
+		s.sessionStart = time.Now()
+		s.airplay1Stored = false
+		s.firstSendLog = false
 		s.mu.Unlock()
 
-		// Start StreamFrames in background — the EXACT same code path as Linux
 		go func() {
-			err := mirror.StreamFrames(ctx, pipeR, 0)
-			if err != nil {
-				s.logf("[AIRPLAY] StreamFrames ended: %v", err)
+			var streamErr error
+			if airplay.AirPlay1Mode {
+				streamErr = mirror.StreamFramesAirPlay1(ctx, pipeR)
+			} else {
+				streamErr = mirror.StreamFrames(ctx, pipeR, 0)
 			}
-			s.handler.OnDisconnected(fmt.Sprintf("%v", err))
+			if streamErr != nil {
+				s.logf("[AIRPLAY] frame forwarder ended: %v", streamErr)
+			}
+			s.handler.OnDisconnected(fmt.Sprintf("%v", streamErr))
 		}()
 
 		s.handler.OnConnected()
 	}()
 }
 
-// SendFrame writes raw Annex-B H.264 data into the pipe for StreamFrames to process.
 func (s *Session) SendFrame(annexBData []byte, isKeyframe bool) {
 	s.mu.Lock()
 	w := s.pipeW
+	firstLog := !s.firstSendLog
+	if firstLog {
+		s.firstSendLog = true
+	}
+	needStore := airplay.AirPlay1Mode && !s.airplay1Stored
+	if needStore {
+		s.airplay1Stored = true
+	}
+	frameWidth, frameHeight := s.airplay1Width, s.airplay1Height
+	tsMillis := time.Since(s.sessionStart).Milliseconds()
 	s.mu.Unlock()
 	if w == nil {
 		return
 	}
-	// Just write raw Annex-B data — StreamFrames handles all NAL parsing,
-	// AVCC conversion, codec frame generation, and encryption.
-	_, err := w.Write(annexBData)
-	if err != nil {
+	if firstLog {
+		dumpN := len(annexBData)
+		if dumpN > 32 {
+			dumpN = 32
+		}
+		s.logf("[AIRPLAY] first SendFrame: %d bytes, keyframe=%v, leading hex=%x", len(annexBData), isKeyframe, annexBData[:dumpN])
+	}
+
+	if airplay.AirPlay1Mode {
+		s.sendFrameAirPlay1(w, annexBData, needStore, frameWidth, frameHeight, uint64(tsMillis))
+		return
+	}
+	// AirPlay 2: StreamFrames on the reader side does NAL parsing, AVCC wrapping, codec-frame packetization and ChaCha20 encryption, so the sender just dumps raw Annex-B into the pipe
+	if _, err := w.Write(annexBData); err != nil {
 		s.logf("[AIRPLAY] pipe write error: %v", err)
 	}
 }
 
-// Disconnect tears down the session.
 func (s *Session) Disconnect() {
 	s.mu.Lock()
 	defer s.mu.Unlock()

@@ -64,6 +64,14 @@ public class AirPlayFragment extends Fragment {
             Pref.getPreferences().edit().putBoolean(Pref.KEY_AIRPLAY_APPLE_RECEIVER, c).apply();
             airplaylib.Airplaylib.setAppleReceiver(c);
         });
+
+        MaterialSwitch airplay1ModeSwitch = view.findViewById(R.id.airplay1ModeSwitch);
+        airplay1ModeSwitch.setChecked(Pref.getAirPlay1Mode());
+        airplaylib.Airplaylib.setAirPlay1Mode(Pref.getAirPlay1Mode());
+        airplay1ModeSwitch.setOnCheckedChangeListener((b, c) -> {
+            Pref.getPreferences().edit().putBoolean(Pref.KEY_AIRPLAY1_MODE, c).apply();
+            airplaylib.Airplaylib.setAirPlay1Mode(c);
+        });
         manageDisplayBtn.setOnClickListener(v ->
                 ((MirrorMainActivity) requireActivity()).manageDisplayInExtend(
                         State.getAirPlayVirtualDisplayId(),

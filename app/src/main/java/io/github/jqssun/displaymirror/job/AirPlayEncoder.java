@@ -14,6 +14,7 @@ import android.view.WindowManager;
 
 import java.nio.ByteBuffer;
 
+import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.State;
 
 public class AirPlayEncoder {
@@ -46,6 +47,27 @@ public class AirPlayEncoder {
             screenHeight = dm.heightPixels;
             screenDpi = dm.densityDpi;
 
+            if (Pref.getAirPlay1Mode()) {
+                // Portrait input buffers segfault the fallback software
+                // decoder and 1080p IDRs overflow its 2 MiB input ceiling
+                // so swap to landscape and cap at 1280x720
+                if (screenHeight > screenWidth) {
+                    int tmp = screenWidth;
+                    screenWidth = screenHeight;
+                    screenHeight = tmp;
+                }
+                if (screenWidth > 1280) {
+                    screenHeight = (int) ((long) screenHeight * 1280L / screenWidth);
+                    screenWidth = 1280;
+                }
+                if (screenHeight > 720) {
+                    screenWidth = (int) ((long) screenWidth * 720L / screenHeight);
+                    screenHeight = 720;
+                }
+                screenWidth &= ~1;
+                screenHeight &= ~1;
+            }
+
             // Android 14+ requires a callback registered before createVirtualDisplay
             projection.registerCallback(new MediaProjection.Callback() {
                 @Override
@@ -56,14 +78,23 @@ public class AirPlayEncoder {
             }, new android.os.Handler(android.os.Looper.getMainLooper()));
 
             MediaFormat format = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, screenWidth, screenHeight);
-            format.setInteger(MediaFormat.KEY_BIT_RATE, 8_000_000);
+            boolean airplay1 = Pref.getAirPlay1Mode();
+            format.setInteger(MediaFormat.KEY_BIT_RATE, airplay1 ? 4_000_000 : 8_000_000);
             format.setInteger(MediaFormat.KEY_FRAME_RATE, fps);
-            format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 3);
+            format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, airplay1 ? 1 : 3);
             format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
                 format.setInteger(MediaFormat.KEY_LOW_LATENCY, 1);
             }
             format.setInteger(MediaFormat.KEY_MAX_B_FRAMES, 0);
+            if (airplay1) {
+                // Baseline@4.0 is the only profile/level combo that clears
+                // every known third-party decoder quirk. See AIRPIN.md.
+                format.setInteger(MediaFormat.KEY_PROFILE,
+                    MediaCodecInfo.CodecProfileLevel.AVCProfileBaseline);
+                format.setInteger(MediaFormat.KEY_LEVEL,
+                    MediaCodecInfo.CodecProfileLevel.AVCLevel4);
+            }
 
             codec = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_VIDEO_AVC);
             codec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
