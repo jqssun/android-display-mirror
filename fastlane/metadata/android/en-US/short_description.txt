@@ -1,0 +1,1 @@
+Screen mirroring manager with support for sharing screen content over AirPlay, Moonlight/Sunshine, and DisplayLink

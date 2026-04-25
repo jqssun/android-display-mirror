@@ -406,65 +406,61 @@ namespace sunshine_callbacks {
         AMediaFormat_setString(format, AMEDIAFORMAT_KEY_MIME, config.videoFormat == 1 ? "video/hevc" : "video/avc");
 
         auto encodeFrameRate = config.framerate < 60 ? 60 : config.framerate;
-        // Base config unchanged
+        // base config (API 21+)
         AMediaFormat_setInt32(format, AMEDIAFORMAT_KEY_WIDTH, config.width);
         AMediaFormat_setInt32(format, AMEDIAFORMAT_KEY_HEIGHT, config.height);
         AMediaFormat_setInt32(format, AMEDIAFORMAT_KEY_BIT_RATE, config.bitrate * 1000);
-        AMediaFormat_setInt32(format, AMEDIAFORMAT_KEY_OPERATING_RATE, encodeFrameRate);
-        AMediaFormat_setInt32(format, AMEDIAFORMAT_KEY_CAPTURE_RATE, encodeFrameRate);
         AMediaFormat_setInt32(format, AMEDIAFORMAT_KEY_FRAME_RATE, encodeFrameRate);
         AMediaFormat_setInt32(format, "max-fps-to-encoder", encodeFrameRate);
-        AMediaFormat_setInt32(format, AMEDIAFORMAT_KEY_I_FRAME_INTERVAL, 3); // keyframe interval (seconds)
+        AMediaFormat_setInt32(format, AMEDIAFORMAT_KEY_I_FRAME_INTERVAL, 3);
         AMediaFormat_setInt32(format, AMEDIAFORMAT_KEY_COLOR_FORMAT, 2130708361); // COLOR_FormatSurface
-        AMediaFormat_setInt32(format, AMEDIAFORMAT_KEY_LATENCY, 0); // minimum latency
-        AMediaFormat_setInt32(format, AMEDIAFORMAT_KEY_COMPLEXITY, 10);
         AMediaFormat_setInt32(format, "max-bframes", 0);
+        // keys below are NDK-exported as __INTRODUCED_IN(28)
+        AMediaFormat_setInt32(format, "operating-rate", encodeFrameRate);
+        AMediaFormat_setInt32(format, "capture-rate", encodeFrameRate);
+        AMediaFormat_setInt32(format, "latency", 0);
+        AMediaFormat_setInt32(format, "complexity", 10);
 
-        // Set encoding config
         if (config.videoFormat == 1) {
             if (colorspace.bit_depth == 10) {
-                AMediaFormat_setInt32(format, AMEDIAFORMAT_KEY_PROFILE, 2); // HEVCProfileMain10
+                AMediaFormat_setInt32(format, "profile", 2); // HEVCProfileMain10
             } else {
-                AMediaFormat_setInt32(format, AMEDIAFORMAT_KEY_PROFILE, 1); // HEVCProfileMain
+                AMediaFormat_setInt32(format, "profile", 1); // HEVCProfileMain
             }
-            AMediaFormat_setInt32(format, AMEDIAFORMAT_KEY_LEVEL, 65536); // HEVCMainTierLevel51
+            AMediaFormat_setInt32(format, "level", 65536); // HEVCMainTierLevel51
         } else {
-            AMediaFormat_setInt32(format, AMEDIAFORMAT_KEY_PROFILE, 0x08); // HIGH profile
-            AMediaFormat_setInt32(format, AMEDIAFORMAT_KEY_LEVEL, 0x200); // Level 4.2
+            AMediaFormat_setInt32(format, "profile", 0x08); // HIGH profile
+            AMediaFormat_setInt32(format, "level", 0x200); // Level 4.2
             AMediaFormat_setInt32(format, "vendor.qti-ext-enc-low-latency.enable", 1);
         }
 
-        // Set color space
         switch (colorspace.colorspace) {
             case video::colorspace_e::rec601:
-                AMediaFormat_setInt32(format, AMEDIAFORMAT_KEY_COLOR_STANDARD, 4); // COLOR_STANDARD_BT601_NTSC
+                AMediaFormat_setInt32(format, "color-standard", 4); // COLOR_STANDARD_BT601_NTSC
                 break;
             case video::colorspace_e::rec709:
-                AMediaFormat_setInt32(format, AMEDIAFORMAT_KEY_COLOR_STANDARD, 1); // COLOR_STANDARD_BT709
+                AMediaFormat_setInt32(format, "color-standard", 1); // COLOR_STANDARD_BT709
                 break;
             case video::colorspace_e::bt2020:
             case video::colorspace_e::bt2020sdr:
-                AMediaFormat_setInt32(format, AMEDIAFORMAT_KEY_COLOR_STANDARD, 6); // COLOR_STANDARD_BT2020
+                AMediaFormat_setInt32(format, "color-standard", 6); // COLOR_STANDARD_BT2020
                 break;
         }
 
-        // Set color range
-        AMediaFormat_setInt32(format, AMEDIAFORMAT_KEY_COLOR_RANGE, 
+        AMediaFormat_setInt32(format, "color-range",
             colorspace.full_range ? 1 : 2); // 1=FULL, 2=LIMITED
 
-        // Set bit depth
         if (isHdr) {
-            AMediaFormat_setInt32(format, AMEDIAFORMAT_KEY_COLOR_TRANSFER, 6); // COLOR_TRANSFER_ST2084
+            AMediaFormat_setInt32(format, "color-transfer", 6); // COLOR_TRANSFER_ST2084
         } else {
-            AMediaFormat_setInt32(format, AMEDIAFORMAT_KEY_COLOR_TRANSFER, 3); // COLOR_TRANSFER_SDR_VIDEO
+            AMediaFormat_setInt32(format, "color-transfer", 3); // COLOR_TRANSFER_SDR_VIDEO
         }
 
-        // Print final media format color config
         int32_t colorStandard = 0, colorRange = 0, colorTransfer = 0;
-        AMediaFormat_getInt32(format, AMEDIAFORMAT_KEY_COLOR_STANDARD, &colorStandard);
-        AMediaFormat_getInt32(format, AMEDIAFORMAT_KEY_COLOR_RANGE, &colorRange);
-        AMediaFormat_getInt32(format, AMEDIAFORMAT_KEY_COLOR_TRANSFER, &colorTransfer);
-        
+        AMediaFormat_getInt32(format, "color-standard", &colorStandard);
+        AMediaFormat_getInt32(format, "color-range", &colorRange);
+        AMediaFormat_getInt32(format, "color-transfer", &colorTransfer);
+
         BOOST_LOG(info) << "Final media format color config:"sv;
         BOOST_LOG(info) << "  - COLOR_STANDARD: "sv << colorStandard;
         BOOST_LOG(info) << "  - COLOR_RANGE: "sv << colorRange << (colorRange == 1 ? " (FULL)" : " (LIMITED)");
@@ -473,13 +469,13 @@ namespace sunshine_callbacks {
         // Create encoder
         AMediaCodec *codec = AMediaCodec_createEncoderByType(config.videoFormat == 1 ? "video/hevc" : "video/avc");
         if (!codec) {
-           // Create encoder
+           // fallback encoder config
             AMediaFormat_setInt32(format, AMEDIAFORMAT_KEY_WIDTH, 1920);
             AMediaFormat_setInt32(format, AMEDIAFORMAT_KEY_HEIGHT, 1080);
-            AMediaFormat_setInt32(format, AMEDIAFORMAT_KEY_OPERATING_RATE, 60);
-            AMediaFormat_setInt32(format, AMEDIAFORMAT_KEY_CAPTURE_RATE, 60);
             AMediaFormat_setInt32(format, AMEDIAFORMAT_KEY_FRAME_RATE, 60);
             AMediaFormat_setInt32(format, "max-fps-to-encoder", 60);
+            AMediaFormat_setInt32(format, "operating-rate", 60);
+            AMediaFormat_setInt32(format, "capture-rate", 60);
             codec = AMediaCodec_createEncoderByType("video/avc");
         }
         if (!codec) {

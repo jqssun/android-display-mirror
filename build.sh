@@ -26,5 +26,5 @@ sed -i 's|return nil, fmt.Errorf("no video data port in SETUP response")|if rp :
 
 # might rewrite entire thing
 go get golang.org/x/mobile/bind 2>/dev/null || true;
-gomobile init && gomobile bind -v -target android -androidapi 28 -o ../../app/libs/airplaylib.aar ./airplaylib/ # -overlay $(realpath ../overlay.json)
+gomobile init && gomobile bind -v -target android -androidapi 26 -o ../../app/libs/airplaylib.aar ./airplaylib/ # -overlay $(realpath ../overlay.json)
 git reset --hard && git clean -fdx

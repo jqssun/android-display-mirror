@@ -1,0 +1,5 @@
+- Outbound AirPlay 2 (modern) or AirPlay 1 (legacy) screen mirroring to Apple devices or third-party AirPlay receivers
+- Outbound Moonlight streaming and remote control, with Sunshine server built in
+- DisplayLink USB output via USB 2 or USB 3 host mode
+- Each display sink is registered as a virtual display allowing other applications to launch activities on it
+- Touchscreen relay for remote pointer and keyboard input directed at the mirrored display
