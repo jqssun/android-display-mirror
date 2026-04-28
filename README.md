@@ -1,6 +1,6 @@
 # Screen Mirroring Manager for Android
 
-[![Stars](https://img.shields.io/github/stars/jqssun/android-display-mirror?label=stars&logo=GitHub)](https://github.com/jqssun/android-display-mirror)
+[![Stars](https://img.shields.io/github/stars/jqssun/android-display-mirror?label=stars&logo=GitHub)](https://github.com/jqssun/android-display-mirror/stargazers)
 [![GitHub](https://img.shields.io/github/downloads/jqssun/android-display-mirror/total?label=GitHub&logo=GitHub)](https://github.com/jqssun/android-display-mirror/releases)
 [![license](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://github.com/jqssun/android-display-mirror/blob/main/LICENSE)
 [![build](https://img.shields.io/github/actions/workflow/status/jqssun/android-display-mirror/apk.yml?label=build)](https://github.com/jqssun/android-display-mirror/actions/workflows/apk.yml)
@@ -12,6 +12,8 @@
 - [Moonlight](https://github.com/moonlight-stream) ([Nvidia GameStream](https://www.nvidia.com/en-us/support/gamestream/)) clients with remote control support via the built-in [Sunshine](https://github.com/lizardbyte/sunshine) server
 
 It can be used in conjunction with [**Extend**](https://github.com/jqssun/android-display-extend) to turn any connected display or sink device into a secondary display where you can cast and control any application. You can also use this with [**Android AirPlay**](https://github.com/jqssun/android-airplay-server) or [**Moonlight for Android**](https://github.com/moonlight-stream/moonlight-android) to create a dummay display that stays in Picture-in-Picture.
+
+<video loop src='https://github.com/user-attachments/assets/ae95585b-dd78-4e31-bc80-8cdb617dabe5' alt="demo" width="1200" style="display: block; margin: auto;"></video>
 
 ## Usage
 
