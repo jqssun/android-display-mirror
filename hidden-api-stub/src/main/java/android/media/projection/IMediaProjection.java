@@ -1,4 +1,3 @@
 package android.media.projection;
 
-public interface IMediaProjection {
-}
+public interface IMediaProjection {}

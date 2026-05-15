@@ -44,10 +44,11 @@ jobs:
       - name: Use Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.25"
+          go-version: "1.25.10"
 
       - name: Build
         run: |
+          export SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)
           echo ${{ secrets.STORE }} | base64 -d > upload.jks
           echo ${{ secrets.LOCAL }} | base64 -d > local.properties
           chmod +x ./build.sh ./gradlew

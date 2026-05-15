@@ -13,7 +13,6 @@ import (
 	"doubletake/internal/airplay"
 )
 
-// airplay receiver
 type Device struct {
 	Name     string
 	IP       string
@@ -21,7 +20,6 @@ type Device struct {
 	DeviceID string
 }
 
-// airplay session
 type EventHandler interface {
 	OnDeviceFound(deviceJSON string)
 	OnConnected()
@@ -31,7 +29,6 @@ type EventHandler interface {
 	OnLog(msg string)
 }
 
-// airplay connection
 type Session struct {
 	mu      sync.Mutex
 	client  *airplay.AirPlayClient

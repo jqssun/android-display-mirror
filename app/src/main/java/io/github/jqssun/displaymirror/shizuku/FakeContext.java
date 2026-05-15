@@ -8,87 +8,87 @@ import android.content.ContextWrapper;
 import android.content.IContentProvider;
 import android.os.Binder;
 import android.os.Process;
-
 import io.github.jqssun.displaymirror.job.AndroidVersions;
 
 public final class FakeContext extends ContextWrapper {
 
-    public static final String PACKAGE_NAME = "com.android.shell";
-    public static final int ROOT_UID = 0; // Like android.os.Process.ROOT_UID, but before API 29
+  public static final String PACKAGE_NAME = "com.android.shell";
+  public static final int ROOT_UID = 0; // like android.os.Process.ROOT_UID, but before API 29
 
-    private static final FakeContext INSTANCE = new FakeContext();
+  private static final FakeContext INSTANCE = new FakeContext();
 
-    public static FakeContext get() {
-        return INSTANCE;
-    }
+  public static FakeContext get() {
+    return INSTANCE;
+  }
 
-    private final ContentResolver contentResolver = new ContentResolver(this) {
+  private final ContentResolver contentResolver =
+      new ContentResolver(this) {
         @SuppressWarnings({"unused", "ProtectedMemberInFinalClass"})
         // @Override (but super-class method not visible)
         protected IContentProvider acquireProvider(Context c, String name) {
-            return ServiceManager.getActivityManager().getContentProviderExternal(name, new Binder());
+          return ServiceManager.getActivityManager().getContentProviderExternal(name, new Binder());
         }
 
         @SuppressWarnings("unused")
         // @Override (but super-class method not visible)
         public boolean releaseProvider(IContentProvider icp) {
-            return false;
+          return false;
         }
 
         @SuppressWarnings({"unused", "ProtectedMemberInFinalClass"})
         // @Override (but super-class method not visible)
         protected IContentProvider acquireUnstableProvider(Context c, String name) {
-            return null;
+          return null;
         }
 
         @SuppressWarnings("unused")
         // @Override (but super-class method not visible)
         public boolean releaseUnstableProvider(IContentProvider icp) {
-            return false;
+          return false;
         }
 
         @SuppressWarnings("unused")
         // @Override (but super-class method not visible)
         public void unstableProviderDied(IContentProvider icp) {
-            // ignore
+          // ignore
         }
-    };
+      };
 
-    private FakeContext() {
-        super(Workarounds.getSystemContext());
-    }
+  private FakeContext() {
+    super(Workarounds.getSystemContext());
+  }
 
-    @Override
-    public String getPackageName() {
-        return PACKAGE_NAME;
-    }
+  @Override
+  public String getPackageName() {
+    return PACKAGE_NAME;
+  }
 
-    @Override
-    public String getOpPackageName() {
-        return PACKAGE_NAME;
-    }
+  @Override
+  public String getOpPackageName() {
+    return PACKAGE_NAME;
+  }
 
-    @TargetApi(AndroidVersions.API_31_ANDROID_12)
-    @Override
-    public AttributionSource getAttributionSource() {
-        AttributionSource.Builder builder = new AttributionSource.Builder(Process.SHELL_UID);
-        builder.setPackageName("shell");
-        return builder.build();
-    }
+  @TargetApi(AndroidVersions.API_31_ANDROID_12)
+  @Override
+  public AttributionSource getAttributionSource() {
+    AttributionSource.Builder builder = new AttributionSource.Builder(Process.SHELL_UID);
+    builder.setPackageName("shell");
+    return builder.build();
+  }
 
-    // @Override to be added on SDK upgrade for Android 14
-    @SuppressWarnings("unused")
-    public int getDeviceId() {
-        return 0;
-    }
+  // @Override to be added on SDK upgrade for Android 14
+  @SuppressWarnings("unused")
+  public int getDeviceId() {
+    return 0;
+  }
 
-    @Override
-    public Context getApplicationContext() {
-        return this;
-    }
+  @Override
+  public Context getApplicationContext() {
+    return this;
+  }
 
-    @Override
-    public ContentResolver getContentResolver() {
-        return contentResolver;
-    }
+  @Override
+  public ContentResolver getContentResolver() {
+    return contentResolver;
+  }
 }

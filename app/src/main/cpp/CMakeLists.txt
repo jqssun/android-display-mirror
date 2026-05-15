@@ -2,20 +2,31 @@ cmake_minimum_required(VERSION 3.24.0)
 
 project("sunshine")
 
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffile-prefix-map=${CMAKE_SOURCE_DIR}=. -ffile-prefix-map=${CMAKE_BINARY_DIR}=. -ffile-prefix-map=${ANDROID_NDK}=.")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffile-prefix-map=${CMAKE_SOURCE_DIR}=. -ffile-prefix-map=${CMAKE_BINARY_DIR}=. -ffile-prefix-map=${ANDROID_NDK}=.")
+
 include(dependencies/Boost_Sunshine.cmake)
 add_subdirectory(dependencies/moonlight-common-c/enet)
 set(BUILD_OPENSSL ON CACHE BOOL "Build OpenSSL from source" FORCE)
 set(OPENSSL_BUILD_VERSION "3.5.5" CACHE STRING "OpenSSL version" FORCE)
 set(CROSS_ANDROID ON CACHE BOOL "Cross-compiling for Android" FORCE)
-set(FORWARD_ANDROID_NDK_ROOT "${ANDROID_NDK}" CACHE STRING "" FORCE) # CI
+set(FORWARD_ANDROID_NDK_ROOT "${ANDROID_NDK}" CACHE STRING "" FORCE) # ci
+list(PREPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 add_subdirectory(dependencies/openssl-cmake)
 add_subdirectory(dependencies/Simple-Web-Server)
 
-# Build opus from source
+# build opus from source
 set(OPUS_BUILD_TESTING OFF CACHE BOOL "" FORCE)
 set(OPUS_BUILD_PROGRAMS OFF CACHE BOOL "" FORCE)
 set(OPUS_INSTALL_PKG_CONFIG_MODULE OFF CACHE BOOL "" FORCE)
 set(OPUS_INSTALL_CMAKE_CONFIG_MODULE OFF CACHE BOOL "" FORCE)
+
+# pin opus version for fdroid
+set(__opus_version INCLUDED)
+function(get_package_version PACKAGE_VERSION PROJECT_VERSION)
+  set(${PACKAGE_VERSION} "unknown" PARENT_SCOPE)
+  set(${PROJECT_VERSION} "0" PARENT_SCOPE)
+endfunction()
 add_subdirectory(dependencies/opus)
 
 add_library(

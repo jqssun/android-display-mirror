@@ -17,20 +17,20 @@ func (s *Session) setupAirPlay2(ctx context.Context, client *airplay.AirPlayClie
 		return err
 	}
 	if err := client.Pair(ctx, pin); err != nil {
-		s.logf("[AIRPLAY] pairing failed: %v", err)
+		s.logf("[AIRPLAY2] pairing failed: %v", err)
 		if pinErr := client.StartPINDisplay(); pinErr != nil {
-			s.logf("[AIRPLAY] StartPINDisplay failed: %v", pinErr)
+			s.logf("[AIRPLAY2] StartPINDisplay failed: %v", pinErr)
 		}
 		client.Close()
 		s.handler.OnPinRequired()
 		return err
 	}
-	s.logf("[AIRPLAY] pairing succeeded")
+	s.logf("[AIRPLAY2] pairing succeeded")
 
 	if err := client.FairPlaySetup(ctx); err != nil {
-		s.logf("[AIRPLAY] FairPlay setup FAILED: %v", err)
+		s.logf("[AIRPLAY2] FairPlay setup failed: %v", err)
 	} else {
-		s.logf("[AIRPLAY] FairPlay setup succeeded")
+		s.logf("[AIRPLAY2] FairPlay setup succeeded")
 	}
 	return nil
 }

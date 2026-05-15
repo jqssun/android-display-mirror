@@ -1,4 +1,3 @@
 package android.app;
 
-public class ContextImpl {
-}
+public class ContextImpl {}

@@ -18,8 +18,8 @@ android {
         applicationId "io.github.jqssun.displaymirror"
         minSdk 26
         targetSdk 35
-        versionCode 20
-        versionName "0.0.20"
+        versionCode 21
+        versionName "0.0.21"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -32,6 +32,11 @@ android {
                 cppFlags ''
             }
         }
+    }
+
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
     }
 
     if (localProps.containsKey("storeFile")) {
@@ -72,6 +77,11 @@ android {
             version "4.1.2"
         }
     }
+}
+
+tasks.withType(Zip).configureEach {
+    reproducibleFileOrder = true
+    preserveFileTimestamps = false
 }
 
 dependencies {

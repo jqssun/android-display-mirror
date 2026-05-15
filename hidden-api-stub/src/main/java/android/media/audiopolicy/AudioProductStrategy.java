@@ -1,4 +1,3 @@
 package android.media.audiopolicy;
 
-public class AudioProductStrategy {
-}
+public class AudioProductStrategy {}

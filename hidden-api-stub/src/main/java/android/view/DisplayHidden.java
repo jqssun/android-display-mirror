@@ -4,7 +4,7 @@ import dev.rikka.tools.refine.RefineAs;
 
 @RefineAs(Display.class)
 public class DisplayHidden {
-    public int getType() {
-        throw new RuntimeException("stub!");
-    }
+  public int getType() {
+    throw new RuntimeException("stub!");
+  }
 }

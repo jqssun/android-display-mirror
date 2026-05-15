@@ -9,14 +9,11 @@ import android.media.projection.MediaProjection;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.Surface;
-
 import androidx.lifecycle.MutableLiveData;
-
 import io.github.jqssun.displaymirror.job.Job;
 import io.github.jqssun.displaymirror.job.YieldException;
 import io.github.jqssun.displaymirror.shizuku.IUserService;
 import io.github.jqssun.displaymirror.shizuku.UserService;
-
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,331 +21,343 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import rikka.shizuku.Shizuku;
 
 public class State {
-    // Job modes — each mode gets its own independent job slot
-    public static final String MODE_MOONLIGHT = "moonlight";
-    public static final String MODE_DISPLAYLINK = "displaylink";
-    public static final String MODE_MIRROR = "mirror";
-    public static final String MODE_UTILITY = "utility"; // for non-mode jobs like FetchLogAndShare
+  // job modes: each mode gets its own independent job slot
+  public static final String MODE_MOONLIGHT = "moonlight";
+  public static final String MODE_DISPLAYLINK = "displaylink";
+  public static final String MODE_MIRROR = "mirror";
+  public static final String MODE_UTILITY = "utility"; // for non-mode jobs like FetchLogAndShare
 
-    // WeakReference to avoid leaking the activity
-    private static WeakReference<MirrorMainActivity> currentActivity = new WeakReference<>(null);
-    public static final MutableLiveData<MirrorUiState> uiState = new MutableLiveData<>(new MirrorUiState());
-    public static String serverUuid;
-    private static final Map<String, Job> jobs = new HashMap<>();
-    // Legacy single-job alias — used by code that doesn't specify a mode
-    private static Job currentJob;
-    public static List<String> logs = java.util.Collections.synchronizedList(new ArrayList<>());
-    public static DisplaylinkState displaylinkState = new DisplaylinkState();
-    private static MediaProjection mediaProjection;
-    public static MediaProjection mediaProjectionInUse;
-    public static int lastSingleAppDisplay;
-    private static int airPlayVirtualDisplayId = -1;
-    private static Surface airPlaySurface;
-    public static String displaylinkDeviceName;
-    public static VirtualDisplay mirrorVirtualDisplay;
-    public static volatile IUserService userService;
-    public static Set<String> discoveredMirrorClients = new HashSet<>();
+  // weak reference to avoid leaking the activity
+  private static WeakReference<MirrorMainActivity> currentActivity = new WeakReference<>(null);
+  public static final MutableLiveData<MirrorUiState> uiState =
+      new MutableLiveData<>(new MirrorUiState());
+  public static String serverUuid;
+  private static final Map<String, Job> jobs = new HashMap<>();
+  // legacy single-job alias: used by code that doesn't specify a mode
+  private static Job currentJob;
+  public static List<String> logs = java.util.Collections.synchronizedList(new ArrayList<>());
+  public static DisplaylinkState displaylinkState = new DisplaylinkState();
+  private static MediaProjection mediaProjection;
+  public static MediaProjection mediaProjectionInUse;
+  public static int lastSingleAppDisplay;
+  private static int airPlayVirtualDisplayId = -1;
+  private static Surface airPlaySurface;
+  public static String displaylinkDeviceName;
+  public static VirtualDisplay mirrorVirtualDisplay;
+  public static volatile IUserService userService;
+  public static Set<String> discoveredMirrorClients = new HashSet<>();
 
-    public static MirrorMainActivity getCurrentActivity() {
-        if (currentActivity == null) {
-            return null;
-        }
-        return currentActivity.get();
+  public static MirrorMainActivity getCurrentActivity() {
+    if (currentActivity == null) {
+      return null;
     }
+    return currentActivity.get();
+  }
 
-    public static void setCurrentActivity(MirrorMainActivity activity) {
-        currentActivity = new WeakReference<>(activity);
-    }
+  public static void setCurrentActivity(MirrorMainActivity activity) {
+    currentActivity = new WeakReference<>(activity);
+  }
 
-    public static final ServiceConnection userServiceConnection = new ServiceConnection() {
+  public static final ServiceConnection userServiceConnection =
+      new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder binder) {
-            State.log("user service connected");
-            State.userService = IUserService.Stub.asInterface(binder);
-            if (State.currentActivity != null && State.currentActivity.get() != null) {
-                MirrorMainActivity context = State.currentActivity.get();
-                context.runOnUiThread(() -> {
-                    State.resumeJob();
+          State.log("user service connected");
+          State.userService = IUserService.Stub.asInterface(binder);
+          if (State.currentActivity != null && State.currentActivity.get() != null) {
+            MirrorMainActivity context = State.currentActivity.get();
+            context.runOnUiThread(
+                () -> {
+                  State.resumeJob();
                 });
+          }
+          SharedPreferences preferences = Pref.getPreferences();
+          if (preferences != null
+              && preferences.getInt("AUTO_GRANT_PERMISSION", 0) != BuildConfig.VERSION_CODE) {
+            preferences.edit().putInt("AUTO_GRANT_PERMISSION", BuildConfig.VERSION_CODE).apply();
+            State.log("Granted media projection and overlay permissions");
+            try {
+              State.userService.executeCommand(
+                  "appops set io.github.jqssun.displaymirror PROJECT_MEDIA allow");
+              State.userService.executeCommand(
+                  "appops set io.github.jqssun.displaymirror SYSTEM_ALERT_WINDOW allow");
+            } catch (Throwable e) {
+              // ignore
             }
-            SharedPreferences preferences = Pref.getPreferences();
-            if (preferences != null && preferences.getInt("AUTO_GRANT_PERMISSION", 0) != BuildConfig.VERSION_CODE) {
-                preferences.edit().putInt("AUTO_GRANT_PERMISSION", BuildConfig.VERSION_CODE).apply();
-                State.log("Granted media projection and overlay permissions");
-                try {
-                    State.userService.executeCommand("appops set io.github.jqssun.displaymirror PROJECT_MEDIA allow");
-                    State.userService.executeCommand("appops set io.github.jqssun.displaymirror SYSTEM_ALERT_WINDOW allow");
-                } catch (Throwable e) {
-                    // ignore
-                }
-            }
+          }
         }
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
-            State.log("user service disconnected");
+          State.log("user service disconnected");
         }
-    };
+      };
 
-    public static Shizuku.UserServiceArgs userServiceArgs = new Shizuku.UserServiceArgs(new ComponentName(BuildConfig.APPLICATION_ID, UserService.class.getName()))
-            .daemon(true)
-            .tag("mirror")
-            .processNameSuffix("mirror")
-            .debuggable(false)
-            .version(BuildConfig.VERSION_CODE);
+  public static Shizuku.UserServiceArgs userServiceArgs =
+      new Shizuku.UserServiceArgs(
+              new ComponentName(BuildConfig.APPLICATION_ID, UserService.class.getName()))
+          .daemon(true)
+          .tag("mirror")
+          .processNameSuffix("mirror")
+          .debuggable(false)
+          .version(BuildConfig.VERSION_CODE);
 
-    private static final android.os.Handler mainHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+  private static final android.os.Handler mainHandler =
+      new android.os.Handler(android.os.Looper.getMainLooper());
 
-    public static boolean isJobRunning() {
-        return currentJob != null;
+  public static boolean isJobRunning() {
+    return currentJob != null;
+  }
+
+  public static boolean isJobRunning(String mode) {
+    return jobs.containsKey(mode);
+  }
+
+  /** start a job in a specific mode slot. Different modes can run concurrently. */
+  public static void startNewJob(String mode, Job job) {
+    if (jobs.containsKey(mode)) {
+      State.log(
+          "Task " + jobs.get(mode).getClass().getSimpleName() + " is already running for " + mode);
+      return;
     }
-
-    public static boolean isJobRunning(String mode) {
-        return jobs.containsKey(mode);
+    jobs.put(mode, job);
+    // keep legacy alias pointing at most recent job for backward compat
+    currentJob = job;
+    try {
+      State.log("Starting task " + job.getClass().getSimpleName() + " [" + mode + "]");
+      job.start();
+      State.log("Task " + job.getClass().getSimpleName() + " completed [" + mode + "]");
+      jobs.remove(mode);
+      if (currentJob == job) currentJob = null;
+    } catch (YieldException e) {
+      State.log(
+          "Task " + job.getClass().getSimpleName() + " yielded [" + mode + "], " + e.getMessage());
+    } catch (RuntimeException e) {
+      State.log("Task " + job.getClass().getSimpleName() + " failed [" + mode + "]");
+      String stackTrace = android.util.Log.getStackTraceString(e);
+      State.log("Stack trace: " + stackTrace);
+      jobs.remove(mode);
+      if (currentJob == job) currentJob = null;
     }
+  }
 
-    /** Start a job in a specific mode slot. Different modes can run concurrently. */
-    public static void startNewJob(String mode, Job job) {
-        if (jobs.containsKey(mode)) {
-            State.log("Task " + jobs.get(mode).getClass().getSimpleName() + " is already running for " + mode);
-            return;
-        }
-        jobs.put(mode, job);
-        // Keep legacy alias pointing at most recent job for backward compat
-        currentJob = job;
-        try {
-            State.log("Starting task " + job.getClass().getSimpleName() + " [" + mode + "]");
-            job.start();
-            State.log("Task " + job.getClass().getSimpleName() + " completed [" + mode + "]");
-            jobs.remove(mode);
-            if (currentJob == job) currentJob = null;
-        } catch (YieldException e) {
-            State.log("Task " + job.getClass().getSimpleName() + " yielded [" + mode + "], " + e.getMessage());
-        } catch (RuntimeException e) {
-            State.log("Task " + job.getClass().getSimpleName() + " failed [" + mode + "]");
-            String stackTrace = android.util.Log.getStackTraceString(e);
-            State.log("Stack trace: " + stackTrace);
-            jobs.remove(mode);
-            if (currentJob == job) currentJob = null;
-        }
+  /** legacy: start a job in the utility slot (blocks only other utility jobs). */
+  public static void startNewJob(Job job) {
+    startNewJob(MODE_UTILITY, job);
+  }
+
+  /** resume all yielded jobs (e.g. after permission grant). */
+  public static void resumeJob() {
+    // resume legacy job
+    if (currentJob == null) return;
+    Job job = currentJob;
+    try {
+      State.log("Resuming task " + job.getClass().getSimpleName());
+      job.start();
+      State.log("Task " + job.getClass().getSimpleName() + " completed");
+      // remove from mode map
+      jobs.values().remove(job);
+      if (currentJob == job) currentJob = null;
+    } catch (YieldException e) {
+      State.log("Task " + job.getClass().getSimpleName() + " yielded, " + e.getMessage());
+    } catch (RuntimeException e) {
+      State.log("Task " + job.getClass().getSimpleName() + " failed to resume");
+      String stackTrace = android.util.Log.getStackTraceString(e);
+      State.log("Stack trace: " + stackTrace);
+      jobs.values().remove(job);
+      if (currentJob == job) currentJob = null;
     }
+  }
 
-    /** Legacy: start a job in the utility slot (blocks only other utility jobs). */
-    public static void startNewJob(Job job) {
-        startNewJob(MODE_UTILITY, job);
+  /** resume a job in a specific mode slot. */
+  public static void resumeJob(String mode) {
+    Job job = jobs.get(mode);
+    if (job == null) {
+      resumeJob();
+      return;
     }
-
-    /** Resume all yielded jobs (e.g. after permission grant). */
-    public static void resumeJob() {
-        // Resume legacy job
-        if (currentJob == null) return;
-        Job job = currentJob;
-        try {
-            State.log("Resuming task " + job.getClass().getSimpleName());
-            job.start();
-            State.log("Task " + job.getClass().getSimpleName() + " completed");
-            // Remove from mode map
-            jobs.values().remove(job);
-            if (currentJob == job) currentJob = null;
-        } catch (YieldException e) {
-            State.log("Task " + job.getClass().getSimpleName() + " yielded, " + e.getMessage());
-        } catch (RuntimeException e) {
-            State.log("Task " + job.getClass().getSimpleName() + " failed to resume");
-            String stackTrace = android.util.Log.getStackTraceString(e);
-            State.log("Stack trace: " + stackTrace);
-            jobs.values().remove(job);
-            if (currentJob == job) currentJob = null;
-        }
+    currentJob = job; // update legacy alias
+    try {
+      State.log("Resuming task " + job.getClass().getSimpleName() + " [" + mode + "]");
+      job.start();
+      State.log("Task " + job.getClass().getSimpleName() + " completed [" + mode + "]");
+      jobs.remove(mode);
+      if (currentJob == job) currentJob = null;
+    } catch (YieldException e) {
+      State.log(
+          "Task " + job.getClass().getSimpleName() + " yielded [" + mode + "], " + e.getMessage());
+    } catch (RuntimeException e) {
+      State.log("Task " + job.getClass().getSimpleName() + " failed to resume [" + mode + "]");
+      String stackTrace = android.util.Log.getStackTraceString(e);
+      State.log("Stack trace: " + stackTrace);
+      jobs.remove(mode);
+      if (currentJob == job) currentJob = null;
     }
+  }
 
-    /** Resume a job in a specific mode slot. */
-    public static void resumeJob(String mode) {
-        Job job = jobs.get(mode);
-        if (job == null) {
-            resumeJob();
-            return;
-        }
-        currentJob = job; // update legacy alias
-        try {
-            State.log("Resuming task " + job.getClass().getSimpleName() + " [" + mode + "]");
-            job.start();
-            State.log("Task " + job.getClass().getSimpleName() + " completed [" + mode + "]");
-            jobs.remove(mode);
-            if (currentJob == job) currentJob = null;
-        } catch (YieldException e) {
-            State.log("Task " + job.getClass().getSimpleName() + " yielded [" + mode + "], " + e.getMessage());
-        } catch (RuntimeException e) {
-            State.log("Task " + job.getClass().getSimpleName() + " failed to resume [" + mode + "]");
-            String stackTrace = android.util.Log.getStackTraceString(e);
-            State.log("Stack trace: " + stackTrace);
-            jobs.remove(mode);
-            if (currentJob == job) currentJob = null;
-        }
+  public static void clearJob(String mode) {
+    Job job = jobs.remove(mode);
+    if (job != null && currentJob == job) currentJob = null;
+  }
+
+  public static void resumeJobLater(long delayMillis) {
+    if (currentActivity.get() != null) {
+      mainHandler.postDelayed(State::resumeJob, delayMillis);
     }
+  }
 
-    public static void clearJob(String mode) {
-        Job job = jobs.remove(mode);
-        if (job != null && currentJob == job) currentJob = null;
+  public static void resumeJobLater(String mode, long delayMillis) {
+    if (currentActivity.get() != null) {
+      mainHandler.postDelayed(() -> resumeJob(mode), delayMillis);
     }
+  }
 
-    public static void resumeJobLater(long delayMillis) {
-        if (currentActivity.get() != null) {
-            mainHandler.postDelayed(State::resumeJob, delayMillis);
-        }
+  private static final java.util.concurrent.atomic.AtomicInteger _logVersion =
+      new java.util.concurrent.atomic.AtomicInteger(0);
+  public static final MutableLiveData<Integer> logVersion = new MutableLiveData<>(0);
+
+  public static void log(String message) {
+    logs.add(message);
+    Log.i("Mirror", message);
+    logVersion.postValue(_logVersion.incrementAndGet());
+  }
+
+  public static MediaProjection getMediaProjection() {
+    return mediaProjection;
+  }
+
+  public static void setMediaProjection(MediaProjection newMediaProjection) {
+    if (newMediaProjection == null) {
+      Log.d("State", "MediaProjection used");
+      mediaProjection = null;
+    } else {
+      Log.d("State", "MediaProjection acquired");
+      mediaProjection = newMediaProjection;
+      mediaProjectionInUse = newMediaProjection;
     }
+  }
 
-    public static void resumeJobLater(String mode, long delayMillis) {
-        if (currentActivity.get() != null) {
-            mainHandler.postDelayed(() -> resumeJob(mode), delayMillis);
-        }
+  public static int getDisplaylinkVirtualDisplayId() {
+    if (displaylinkState.getVirtualDisplay() == null) {
+      return -1;
     }
+    return displaylinkState.getVirtualDisplay().getDisplay().getDisplayId();
+  }
 
-    private static final java.util.concurrent.atomic.AtomicInteger _logVersion = new java.util.concurrent.atomic.AtomicInteger(0);
-    public static final MutableLiveData<Integer> logVersion = new MutableLiveData<>(0);
+  public static int getAirPlayVirtualDisplayId() {
+    return airPlayVirtualDisplayId;
+  }
 
-    public static void log(String message) {
-        logs.add(message);
-        Log.i("Mirror", message);
-        logVersion.postValue(_logVersion.incrementAndGet());
+  public static Surface getAirPlaySurface() {
+    return airPlaySurface;
+  }
+
+  public static void setAirPlayTouchTarget(int displayId, Surface surface) {
+    boolean changed = airPlayVirtualDisplayId != displayId || airPlaySurface != surface;
+    airPlayVirtualDisplayId = displayId;
+    airPlaySurface = surface;
+    if (changed) {
+      refreshMainActivity();
     }
+  }
 
-    public static MediaProjection getMediaProjection() {
-        return mediaProjection;
-    }
+  public static void clearAirPlayTouchTarget() {
+    setAirPlayTouchTarget(-1, null);
+  }
 
-    public static void setMediaProjection(MediaProjection newMediaProjection) {
-        if (newMediaProjection == null) {
-            Log.d("State", "MediaProjection used");
-            mediaProjection = null;
-        } else {
-            Log.d("State", "MediaProjection acquired");
-            mediaProjection = newMediaProjection;
-            mediaProjectionInUse = newMediaProjection;
-        }
+  public static void setAirPlayVirtualDisplayId(int displayId) {
+    if (airPlayVirtualDisplayId == displayId) {
+      return;
     }
+    airPlayVirtualDisplayId = displayId;
+    refreshMainActivity();
+  }
 
-    public static int getDisplaylinkVirtualDisplayId() {
-        if (displaylinkState.getVirtualDisplay() == null) {
-            return -1;
-        }
-        return displaylinkState.getVirtualDisplay().getDisplay().getDisplayId();
+  public static int getMoonlightManagedDisplayId() {
+    int mirrorDisplayId = getMirrorVirtualDisplayId();
+    if (mirrorDisplayId > 0) {
+      return mirrorDisplayId;
     }
+    return lastSingleAppDisplay > 0 ? lastSingleAppDisplay : -1;
+  }
 
-    public static int getAirPlayVirtualDisplayId() {
-        return airPlayVirtualDisplayId;
+  public static void setLastSingleAppDisplay(int displayId) {
+    if (lastSingleAppDisplay == displayId) {
+      return;
     }
+    lastSingleAppDisplay = displayId;
+    refreshMainActivity();
+  }
 
-    public static Surface getAirPlaySurface() {
-        return airPlaySurface;
-    }
+  public static void clearLastSingleAppDisplay() {
+    setLastSingleAppDisplay(0);
+  }
 
-    public static void setAirPlayTouchTarget(int displayId, Surface surface) {
-        boolean changed = airPlayVirtualDisplayId != displayId || airPlaySurface != surface;
-        airPlayVirtualDisplayId = displayId;
-        airPlaySurface = surface;
-        if (changed) {
-            refreshMainActivity();
-        }
+  public static void setMirrorVirtualDisplay(VirtualDisplay virtualDisplay) {
+    if (mirrorVirtualDisplay == virtualDisplay) {
+      return;
     }
+    mirrorVirtualDisplay = virtualDisplay;
+    refreshMainActivity();
+  }
 
-    public static void clearAirPlayTouchTarget() {
-        setAirPlayTouchTarget(-1, null);
+  public static void stopMirrorVirtualDisplay() {
+    if (mirrorVirtualDisplay != null) {
+      mirrorVirtualDisplay.release();
+      mirrorVirtualDisplay = null;
+      refreshMainActivity();
     }
+  }
 
-    public static void setAirPlayVirtualDisplayId(int displayId) {
-        if (airPlayVirtualDisplayId == displayId) {
-            return;
-        }
-        airPlayVirtualDisplayId = displayId;
-        refreshMainActivity();
+  public static int getMirrorVirtualDisplayId() {
+    if (mirrorVirtualDisplay == null) {
+      return -1;
     }
+    return mirrorVirtualDisplay.getDisplay().getDisplayId();
+  }
 
-    public static int getMoonlightManagedDisplayId() {
-        int mirrorDisplayId = getMirrorVirtualDisplayId();
-        if (mirrorDisplayId > 0) {
-            return mirrorDisplayId;
-        }
-        return lastSingleAppDisplay > 0 ? lastSingleAppDisplay : -1;
+  public static void unbindUserService() {
+    try {
+      Shizuku.unbindUserService(State.userServiceArgs, userServiceConnection, false);
+      State.userService = null;
+    } catch (Exception e) {
+      // ignore
     }
+  }
 
-    public static void setLastSingleAppDisplay(int displayId) {
-        if (lastSingleAppDisplay == displayId) {
-            return;
-        }
-        lastSingleAppDisplay = displayId;
-        refreshMainActivity();
+  public static void refreshMainActivity() {
+    MirrorMainActivity mirrorMainActivity = currentActivity.get();
+    if (mirrorMainActivity != null) {
+      mirrorMainActivity.runOnUiThread(mirrorMainActivity::refresh);
     }
+  }
 
-    public static void clearLastSingleAppDisplay() {
-        setLastSingleAppDisplay(0);
-    }
+  public static void showErrorStatus(String msg) {
+    State.log(msg);
+    MirrorUiState newUiState = new MirrorUiState();
+    newUiState.errorStatusText = msg;
+    State.uiState.setValue(newUiState);
+  }
 
-    public static void setMirrorVirtualDisplay(VirtualDisplay virtualDisplay) {
-        if (mirrorVirtualDisplay == virtualDisplay) {
-            return;
-        }
-        mirrorVirtualDisplay = virtualDisplay;
-        refreshMainActivity();
+  public static Context getContext() {
+    if (currentActivity != null && currentActivity.get() != null) {
+      return currentActivity.get();
     }
+    if (SunshineService.instance != null) {
+      return SunshineService.instance;
+    }
+    return null;
+  }
 
-    public static void stopMirrorVirtualDisplay() {
-        if (mirrorVirtualDisplay != null) {
-            mirrorVirtualDisplay.release();
-            mirrorVirtualDisplay = null;
-            refreshMainActivity();
-        }
+  public static void bindUserService() {
+    try {
+      Shizuku.peekUserService(State.userServiceArgs, State.userServiceConnection);
+      Shizuku.bindUserService(State.userServiceArgs, State.userServiceConnection);
+    } catch (Exception e) {
+      State.log("bindUserService failed: " + e.getMessage());
     }
-
-    public static int getMirrorVirtualDisplayId() {
-        if (mirrorVirtualDisplay == null) {
-            return -1;
-        }
-        return mirrorVirtualDisplay.getDisplay().getDisplayId();
-    }
-
-    public static void unbindUserService() {
-        try {
-            Shizuku.unbindUserService(State.userServiceArgs, userServiceConnection, false);
-            State.userService = null;
-        } catch (Exception e) {
-            // ignore
-        }
-    }
-
-    public static void refreshMainActivity() {
-        MirrorMainActivity mirrorMainActivity = currentActivity.get();
-        if (mirrorMainActivity != null) {
-            mirrorMainActivity.runOnUiThread(mirrorMainActivity::refresh);
-        }
-    }
-
-    public static void showErrorStatus(String msg) {
-        State.log(msg);
-        MirrorUiState newUiState = new MirrorUiState();
-        newUiState.errorStatusText = msg;
-        State.uiState.setValue(newUiState);
-    }
-
-    public static Context getContext() {
-        if (currentActivity != null && currentActivity.get() != null) {
-            return currentActivity.get();
-        }
-        if (SunshineService.instance != null) {
-            return SunshineService.instance;
-        }
-        return null;
-    }
-
-    public static void bindUserService() {
-        try {
-            Shizuku.peekUserService(State.userServiceArgs, State.userServiceConnection);
-            Shizuku.bindUserService(State.userServiceArgs, State.userServiceConnection);
-        } catch (Exception e) {
-            State.log("bindUserService failed: " + e.getMessage());
-        }
-    }
+  }
 }

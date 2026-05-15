@@ -1,4 +1,3 @@
 package android.hardware.input;
 
-public class InputDeviceIdentifier {
-}
+public class InputDeviceIdentifier {}
