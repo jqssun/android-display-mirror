@@ -9,6 +9,7 @@ import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.IBinder;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.system.Os;
 import android.util.Log;
@@ -70,8 +71,22 @@ public class UserService extends IUserService.Stub {
   }
 
   @Override
-  public String fetchLogs() throws RemoteException {
-    return executeCommand("logcat -d");
+  public void fetchLogs(ParcelFileDescriptor sink) throws RemoteException {
+    try (java.io.OutputStream out = new ParcelFileDescriptor.AutoCloseOutputStream(sink)) {
+      Process process = new ProcessBuilder("logcat", "-d").redirectErrorStream(true).start();
+      try (java.io.InputStream in = process.getInputStream()) {
+        byte[] buf = new byte[8192];
+        int n;
+        while ((n = in.read(buf)) != -1) {
+          out.write(buf, 0, n);
+        }
+      }
+      out.flush();
+      process.waitFor();
+    } catch (Exception e) {
+      Log.e("UserService", "logcat -d failed", e);
+      throw new RemoteException("Failed to execute logcat -d: " + e.getMessage());
+    }
   }
 
   @Override
@@ -188,7 +203,7 @@ public class UserService extends IUserService.Stub {
               while (listenVolumeKey) {
                 try {
                   Ln.i("Run getevent to detect volume key pressed");
-                  listenVolumeKeyProcess = Runtime.getRuntime().exec("getevent");
+                  listenVolumeKeyProcess = Runtime.getRuntime().exec(new String[] {"getevent"});
                   java.io.BufferedReader reader =
                       new java.io.BufferedReader(
                           new java.io.InputStreamReader(listenVolumeKeyProcess.getInputStream()));

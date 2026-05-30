@@ -134,10 +134,9 @@
 
     <!-- FetchLogAndShare -->
     <string name="cannot_start_user_service">Failed to start user service to get logs</string>
-    <string name="grant_file_permission">File permissions required</string>
-    <string name="log_file_not_generated">Log file not generated</string>
+    <string name="no_logs_to_export">No logs to export</string>
     <string name="share_log_file">Share log file</string>
-    <string name="check_log_file_export">Check if the \'Mirror.log\' file has been exported in the download directory</string>
+    <string name="log_export_failed">Failed to export logs</string>
 
     <!-- APK Import -->
     <string name="auto_import_displaylink_libs">Automatically download and import libraries</string>

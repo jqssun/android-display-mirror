@@ -1,5 +1,6 @@
 package io.github.jqssun.displaymirror.shizuku;
 
+import android.os.ParcelFileDescriptor;
 import android.view.Surface;
 
 interface IUserService {
@@ -8,7 +9,7 @@ interface IUserService {
 
     void exit() = 1; // Exit method defined by user
 
-    String fetchLogs() = 2;
+    void fetchLogs(in ParcelFileDescriptor sink) = 2;
 
     String executeCommand(String command) = 3;
 

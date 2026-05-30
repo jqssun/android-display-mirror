@@ -54,7 +54,6 @@ Mirror gets pixels onto a display. What application runs on it, where it renders
 | Untrusted virtual display | F | 26 (`MediaProjection.createVirtualDisplay`) |
 | Application mirroring | N | 26 (`ActivityOptions.setLaunchDisplayId`) <br> 29 (`ActivityManager.isActivityStartAllowedOnDisplay`) |
 | Prevent auto-lock | R | 26 (`WRITE_SECURE_SETTINGS`) |
-| Sharing logs | R | 26 (base) <br> 30 (`MANAGE_EXTERNAL_STORAGE`) |
 | Disable USB audio output | R | 26 (`IAudioService.setWiredDeviceConnectionState`) <br> 33 (`IAudioService.getDevicesForAttributes`) |
 | Display hotplug monitor | I | 26 (`DisplayManager.DisplayListener`) |
 

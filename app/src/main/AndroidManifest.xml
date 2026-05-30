@@ -8,23 +8,19 @@
         tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
     <uses-feature android:name="android.hardware.usb.host" />
-    <uses-permission android:name="android.permission.USB_PERMISSION" />
-    <uses-permission
-        android:name="android.permission.QUERY_ALL_PACKAGES"
-        tools:ignore="QueryAllPackagesPermission" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 
+    <permission
+        android:name="io.github.jqssun.displaymirror.permission.TOUCHSCREEN_BRIDGE"
+        android:protectionLevel="signature" />
+    <uses-permission android:name="io.github.jqssun.displaymirror.permission.TOUCHSCREEN_BRIDGE" />
+
     <application
-     android:requestLegacyExternalStorage="true"
         android:allowBackup="true"
         android:enableOnBackInvokedCallback="true"
         android:icon="@mipmap/ic_launcher"
@@ -69,6 +65,7 @@
         <activity
             android:name=".TouchscreenActivity"
             android:exported="true"
+            android:permission="io.github.jqssun.displaymirror.permission.TOUCHSCREEN_BRIDGE"
             android:theme="@style/AppTheme" >
             <intent-filter>
                 <action android:name="io.github.jqssun.displaymirror.action.OPEN_TOUCHSCREEN" />
@@ -97,7 +94,8 @@
         <provider
             android:name=".MirrorTouchscreenProvider"
             android:authorities="${applicationId}.touchscreen"
-            android:exported="true" />
+            android:exported="true"
+            android:permission="io.github.jqssun.displaymirror.permission.TOUCHSCREEN_BRIDGE" />
         
         <service
             android:name=".SunshineService"
@@ -115,9 +113,6 @@
     </application>
 
     <queries>
-        <intent>
-            <action android:name="android.intent.action.MAIN" />
-            <category android:name="android.intent.category.LAUNCHER" />
-        </intent>
+        <package android:name="io.github.jqssun.displayextend" />
     </queries>
 </manifest>

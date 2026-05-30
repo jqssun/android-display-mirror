@@ -3,10 +3,8 @@ package io.github.jqssun.displaymirror.job;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
-import android.os.Environment;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
-import android.provider.Settings;
 import android.widget.Toast;
 import androidx.core.content.FileProvider;
 import io.github.jqssun.displaymirror.R;
@@ -44,48 +42,28 @@ public class FetchLogAndShare implements Job {
       return;
     }
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-      if (!Environment.isExternalStorageManager()) {
-        Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
-        State.getContext().startActivity(intent);
-        Toast.makeText(State.getContext(), R.string.grant_file_permission, Toast.LENGTH_LONG)
-            .show();
-        return;
-      }
-    }
-
     try {
-      File downloadLogFile =
-          new File(
-              android.os.Environment.getExternalStoragePublicDirectory(
-                  android.os.Environment.DIRECTORY_DOWNLOADS),
-              "Mirror.log");
-
-      if (downloadLogFile.exists()) {
-        downloadLogFile.delete();
+      File logFile = new File(State.getContext().getCacheDir(), "Mirror.log");
+      try (ParcelFileDescriptor sink =
+          ParcelFileDescriptor.open(
+              logFile,
+              ParcelFileDescriptor.MODE_CREATE
+                  | ParcelFileDescriptor.MODE_WRITE_ONLY
+                  | ParcelFileDescriptor.MODE_TRUNCATE)) {
+        State.userService.fetchLogs(sink);
       }
 
-      State.userService.fetchLogs();
-
-      if (!downloadLogFile.exists()) {
-        Toast.makeText(State.getContext(), R.string.log_file_not_generated, Toast.LENGTH_SHORT)
+      if (logFile.length() == 0) {
+        Toast.makeText(State.getContext(), R.string.no_logs_to_export, Toast.LENGTH_SHORT)
             .show();
         return;
       }
-
-      File cacheDir = State.getContext().getCacheDir();
-      File cacheCopyFile = new File(cacheDir, "Mirror.log");
-
-      java.nio.file.Files.copy(
-          downloadLogFile.toPath(),
-          cacheCopyFile.toPath(),
-          java.nio.file.StandardCopyOption.REPLACE_EXISTING);
 
       Intent shareIntent = new Intent(Intent.ACTION_SEND);
       shareIntent.setType("text/plain");
       Uri fileUri =
           FileProvider.getUriForFile(
-              State.getContext(), State.getContext().getPackageName() + ".provider", cacheCopyFile);
+              State.getContext(), State.getContext().getPackageName() + ".provider", logFile);
       shareIntent.putExtra(Intent.EXTRA_STREAM, fileUri);
       shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
       State.getContext()
@@ -94,7 +72,7 @@ public class FetchLogAndShare implements Job {
                   shareIntent, State.getContext().getString(R.string.share_log_file)));
 
     } catch (RemoteException | IOException e) {
-      Toast.makeText(State.getContext(), R.string.check_log_file_export, Toast.LENGTH_LONG).show();
+      Toast.makeText(State.getContext(), R.string.log_export_failed, Toast.LENGTH_LONG).show();
       throw new RuntimeException(e);
     }
   }
