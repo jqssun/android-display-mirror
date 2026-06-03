@@ -116,6 +116,21 @@ public class OverviewFragment extends Fragment {
     boolean has = Settings.canDrawOverlays(requireContext());
     status.setText(has ? R.string.status_authorized : R.string.status_not_authorized);
     btn.setVisibility(has ? View.GONE : View.VISIBLE);
+    _updatePermissionsCard(view);
+  }
+
+  private void _updatePermissionsCard(View view) {
+    TextView title = view.findViewById(R.id.permissionsStatusTitle);
+    TextView detail = view.findViewById(R.id.permissionsStatusDetail);
+    ImageView icon = view.findViewById(R.id.permissionsStatusIcon);
+    boolean granted =
+        ShizukuUtils.hasShizukuStarted()
+            && ShizukuUtils.hasPermission()
+            && Settings.canDrawOverlays(requireContext());
+    title.setText(granted ? R.string.permissions_granted : R.string.permissions_not_granted);
+    detail.setText(
+        granted ? R.string.permissions_granted_detail : R.string.permissions_not_granted_detail);
+    icon.setImageResource(granted ? R.drawable.ic_check_circle : R.drawable.ic_error);
   }
 
   private void _updateStatus(View view) {

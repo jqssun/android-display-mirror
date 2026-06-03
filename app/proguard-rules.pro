@@ -1,4 +1,6 @@
-# Sunshine JNI - native methods and callbacks from C++
+-dontobfuscate
+
+# Sunshine/AirPlay JNI
 -keep class io.github.jqssun.displaymirror.job.SunshineServer {
     native <methods>;
     # Called from native code
@@ -9,6 +11,10 @@
     public static void onMirrorClientDiscovered(java.lang.String);
     public static void setMirrorServerUuid(java.lang.String);
 }
+-keep class io.github.jqssun.displaymirror.job.SunshineMouse { *; }
+-keep class io.github.jqssun.displaymirror.job.SunshineKeyboard { *; }
+-keep class io.github.jqssun.displaymirror.job.AirPlayService { *; }
+-keep class io.github.jqssun.displaymirror.job.AudioRecordProxy { *; }
 
 # DisplayLink native driver
 -keep class com.displaylink.manager.NativeDriver { *; }

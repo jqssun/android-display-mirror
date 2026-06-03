@@ -7,11 +7,11 @@
 [![release](https://img.shields.io/github/v/release/jqssun/android-display-mirror)](https://github.com/jqssun/android-display-mirror/releases)
 
 **Mirror** is an all-in-one application that forwards your screen content to external displays and expands Android's built-in screen mirroring capabilities. It creates virtual displays and supports screen sharing to:
-- AirPlay receivers (Apple devices or third-party receivers using [UxPlay](https://github.com/FDH2/UxPlay) or [Android AirPlay](https://github.com/jqssun/android-airplay-server))
+- AirPlay receivers (Apple tvOS and macOS built-in receivers, or third-party receivers using [AirPlay Server for Android](https://github.com/jqssun/android-airplay-server) or [UxPlay](https://github.com/FDH2/UxPlay))
 - [DisplayLink](https://www.synaptics.com/products/displaylink-graphics) adapters connected to the device via USB host mode
 - [Moonlight](https://github.com/moonlight-stream) ([Nvidia GameStream](https://www.nvidia.com/en-us/support/gamestream/)) clients with remote control support via the built-in [Sunshine](https://github.com/lizardbyte/sunshine) server
 
-It can be used in conjunction with [**Extend**](https://github.com/jqssun/android-display-extend) to turn any connected display or sink device into a secondary display where you can cast and control any application. You can also use this with [**Android AirPlay**](https://github.com/jqssun/android-airplay-server) or [**Moonlight for Android**](https://github.com/moonlight-stream/moonlight-android) to create a dummay display that stays in Picture-in-Picture.
+It can be used in conjunction with [**Extend**](https://github.com/jqssun/android-display-extend) to turn any connected display or sink device into a secondary display where you can cast and control any application. You can also use this with [**AirPlay Server for Android**](https://github.com/jqssun/android-airplay-server) or [**Moonlight for Android**](https://github.com/moonlight-stream/moonlight-android) to create a dummy display that stays in Picture-in-Picture.
 
 <video loop src='https://github.com/user-attachments/assets/ae95585b-dd78-4e31-bc80-8cdb617dabe5' alt="demo" width="1200" style="display: block; margin: auto;"></video>
 
@@ -32,9 +32,9 @@ Mirror gets pixels onto a display. What application runs on it, where it renders
 
 ## Features
 
-- Outbound AirPlay 2 (modern) or AirPlay 1 (legacy) screen mirroring to Apple devices or third-party AirPlay receivers
+- Outbound AirPlay 2 (modern) and AirPlay 1 (legacy) screen mirroring to Apple devices or third-party AirPlay receivers
 - Outbound Moonlight streaming and remote control, with Sunshine server built in
-- DisplayLink USB output via USB 2 or USB 3 host mode
+- DisplayLink USB output via USB host mode (including USB 2)
 - Each display sink is registered as a virtual display via `DisplayManager` API allowing other applications to launch activities on it
 - Touchscreen relay for remote pointer and keyboard input directed at the mirrored display
 

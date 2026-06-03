@@ -51,6 +51,8 @@ public class MirrorMainActivity extends AppCompatActivity {
   public static final String SCREEN_DISPLAYLINK = "displaylink";
   public static final String SCREEN_SETTINGS = "settings";
   public static final String SOURCE_EXTEND_OVERVIEW = "extend_overview";
+  private static final Uri EXTEND_MARKET_URI =
+      Uri.parse("market://details?id=" + EXTEND_PACKAGE_NAME);
   private static final Uri EXTEND_PROJECT_URI =
       Uri.parse("https://github.com/jqssun/android-display-extend");
 
@@ -575,7 +577,12 @@ public class MirrorMainActivity extends AppCompatActivity {
   private void _startExtendIntentOrFallback(Intent intent) {
     if (intent.resolveActivity(getPackageManager()) == null) {
       Toast.makeText(this, R.string.extend_app_not_installed, Toast.LENGTH_SHORT).show();
-      startActivity(new Intent(Intent.ACTION_VIEW, EXTEND_PROJECT_URI));
+      Intent market = new Intent(Intent.ACTION_VIEW, EXTEND_MARKET_URI);
+      if (market.resolveActivity(getPackageManager()) != null) {
+        startActivity(market);
+      } else {
+        startActivity(new Intent(Intent.ACTION_VIEW, EXTEND_PROJECT_URI));
+      }
       return;
     }
     startActivity(intent);

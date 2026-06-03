@@ -124,7 +124,7 @@ public class SunshineService extends Service {
     if (Pref.getPreventAutoLock()) {
       preventAutoLock();
     }
-    String sunshineName = "Mirror-" + Build.MANUFACTURER + "-" + Build.MODEL;
+    String sunshineName = Pref.getMoonlightDeviceName();
     SunshineServer.setSunshineName(sunshineName);
     Set<String> ipAddresses = getAllWifiIpAddresses(this);
     probeH265();

@@ -206,6 +206,16 @@
             <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/airplay1ModeSwitch" android:layout_width="wrap_content" android:layout_height="wrap_content" />
         </LinearLayout>
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp"
+            android:text="@string/about_airplay_notice"
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            android:textColor="?colorOnSurfaceVariant" />
+
     </LinearLayout>
 
 </ScrollView>

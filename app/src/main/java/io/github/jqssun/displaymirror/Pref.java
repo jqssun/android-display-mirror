@@ -2,6 +2,7 @@ package io.github.jqssun.displaymirror;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Build;
 
 public class Pref {
   public static final String PREF_NAME = "mirror_settings";
@@ -19,6 +20,7 @@ public class Pref {
   public static final String KEY_AUTO_CONNECT_CLIENT = "auto_connect_client";
   public static final String KEY_SELECTED_CLIENT = "selected_client";
   public static final String KEY_DISABLE_REMOTE_SUBMIX = "disable_remote_submix";
+  public static final String KEY_MOONLIGHT_DEVICE_NAME = "moonlight_device_name";
 
   // airplay
   public static final String KEY_AIRPLAY_APPLE_RECEIVER = "airplay_apple_receiver";
@@ -72,6 +74,15 @@ public class Pref {
 
   public static boolean getDisableRemoteSubmix() {
     return getBoolean(KEY_DISABLE_REMOTE_SUBMIX, false);
+  }
+
+  public static String getMoonlightDeviceName() {
+    String name = getString(KEY_MOONLIGHT_DEVICE_NAME, "");
+    return name.isEmpty() ? getDefaultMoonlightDeviceName() : name;
+  }
+
+  public static String getDefaultMoonlightDeviceName() {
+    return "Mirror-" + Build.MANUFACTURER + "-" + Build.MODEL;
   }
 
   public static boolean getAirPlayAppleReceiver() {

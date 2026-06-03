@@ -89,6 +89,21 @@ public class MoonlightFragment extends Fragment {
   }
 
   private void _initMoonlightSettings(View view) {
+    EditText deviceNameEditText = view.findViewById(R.id.deviceNameEditText);
+    deviceNameEditText.setText(Pref.getMoonlightDeviceName());
+    deviceNameEditText.setOnFocusChangeListener(
+        (v, hasFocus) -> {
+          if (!hasFocus) {
+            String name = deviceNameEditText.getText().toString().trim();
+            if (name.isEmpty()) {
+              name = Pref.getDefaultMoonlightDeviceName();
+              deviceNameEditText.setText(name);
+            }
+            String stored = name.equals(Pref.getDefaultMoonlightDeviceName()) ? "" : name;
+            preferences.edit().putString(Pref.KEY_MOONLIGHT_DEVICE_NAME, stored).apply();
+          }
+        });
+
     MaterialSwitch showCursorCheckbox = view.findViewById(R.id.showMoonlightCursorCheckbox);
     MaterialSwitch autoConnectCheckbox = view.findViewById(R.id.autoConnectClientCheckbox);
     LinearLayout clientConnectionContainer = view.findViewById(R.id.clientConnectionContainer);

@@ -13,6 +13,12 @@
     <string name="displaylink_libs_status_active">Active</string>
     <string name="displaylink_libs_detail_imported">DisplayLink USB display support is ready</string>
 
+    <!-- Permissions status card -->
+    <string name="permissions_granted">Ready</string>
+    <string name="permissions_granted_detail">All permissions granted</string>
+    <string name="permissions_not_granted">Missing permissions</string>
+    <string name="permissions_not_granted_detail">Certain features will not work</string>
+
     <!-- Settings section headers -->
     <string name="section_permissions">Permissions</string>
     <string name="section_display">Streaming</string>
@@ -95,12 +101,14 @@
     <string name="auto_connect_moonlight_desc">Proactively send a JSON connect request to the Moonlight client. Requires a fork with the autostart listener. Not compatible with standard Moonlight.</string>
     <string name="show_moonlight_cursor">Show cursor location</string>
     <string name="show_moonlight_cursor_desc">Show a cursor overlay on the device screen for Moonlight mouse input.</string>
+    <string name="moonlight_device_name">Device name</string>
     <string name="section_airplay_controls">Controls</string>
     <string name="section_airplay">AirPlay Settings</string>
-    <string name="airplay_apple_receiver">Support Apple receivers (Beta)</string>
-    <string name="airplay_apple_receiver_desc">Enable if used with Apple TV, Mac, or other first-party receivers. Leave off for UxPlay or other third-party receivers. Enabling allows this client to work with real FairPlay SAP when audio is disabled. Approval is required on macOS at initial pairing.</string>
-    <string name="airplay1_mode">Use legacy AirPlay instead</string>
-    <string name="airplay1_mode_desc">Use the legacy AirPlay 1 protocol. Enable for legacy third-party receivers that do not respond well to the modern AirPlay 2 protocol.</string>
+    <string name="airplay_apple_receiver">Support for 1st party receivers (Beta)</string>
+    <string name="airplay_apple_receiver_desc">Enable only when used with Apple devices. This allows real FairPlay SAP when audio is disabled. Approval is required on macOS at initial pairing.</string>
+    <string name="airplay1_mode">Support for legacy 3rd party receivers</string>
+    <string name="airplay1_mode_desc">Enable only when used with legacy AirPlay 1 receivers that do not have AirPlay 2 support.</string>
+    <string name="about_airplay_notice">1st party receivers: Apple tvOS and macOS.\n\n3rd party receivers (AirPlay 2): AirPlay Receiver for Android (UxPlay).\n\n3rd party receivers (AirPlay 1): Anker Nebula Cast (AirPin).\n\nThis app is not affiliated with Apple.</string>
     <string name="airplay_discover">Scan for AirPlay receivers</string>
     <string name="airplay_no_devices">AirPlay receiver not connected</string>
     <string name="airplay_no_devices_detail">Search for receivers on your network</string>
