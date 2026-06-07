@@ -30,21 +30,17 @@
 # AIDL generated
 -keep class * implements android.os.IInterface { *; }
 
+-keep class io.github.jqssun.displaymirror.** extends android.os.Binder { *; }
+
 # BouncyCastle
 -keep class org.bouncycastle.** { *; }
 -dontwarn org.bouncycastle.**
-
-# NanoHTTPD
--keep class org.nanohttpd.** { *; }
 
 # JmDNS
 -keep class javax.jmdns.** { *; }
 
 # Shizuku
 -keep class rikka.shizuku.** { *; }
-
-# ZXing
--keep class com.google.zxing.** { *; }
 
 # libsu
 -keep class com.topjohnwu.superuser.** { *; }

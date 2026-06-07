@@ -245,10 +245,13 @@ public class CreateVirtualDisplay {
   }
 
   public static class VirtualDisplayCallback extends IVirtualDisplayCallback.Stub {
+    @Override
     public void onPaused() {}
 
+    @Override
     public void onResumed() {}
 
+    @Override
     public void onStopped() {}
   }
 }

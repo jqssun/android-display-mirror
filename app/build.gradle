@@ -18,8 +18,8 @@ android {
         applicationId "io.github.jqssun.displaymirror"
         minSdk 26
         targetSdk 35
-        versionCode 23
-        versionName "0.0.23"
+        versionCode 24
+        versionName "0.0.24"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -93,10 +93,7 @@ dependencies {
     implementation 'androidx.navigation:navigation-ui:2.9.7'
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
     implementation 'androidx.fragment:fragment:1.8.9'
-    implementation 'androidx.core:core-ktx:1.18.0'
     implementation 'androidx.appcompat:appcompat:1.7.1'
-    implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
-    implementation libs.androidx.window
     testImplementation libs.junit
     androidTestImplementation libs.androidx.junit
     androidTestImplementation libs.androidx.espresso.core
@@ -104,13 +101,8 @@ dependencies {
     implementation 'dev.rikka.shizuku:provider:13.1.5'
     implementation 'dev.rikka.tools.refine:runtime:4.4.0'
     implementation 'org.lsposed.hiddenapibypass:hiddenapibypass:6.1'
-    implementation 'org.nanohttpd:nanohttpd:2.3.1'
-    implementation 'org.bouncycastle:bcprov-jdk18on:1.83'
     implementation 'org.bouncycastle:bcpkix-jdk18on:1.83'
-    implementation 'com.google.zxing:core:3.5.4'
     implementation 'org.jmdns:jmdns:3.6.3'
-    implementation "androidx.lifecycle:lifecycle-viewmodel:2.10.0"
     implementation "androidx.lifecycle:lifecycle-livedata:2.10.0"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-savedstate:2.10.0"
     implementation fileTree(dir: 'libs', include: ['*.aar'])
 }
