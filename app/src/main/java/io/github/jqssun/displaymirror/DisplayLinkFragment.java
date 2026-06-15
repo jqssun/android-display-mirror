@@ -173,7 +173,7 @@ public class DisplayLinkFragment extends Fragment {
           public void onNothingSelected(AdapterView<?> parent) {}
         });
 
-    new MaterialAlertDialogBuilder(requireContext())
+    TvFocus.attach(new MaterialAlertDialogBuilder(requireContext())
         .setTitle(R.string.displaylink_resolution_title)
         .setView(dialogView)
         .setPositiveButton(
@@ -198,7 +198,7 @@ public class DisplayLinkFragment extends Fragment {
               }
             })
         .setNegativeButton(R.string.cancel, null)
-        .show();
+        .show());
   }
 
   private void _updateManageDisplayButton() {

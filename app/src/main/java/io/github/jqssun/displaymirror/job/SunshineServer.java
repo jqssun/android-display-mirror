@@ -8,6 +8,7 @@ import android.text.InputType;
 import android.view.Surface;
 import android.widget.FrameLayout;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import io.github.jqssun.displaymirror.TvFocus;
 import io.github.jqssun.displaymirror.MoonlightCursorOverlay;
 import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.R;
@@ -60,7 +61,7 @@ public class SunshineServer {
               if (suppressPin != null) {
                 submitPin(suppressPin);
               } else {
-                new MaterialAlertDialogBuilder(context)
+                TvFocus.attach(new MaterialAlertDialogBuilder(context)
                     .setTitle(R.string.enter_pin_title)
                     .setView(container)
                     .setPositiveButton(
@@ -74,7 +75,7 @@ public class SunshineServer {
                           }
                         })
                     .setNegativeButton(R.string.cancel, (dialog, which) -> dialog.cancel())
-                    .show();
+                    .show());
               }
             });
   }

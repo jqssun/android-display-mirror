@@ -106,6 +106,7 @@ public class TouchscreenActivity extends AppCompatActivity {
     rootLayout.addView(buttonLayout, buttonLayoutParams);
 
     setContentView(rootLayout);
+    TvFocus.attach(getWindow());
 
     if (getSupportActionBar() != null) {
       getSupportActionBar().hide();

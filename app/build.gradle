@@ -18,13 +18,13 @@ android {
         applicationId "io.github.jqssun.displaymirror"
         minSdk 26
         targetSdk 35
-        versionCode 24
-        versionName "0.0.24"
+        versionCode 25
+        versionName "0.0.25"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         ndk {
-            abiFilters "arm64-v8a", "armeabi-v7a"
+            abiFilters "arm64-v8a", "armeabi-v7a", "x86_64"
         }
 
         externalNativeBuild {

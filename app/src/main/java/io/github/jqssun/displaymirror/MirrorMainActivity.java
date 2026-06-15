@@ -201,6 +201,7 @@ public class MirrorMainActivity extends AppCompatActivity {
     Shizuku.addBinderDeadListener(_binderDeadListener);
 
     setContentView(R.layout.activity_main);
+    TvFocus.attach(getWindow());
 
     // setup navigation
     NavHostFragment navHostFragment =

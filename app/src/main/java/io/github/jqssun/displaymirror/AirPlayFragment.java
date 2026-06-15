@@ -235,7 +235,7 @@ public class AirPlayFragment extends Fragment {
     container.setPadding(pad, pad / 2, pad, 0);
     container.addView(inputLayout);
 
-    new MaterialAlertDialogBuilder(requireContext())
+    TvFocus.attach(new MaterialAlertDialogBuilder(requireContext())
         .setTitle(getString(R.string.airplay_connect_title, dev.name))
         .setView(container)
         .setPositiveButton(
@@ -250,7 +250,7 @@ public class AirPlayFragment extends Fragment {
               AirPlayService.getInstance().connect(dev.ip, dev.port, pin, 0, 0, 30);
             })
         .setNegativeButton(R.string.cancel, null)
-        .show();
+        .show());
   }
 
   private void _updateStatus(int iconRes, int titleRes, int detailRes) {

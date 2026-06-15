@@ -240,7 +240,7 @@ public class MoonlightFragment extends Fragment {
     EditText portEditText = dialogView.findViewById(R.id.portEditText);
     portEditText.setText("42515");
 
-    new MaterialAlertDialogBuilder(requireContext())
+    TvFocus.attach(new MaterialAlertDialogBuilder(requireContext())
         .setTitle(R.string.manual_input_client_title)
         .setView(dialogView)
         .setPositiveButton(
@@ -257,6 +257,6 @@ public class MoonlightFragment extends Fragment {
               }
             })
         .setNegativeButton(R.string.cancel, null)
-        .show();
+        .show());
   }
 }
