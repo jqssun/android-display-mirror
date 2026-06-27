@@ -104,6 +104,12 @@ public class MoonlightFragment extends Fragment {
           }
         });
 
+    MaterialSwitch inputToExternalDisplayCheckbox =
+        view.findViewById(R.id.inputToExternalDisplayCheckbox);
+    inputToExternalDisplayCheckbox.setChecked(Pref.getInputToExternalDisplay());
+    inputToExternalDisplayCheckbox.setOnCheckedChangeListener(
+        (b, c) -> preferences.edit().putBoolean(Pref.KEY_INPUT_TO_EXTERNAL_DISPLAY, c).apply());
+
     MaterialSwitch showCursorCheckbox = view.findViewById(R.id.showMoonlightCursorCheckbox);
     MaterialSwitch autoConnectCheckbox = view.findViewById(R.id.autoConnectClientCheckbox);
     LinearLayout clientConnectionContainer = view.findViewById(R.id.clientConnectionContainer);

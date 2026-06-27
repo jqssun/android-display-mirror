@@ -14,6 +14,7 @@ public class Pref {
   public static final String KEY_DISABLE_USB_AUDIO = "disable_usb_audio";
 
   // moonlight
+  public static final String KEY_INPUT_TO_EXTERNAL_DISPLAY = "input_to_external_display";
   public static final String KEY_AUTO_MATCH_ASPECT_RATIO = "auto_match_aspect_ratio";
   public static final String KEY_PREVENT_AUTO_LOCK = "prevent_auto_lock";
   public static final String KEY_SHOW_MOONLIGHT_CURSOR = "show_moonlight_cursor";
@@ -50,6 +51,10 @@ public class Pref {
 
   public static boolean getDisableUsbAudio() {
     return getBoolean(KEY_DISABLE_USB_AUDIO, false);
+  }
+
+  public static boolean getInputToExternalDisplay() {
+    return getBoolean(KEY_INPUT_TO_EXTERNAL_DISPLAY, false);
   }
 
   public static boolean getAutoMatchAspectRatio() {

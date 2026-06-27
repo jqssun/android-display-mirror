@@ -41,6 +41,9 @@ static jmethodID handleLeftMouseButtonMethod = nullptr;
 static jclass sunshineKeyboardClass = nullptr;
 static jmethodID handleKeyboardMethod = nullptr;
 
+static jclass sunshineGamepadClass = nullptr;
+static jmethodID handleGamepadStateMethod = nullptr;
+
 
 JNIEXPORT void JNICALL
 Java_io_github_jqssun_displaymirror_job_SunshineServer_start(JNIEnv *env, jclass clazz) {
@@ -87,6 +90,20 @@ Java_io_github_jqssun_displaymirror_job_SunshineServer_start(JNIEnv *env, jclass
         }
     } else {
         BOOST_LOG(error) << "Failed to find SunshineKeyboard class at startup"sv;
+    }
+
+    jclass gamepadClass = env->FindClass("io/github/jqssun/displaymirror/job/SunshineGamepad");
+    if (gamepadClass != nullptr) {
+        sunshineGamepadClass = (jclass)env->NewGlobalRef(gamepadClass);
+        env->DeleteLocalRef(gamepadClass);
+
+        handleGamepadStateMethod = env->GetStaticMethodID(sunshineGamepadClass, "handleGamepadState", "(IIIIIII)V");
+
+        if (!handleGamepadStateMethod) {
+            BOOST_LOG(warning) << "Failed to cache gamepad handler method ID"sv;
+        }
+    } else {
+        BOOST_LOG(error) << "Failed to find SunshineGamepad class at startup"sv;
     }
 
     // Init AirPlay bridge (separate module)
@@ -155,8 +172,13 @@ Java_io_github_jqssun_displaymirror_job_SunshineServer_cleanup(JNIEnv *env, jcla
         sunshineKeyboardClass = nullptr;
         handleKeyboardMethod = nullptr;
     }
-    
-    // Other cleanup...
+
+    // Clean up SunshineGamepad class ref
+    if (sunshineGamepadClass != nullptr) {
+        env->DeleteGlobalRef(sunshineGamepadClass);
+        sunshineGamepadClass = nullptr;
+        handleGamepadStateMethod = nullptr;
+    }
 }
 
 JNIEXPORT void JNICALL
@@ -900,6 +922,41 @@ namespace sunshine_callbacks {
             static_cast<jint>(modcode),
             static_cast<jboolean>(release),
             static_cast<jint>(flags));
+
+        if (env->ExceptionCheck()) {
+            env->ExceptionDescribe();
+            env->ExceptionClear();
+        }
+
+        jvm->DetachCurrentThread();
+    }
+
+    void callJavaOnGamepad(uint32_t buttonFlags, uint8_t lt, uint8_t rt, int16_t lsX, int16_t lsY, int16_t rsX, int16_t rsY) {
+        if (jvm == nullptr) {
+            BOOST_LOG(error) << "JVM pointer is null"sv;
+            return;
+        }
+
+        if (sunshineGamepadClass == nullptr || handleGamepadStateMethod == nullptr) {
+            BOOST_LOG(error) << "SunshineGamepad class ref or method ID is null"sv;
+            return;
+        }
+
+        JNIEnv *env;
+        jint result = jvm->AttachCurrentThread(&env, nullptr);
+        if (result != JNI_OK) {
+            BOOST_LOG(error) << "Failed to attach to Java thread"sv;
+            return;
+        }
+
+        env->CallStaticVoidMethod(sunshineGamepadClass, handleGamepadStateMethod,
+            static_cast<jint>(buttonFlags),
+            static_cast<jint>(lt),
+            static_cast<jint>(rt),
+            static_cast<jint>(lsX),
+            static_cast<jint>(lsY),
+            static_cast<jint>(rsX),
+            static_cast<jint>(rsY));
 
         if (env->ExceptionCheck()) {
             env->ExceptionDescribe();

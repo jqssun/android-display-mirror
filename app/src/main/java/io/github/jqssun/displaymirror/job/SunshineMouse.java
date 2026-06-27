@@ -153,7 +153,7 @@ public class SunshineMouse {
   private static Map<Integer, Point> pointers = new HashMap<>();
 
   private static Point _translate(float x, float y) {
-    if (State.mirrorVirtualDisplay != null) {
+    if (State.inputToExternalDisplay()) {
       return _translateVirtualDisplay(x, y);
     } else {
       return _translateMirrorMode(x, y);
@@ -429,10 +429,8 @@ public class SunshineMouse {
       autoRotateAndScaleForMoonlight.exitScale();
     }
     if (inputManager != null) {
-      if (State.mirrorVirtualDisplay != null) {
-        MotionEventHidden motionEventHidden = Refine.unsafeCast(event);
-        motionEventHidden.setDisplayId(State.mirrorVirtualDisplay.getDisplay().getDisplayId());
-      }
+      MotionEventHidden motionEventHidden = Refine.unsafeCast(event);
+      motionEventHidden.setDisplayId(State.getInputDisplayId());
       try {
         inputManager.injectInputEvent(event, 0);
         Log.d(TAG, prefix + ": " + event);

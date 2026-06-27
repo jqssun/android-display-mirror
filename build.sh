@@ -7,7 +7,7 @@ if [ -x "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" ]; then
     "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "ndk;${ANDROID_NDK_VERSION}"
 fi
 ANDROID_NDK_HOME=$ANDROID_HOME/ndk/${ANDROID_NDK_VERSION}
-GOMOBILE_VERSION="v0.0.0-20260514233045-7de0a8fa7f4d"
+GOMOBILE_VERSION="v0.0.0-20260611195102-4dd8f1dbf5d2"
 OUT_DIR=$(realpath app/libs)
 WORK_DIR=/tmp/airplaylib
 
@@ -42,4 +42,4 @@ sed -i 's|return nil, fmt.Errorf("no video data port in SETUP response")|if rp :
 
 # might rewrite entire thing
 go get golang.org/x/mobile/bind 2>/dev/null || true;
-gomobile bind -v -trimpath -ldflags="-buildid=" -target android -androidapi 26 -o $OUT_DIR/airplaylib.aar ./airplaylib/ # -overlay $(realpath ../overlay.json)
+gomobile bind -v -trimpath -ldflags="-buildid= -extldflags=-Wl,-z,max-page-size=16384" -target android -androidapi 26 -o $OUT_DIR/airplaylib.aar ./airplaylib/ # -overlay $(realpath ../overlay.json)

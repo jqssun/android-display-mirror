@@ -99,6 +99,7 @@ public class SunshineServer {
 
     SunshineMouse.initialize(width, height);
     SunshineKeyboard.initialize();
+    SunshineGamepad.initialize();
 
     new Handler(Looper.getMainLooper())
         .post(

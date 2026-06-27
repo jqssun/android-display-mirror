@@ -13,7 +13,11 @@
 
 It can be used in conjunction with [**Extend**](https://github.com/jqssun/android-display-extend) to turn any connected display or sink device into a secondary display where you can cast and control any application. You can also use this with [**AirPlay Server for Android**](https://github.com/jqssun/android-airplay-server) or [**Moonlight for Android**](https://github.com/moonlight-stream/moonlight-android) to create a dummy display that stays in Picture-in-Picture.
 
-<video loop src='https://github.com/user-attachments/assets/ae95585b-dd78-4e31-bc80-8cdb617dabe5' alt="demo" width="1200" style="display: block; margin: auto;"></video>
+[<img height="48" alt="Get it on Google Play" src="https://jqssun.github.io/images/badges/google-play-store.svg">](https://play.google.com/store/apps/details?id=io.github.jqssun.displaymirror)
+[<img height="48" alt="Get it on F-Droid" src="https://jqssun.github.io/images/badges/fdroid.svg">](https://f-droid.org/packages/io.github.jqssun.displaymirror)
+[<img height="48" alt="Get it on GitHub" src="https://jqssun.github.io/images/badges/github.svg">](https://github.com/jqssun/android-display-mirror/releases/latest)
+
+<video loop src='https://github.com/user-attachments/assets/99fef870-894a-4cc0-9cd3-d1ebff6cfbb1' alt="demo" width="1200" style="display: block; margin: auto;"></video>
 
 ## Usage
 

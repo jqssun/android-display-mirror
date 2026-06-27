@@ -3,6 +3,7 @@ package io.github.jqssun.displaymirror;
 import android.app.Dialog;
 import android.view.View;
 import android.view.Window;
+import android.widget.EditText;
 
 public final class TvFocus {
     public static void attach(Dialog dialog) {
@@ -20,7 +21,8 @@ public final class TvFocus {
     }
 
     private static void _outline(View view, boolean focused) {
-        if (view == null) return;
-        view.setForeground(focused ? view.getContext().getDrawable(R.drawable.focus_highlight) : null);
+        if (view == null || view instanceof EditText) return;
+        boolean show = focused && !view.isInTouchMode();
+        view.setForeground(show ? view.getContext().getDrawable(R.drawable.focus_highlight) : null);
     }
 }

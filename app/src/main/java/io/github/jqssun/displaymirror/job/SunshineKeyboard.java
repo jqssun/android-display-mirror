@@ -114,10 +114,8 @@ public class SunshineKeyboard {
             0,
             0,
             InputDevice.SOURCE_KEYBOARD);
-    if (State.mirrorVirtualDisplay != null) {
-      KeyEventHidden keyEventHidden = Refine.unsafeCast(keyEvent);
-      keyEventHidden.setDisplayId(State.mirrorVirtualDisplay.getDisplay().getDisplayId());
-    }
+    KeyEventHidden keyEventHidden = Refine.unsafeCast(keyEvent);
+    keyEventHidden.setDisplayId(State.getInputDisplayId());
     Log.d(TAG, "handleKeyboardEvent: " + modcode + " translated to " + keyEvent);
     inputManager.injectInputEvent(keyEvent, 0);
   }

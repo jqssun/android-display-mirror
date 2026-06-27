@@ -91,6 +91,8 @@
     <string name="auto_rotate_desc">When the device is rotated, recreate the stream to match the new orientation.</string>
     <string name="auto_scale_remove_bars">Fill stream to remove black bars</string>
     <string name="auto_scale_remove_bars_desc">Crop and scale the captured screen to fill the stream resolution, removing letterbox bars.</string>
+    <string name="input_to_external_display">Send input to external display</string>
+    <string name="input_to_external_display_desc">Route remote keyboard, mouse, touch, and controller input to the external display instead of the device screen.</string>
     <string name="auto_match_aspect_ratio">Match Moonlight aspect ratio</string>
     <string name="auto_match_aspect_ratio_desc">Adjust main screen aspect ratio to match the external display resolution.</string>
     <string name="prevent_auto_lock">Prevent auto-lock</string>

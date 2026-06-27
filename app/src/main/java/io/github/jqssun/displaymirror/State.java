@@ -8,6 +8,7 @@ import android.hardware.display.VirtualDisplay;
 import android.media.projection.MediaProjection;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.Display;
 import android.view.Surface;
 import androidx.lifecycle.MutableLiveData;
 import io.github.jqssun.displaymirror.job.Job;
@@ -317,6 +318,16 @@ public class State {
       return -1;
     }
     return mirrorVirtualDisplay.getDisplay().getDisplayId();
+  }
+
+  public static boolean inputToExternalDisplay() {
+    return mirrorVirtualDisplay != null && Pref.getInputToExternalDisplay();
+  }
+
+  public static int getInputDisplayId() {
+    return inputToExternalDisplay()
+        ? mirrorVirtualDisplay.getDisplay().getDisplayId()
+        : Display.DEFAULT_DISPLAY;
   }
 
   public static void unbindUserService() {

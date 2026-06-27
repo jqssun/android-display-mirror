@@ -1217,6 +1217,14 @@ sunshine_callbacks::callJavaOnKeyboard(VKEY_MENU, true, flags);
     }
 
 //    platf::gamepad_update(platf_input, gamepad.id, gamepad_state);
+    sunshine_callbacks::callJavaOnGamepad(
+      gamepad_state.buttonFlags,
+      gamepad_state.lt,
+      gamepad_state.rt,
+      gamepad_state.lsX,
+      gamepad_state.lsY,
+      gamepad_state.rsX,
+      gamepad_state.rsY);
 
     gamepad.gamepad_state = gamepad_state;
   }

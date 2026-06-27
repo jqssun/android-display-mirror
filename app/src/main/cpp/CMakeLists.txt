@@ -5,6 +5,11 @@ project("sunshine")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffile-prefix-map=${CMAKE_SOURCE_DIR}=. -ffile-prefix-map=${CMAKE_BINARY_DIR}=. -ffile-prefix-map=${ANDROID_NDK}=.")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffile-prefix-map=${CMAKE_SOURCE_DIR}=. -ffile-prefix-map=${CMAKE_BINARY_DIR}=. -ffile-prefix-map=${ANDROID_NDK}=.")
 
+set(_page16 "-Wl,-z,max-page-size=16384")
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${_page16}")
+set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} ${_page16}")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${_page16}")
+
 include(dependencies/Boost_Sunshine.cmake)
 add_subdirectory(dependencies/moonlight-common-c/enet)
 set(BUILD_OPENSSL ON CACHE BOOL "Build OpenSSL from source" FORCE)
@@ -59,8 +64,6 @@ target_include_directories(sunshine PRIVATE
         dependencies/nanors
         dependencies
         ${Boost_INCLUDE_DIRS})
-
-target_link_options(sunshine PRIVATE "-Wl,-z,max-page-size=16384")
 
 target_link_libraries(
         sunshine
