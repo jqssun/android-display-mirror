@@ -1,20 +1,12 @@
 -dontobfuscate
 
-# Sunshine/AirPlay JNI
--keep class io.github.jqssun.displaymirror.job.SunshineServer {
+# jni: job classes are reached via native FindClass
+-keep class io.github.jqssun.displaymirror.job.** { *; }
+
+# jni: keep every native method and its signature types
+-keepclasseswithmembers,includedescriptorclasses class * {
     native <methods>;
-    # Called from native code
-    public static void onPinRequested();
-    public static void createVirtualDisplay(int, int, int, int, android.view.Surface, boolean);
-    public static void stopVirtualDisplay();
-    public static void showEncoderError(java.lang.String);
-    public static void onMirrorClientDiscovered(java.lang.String);
-    public static void setMirrorServerUuid(java.lang.String);
 }
--keep class io.github.jqssun.displaymirror.job.SunshineMouse { *; }
--keep class io.github.jqssun.displaymirror.job.SunshineKeyboard { *; }
--keep class io.github.jqssun.displaymirror.job.AirPlayService { *; }
--keep class io.github.jqssun.displaymirror.job.AudioRecordProxy { *; }
 
 # DisplayLink native driver
 -keep class com.displaylink.manager.NativeDriver { *; }
