@@ -79,7 +79,7 @@ public class DisplaylinkState {
     stopHandlerThread();
     stopImageReader();
     if (nativeDriver != null) {
-      State.log("Stopping nativeDriver");
+      State.log("stopping nativeDriver");
       nativeDriver.usbDeviceDetached(device.getDeviceName());
       if (displaylinkDevice2 != null) {
         nativeDriver.usbDeviceDetached(displaylinkDevice2.getDeviceName());

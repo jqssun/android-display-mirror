@@ -13,7 +13,7 @@
 
         <!-- Status -->
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/airplayStatusCard"
+            android:id="@+id/airplay_status_card"
             style="@style/Widget.Material3.CardView.Elevated"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -29,7 +29,7 @@
                 android:padding="16dp">
 
                 <ImageView
-                    android:id="@+id/airplayStatusIcon"
+                    android:id="@+id/airplay_status_icon"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:layout_marginEnd="16dp"
@@ -44,7 +44,7 @@
                     android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/airplayStatusTitle"
+                        android:id="@+id/airplay_status_title"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/airplay_no_devices"
@@ -52,7 +52,7 @@
                         android:textColor="?attr/colorOnPrimaryContainer" />
 
                     <TextView
-                        android:id="@+id/airplayStatusDetail"
+                        android:id="@+id/airplay_status_detail"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
@@ -78,7 +78,7 @@
 
         <!-- Scan -->
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/airplayScanBtn"
+            android:id="@+id/airplay_scan_btn"
             style="@style/Widget.Material3.Button.TonalButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -88,7 +88,7 @@
 
         <!-- Device list -->
         <Spinner
-            android:id="@+id/airplayDeviceSpinner"
+            android:id="@+id/airplay_device_spinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
@@ -97,7 +97,7 @@
 
         <!-- Connect / Disconnect -->
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/airplayConnectBtn"
+            android:id="@+id/airplay_connect_btn"
             style="@style/Widget.Material3.Button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -107,7 +107,7 @@
             android:visibility="gone" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/manageDisplayBtn"
+            android:id="@+id/manage_display_btn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
@@ -124,7 +124,7 @@
 
         <!-- Manual IP -->
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/airplayManualBtn"
+            android:id="@+id/airplay_manual_btn"
             style="@style/Widget.Material3.Button.OutlinedButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -133,7 +133,7 @@
             android:text="@string/airplay_manual_ip" />
 
         <LinearLayout
-            android:id="@+id/airplayManualLayout"
+            android:id="@+id/airplay_manual_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -147,7 +147,7 @@
                 android:layout_marginBottom="8dp">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/airplayManualIp"
+                    android:id="@+id/airplay_manual_ip"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/airplay_manual_ip_hint"
@@ -162,7 +162,7 @@
                 android:layout_marginBottom="8dp">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/airplayManualPort"
+                    android:id="@+id/airplay_manual_port"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/airplay_manual_port_hint"
@@ -171,7 +171,7 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/airplayManualConnectBtn"
+                android:id="@+id/airplay_manual_connect_btn"
                 style="@style/Widget.Material3.Button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -195,7 +195,7 @@
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/airplay_apple_receiver" android:textAppearance="?attr/textAppearanceBodyLarge" />
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/airplay_apple_receiver_desc" android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="?colorOnSurfaceVariant" />
             </LinearLayout>
-            <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/airplayAppleReceiverSwitch" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+            <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/airplay_apple_receiver_switch" android:layout_width="wrap_content" android:layout_height="wrap_content" />
         </LinearLayout>
 
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingHorizontal="16dp" android:paddingVertical="12dp">
@@ -203,7 +203,7 @@
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/airplay1_mode" android:textAppearance="?attr/textAppearanceBodyLarge" />
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/airplay1_mode_desc" android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="?colorOnSurfaceVariant" />
             </LinearLayout>
-            <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/airplay1ModeSwitch" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+            <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/airplay1_mode_switch" android:layout_width="wrap_content" android:layout_height="wrap_content" />
         </LinearLayout>
 
         <TextView

@@ -3,12 +3,9 @@ package io.github.jqssun.displaymirror.job;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.InputFilter;
-import android.text.InputType;
 import android.view.Surface;
-import android.widget.FrameLayout;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import io.github.jqssun.displaymirror.TvFocus;
+import io.github.jqssun.displaymirror.dialog.PinDialog;
 import io.github.jqssun.displaymirror.MoonlightCursorOverlay;
 import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.R;
@@ -41,42 +38,11 @@ public class SunshineServer {
               if (context == null) {
                 return;
               }
-
-              com.google.android.material.textfield.TextInputLayout inputLayout =
-                  new com.google.android.material.textfield.TextInputLayout(
-                      context, null, com.google.android.material.R.attr.textInputOutlinedStyle);
-              inputLayout.setHint(R.string.enter_pin_hint);
-              com.google.android.material.textfield.TextInputEditText input =
-                  new com.google.android.material.textfield.TextInputEditText(
-                      inputLayout.getContext());
-              input.setInputType(InputType.TYPE_CLASS_NUMBER);
-              input.setText(pinCandidate);
-              input.setFilters(new InputFilter[] {new InputFilter.LengthFilter(4)});
-              inputLayout.addView(input);
-              int pad = (int) (16 * context.getResources().getDisplayMetrics().density);
-              FrameLayout container = new FrameLayout(context);
-              container.setPadding(pad, pad / 2, pad, 0);
-              container.addView(inputLayout);
-
               if (suppressPin != null) {
                 submitPin(suppressPin);
-              } else {
-                TvFocus.attach(new MaterialAlertDialogBuilder(context)
-                    .setTitle(R.string.enter_pin_title)
-                    .setView(container)
-                    .setPositiveButton(
-                        R.string.ok,
-                        (dialog, which) -> {
-                          String pin = input.getText().toString();
-                          if (pin.length() == 4) {
-                            submitPin(pin);
-                          } else {
-                            inputLayout.setError(context.getString(R.string.enter_pin_error));
-                          }
-                        })
-                    .setNegativeButton(R.string.cancel, (dialog, which) -> dialog.cancel())
-                    .show());
+                return;
               }
+              PinDialog.showPairing(context, pinCandidate, SunshineServer::submitPin);
             });
   }
 
@@ -115,7 +81,7 @@ public class SunshineServer {
     new Handler(Looper.getMainLooper())
         .post(
             () -> {
-              State.log("Stopping Moonlight projection");
+              State.log("stopping Moonlight projection");
               MoonlightCursorOverlay.hide();
               CreateVirtualDisplay.powerOnScreen();
               CreateVirtualDisplay.restoreAspectRatio();

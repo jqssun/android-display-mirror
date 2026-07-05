@@ -44,17 +44,17 @@ public class OverviewFragment extends Fragment {
     _initShizuku(view);
     _initOverlay(view);
 
-    view.findViewById(R.id.moonlightCard)
+    view.findViewById(R.id.moonlight_card)
         .setOnClickListener(
             v -> Navigation.findNavController(v).navigate(R.id.action_overview_to_moonlight));
-    view.findViewById(R.id.airplayCard)
+    view.findViewById(R.id.airplay_card)
         .setOnClickListener(
             v -> Navigation.findNavController(v).navigate(R.id.action_overview_to_airplay));
-    view.findViewById(R.id.displaylinkCard)
+    view.findViewById(R.id.displaylink_card)
         .setOnClickListener(
             v -> Navigation.findNavController(v).navigate(R.id.action_overview_to_displaylink));
 
-    view.findViewById(R.id.touchscreenRow)
+    view.findViewById(R.id.touchscreen_row)
         .setOnClickListener(
             v -> {
               MirrorTouchscreenBridge.TargetInfo target =
@@ -76,14 +76,14 @@ public class OverviewFragment extends Fragment {
   }
 
   private void _initShizuku(View view) {
-    MaterialButton btn = view.findViewById(R.id.shizukuPermissionBtn);
+    MaterialButton btn = view.findViewById(R.id.shizuku_permission_btn);
     btn.setOnClickListener(v -> State.startNewJob(new AcquireShizuku()));
     _updateShizuku(view);
   }
 
   private void _updateShizuku(View view) {
-    TextView status = view.findViewById(R.id.shizukuStatus);
-    MaterialButton btn = view.findViewById(R.id.shizukuPermissionBtn);
+    TextView status = view.findViewById(R.id.shizuku_status);
+    MaterialButton btn = view.findViewById(R.id.shizuku_permission_btn);
     boolean started = ShizukuUtils.hasShizukuStarted();
     boolean hasPermission = ShizukuUtils.hasPermission();
     if (!started) {
@@ -100,7 +100,7 @@ public class OverviewFragment extends Fragment {
   }
 
   private void _initOverlay(View view) {
-    MaterialButton btn = view.findViewById(R.id.overlayPermissionBtn);
+    MaterialButton btn = view.findViewById(R.id.overlay_permission_btn);
     btn.setOnClickListener(
         v ->
             startActivity(
@@ -111,8 +111,8 @@ public class OverviewFragment extends Fragment {
   }
 
   private void _updateOverlay(View view) {
-    TextView status = view.findViewById(R.id.overlayStatus);
-    MaterialButton btn = view.findViewById(R.id.overlayPermissionBtn);
+    TextView status = view.findViewById(R.id.overlay_status);
+    MaterialButton btn = view.findViewById(R.id.overlay_permission_btn);
     boolean has = Settings.canDrawOverlays(requireContext());
     status.setText(has ? R.string.status_authorized : R.string.status_not_authorized);
     btn.setVisibility(has ? View.GONE : View.VISIBLE);
@@ -120,9 +120,9 @@ public class OverviewFragment extends Fragment {
   }
 
   private void _updatePermissionsCard(View view) {
-    TextView title = view.findViewById(R.id.permissionsStatusTitle);
-    TextView detail = view.findViewById(R.id.permissionsStatusDetail);
-    ImageView icon = view.findViewById(R.id.permissionsStatusIcon);
+    TextView title = view.findViewById(R.id.permissions_status_title);
+    TextView detail = view.findViewById(R.id.permissions_status_detail);
+    ImageView icon = view.findViewById(R.id.permissions_status_icon);
     boolean granted =
         ShizukuUtils.hasShizukuStarted()
             && ShizukuUtils.hasPermission()
@@ -140,8 +140,8 @@ public class OverviewFragment extends Fragment {
         MaterialColors.getColor(view, com.google.android.material.R.attr.colorOnSurfaceVariant);
 
     // moonlight
-    TextView moonlightStatus = view.findViewById(R.id.moonlightStatus);
-    ImageView moonlightIcon = view.findViewById(R.id.moonlightIcon);
+    TextView moonlightStatus = view.findViewById(R.id.moonlight_status);
+    ImageView moonlightIcon = view.findViewById(R.id.moonlight_icon);
     boolean moonlightActive = SunshineService.instance != null;
     boolean moonlightProjecting =
         moonlightActive
@@ -159,8 +159,8 @@ public class OverviewFragment extends Fragment {
         ColorStateList.valueOf(moonlightProjecting ? activeColor : inactiveColor));
 
     // airplay
-    TextView airplayStatus = view.findViewById(R.id.airplayStatus);
-    ImageView airplayIcon = view.findViewById(R.id.airplayIcon);
+    TextView airplayStatus = view.findViewById(R.id.airplay_status);
+    ImageView airplayIcon = view.findViewById(R.id.airplay_icon);
     AirPlayService airplay = AirPlayService.getInstance();
     boolean airplayConnected = airplay != null && airplay.isConnected();
     if (airplayConnected) {
@@ -172,8 +172,8 @@ public class OverviewFragment extends Fragment {
         ColorStateList.valueOf(airplayConnected ? activeColor : inactiveColor));
 
     // displaylink
-    TextView displaylinkStatus = view.findViewById(R.id.displaylinkStatus);
-    ImageView displaylinkIcon = view.findViewById(R.id.displaylinkIcon);
+    TextView displaylinkStatus = view.findViewById(R.id.displaylink_status);
+    ImageView displaylinkIcon = view.findViewById(R.id.displaylink_icon);
     boolean displaylinkImported = ApkImporter.areLibsImported(requireContext());
     boolean displaylinkActive = State.displaylinkState.getVirtualDisplay() != null;
     if (displaylinkActive) {
@@ -187,8 +187,8 @@ public class OverviewFragment extends Fragment {
         ColorStateList.valueOf(displaylinkActive ? activeColor : inactiveColor));
 
     // touchscreen
-    View touchscreenRow = view.findViewById(R.id.touchscreenRow);
-    TextView touchscreenStatus = view.findViewById(R.id.touchscreenStatus);
+    View touchscreenRow = view.findViewById(R.id.touchscreen_row);
+    TextView touchscreenStatus = view.findViewById(R.id.touchscreen_status);
     boolean touchscreenAvailable = MirrorTouchscreenBridge.getDefaultTarget() != null;
     touchscreenStatus.setText(
         touchscreenAvailable

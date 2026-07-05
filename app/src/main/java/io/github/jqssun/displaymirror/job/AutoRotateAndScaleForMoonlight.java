@@ -315,7 +315,7 @@ public class AutoRotateAndScaleForMoonlight {
         });
 
     State.log(
-        "AutoRotateAndScaleForMoonlight started, autoRotate="
+        "autoRotateAndScaleForMoonlight started, autoRotate="
             + autoRotate
             + ", autoScale="
             + autoScale);

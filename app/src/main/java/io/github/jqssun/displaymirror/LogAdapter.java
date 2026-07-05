@@ -41,7 +41,7 @@ public class LogAdapter extends RecyclerView.Adapter<LogAdapter.LogViewHolder> {
 
     public LogViewHolder(View itemView) {
       super(itemView);
-      textView = itemView.findViewById(R.id.logText);
+      textView = itemView.findViewById(R.id.log_text);
     }
   }
 }

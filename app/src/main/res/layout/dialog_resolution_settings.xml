@@ -29,7 +29,7 @@
             android:textAppearance="?attr/textAppearanceBodyLarge" />
 
         <Spinner
-            android:id="@+id/resolutionPresetSpinner"
+            android:id="@+id/resolution_preset_spinner"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
     </LinearLayout>
@@ -41,7 +41,7 @@
         android:hint="@string/width_label">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/widthEditText"
+            android:id="@+id/width_edit_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="number" />
@@ -55,7 +55,7 @@
         android:hint="@string/height_label">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/heightEditText"
+            android:id="@+id/height_edit_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="number" />
@@ -69,7 +69,7 @@
         android:hint="@string/refresh_rate_label">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/refreshRateEditText"
+            android:id="@+id/refresh_rate_edit_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="number" />

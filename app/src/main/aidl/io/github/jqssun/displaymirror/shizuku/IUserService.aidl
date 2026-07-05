@@ -1,7 +1,6 @@
 package io.github.jqssun.displaymirror.shizuku;
 
 import android.os.ParcelFileDescriptor;
-import android.view.Surface;
 
 interface IUserService {
 
@@ -18,8 +17,6 @@ interface IUserService {
     void startListenVolumeKey() = 5;
 
     void stopListenVolumeKey() = 6;
-
-    int createVirtualDisplay(in Surface surface) = 7;
 
     boolean isRooted() = 8;
 

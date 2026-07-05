@@ -10,7 +10,7 @@ import com.displaylink.manager.NativeDriverListener;
 import com.displaylink.manager.display.DisplayMode;
 import io.github.jqssun.displaymirror.ApkImporter;
 import io.github.jqssun.displaymirror.DisplaylinkState;
-import io.github.jqssun.displaymirror.MirrorMainActivity;
+import io.github.jqssun.displaymirror.MainActivity;
 import io.github.jqssun.displaymirror.State;
 import io.github.jqssun.displaymirror.SunshineService;
 import java.io.File;
@@ -33,7 +33,7 @@ public class ProjectViaDisplaylink implements Job {
   public void start() throws YieldException {
     Context context = State.getContext();
     if (context == null) {
-      State.log("Activity does not exist, skipping task");
+      State.log("activity does not exist, skipping task");
       return;
     }
     UsbManager usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
@@ -81,7 +81,7 @@ public class ProjectViaDisplaylink implements Job {
   private void _copyFirmwares(Context context) {
     File srcDir = ApkImporter.assetsDir(context);
     if (!srcDir.exists()) {
-      State.log("No imported firmware directory found");
+      State.log("no imported firmware directory found");
       return;
     }
     File[] files = srcDir.listFiles();
@@ -90,7 +90,7 @@ public class ProjectViaDisplaylink implements Job {
       if (!src.getName().endsWith(".spkg")) continue;
       File dst = new File(context.getFilesDir(), src.getName());
       if (dst.exists() && dst.length() > 0) {
-        State.log("Firmware file already exists, skipping: " + src.getName());
+        State.log("firmware file already exists, skipping: " + src.getName());
         continue;
       }
       try (InputStream in = new java.io.FileInputStream(src);
@@ -100,9 +100,9 @@ public class ProjectViaDisplaylink implements Job {
         while ((n = in.read(buf)) != -1) {
           out.write(buf, 0, n);
         }
-        State.log("Successfully copied firmware file: " + src.getName());
+        State.log("successfully copied firmware file: " + src.getName());
       } catch (IOException e) {
-        State.log("Failed to copy firmware file: " + src.getName() + ", error: " + e.getMessage());
+        State.log("failed to copy firmware file: " + src.getName() + ", error: " + e.getMessage());
       }
     }
   }
@@ -112,7 +112,7 @@ public class ProjectViaDisplaylink implements Job {
     if (usbManager.hasPermission(device)) {
       State.log("USB device permission already granted: " + device.getDeviceName());
     } else if (usbRequested) {
-      State.log("Skipping task, USB device permission not granted: " + device.getDeviceName());
+      State.log("skipping task, USB device permission not granted: " + device.getDeviceName());
       return false;
     } else {
       usbRequested = true;
@@ -123,7 +123,7 @@ public class ProjectViaDisplaylink implements Job {
               new Intent(SunshineService.ACTION_USB_PERMISSION),
               PendingIntent.FLAG_IMMUTABLE);
       usbManager.requestPermission(device, pendingIntent);
-      throw new YieldException("Waiting for USB permission");
+      throw new YieldException("waiting for USB permission");
     }
     return true;
   }
@@ -136,7 +136,7 @@ public class ProjectViaDisplaylink implements Job {
         if (displaylinkState.usbConnection == null) {
           throw new RuntimeException("Failed to open USB device connection");
         } else {
-          State.log("Successfully opened USB device connection");
+          State.log("successfully opened USB device connection");
         }
       } else {
         State.log("USB device connection already exists");
@@ -152,17 +152,17 @@ public class ProjectViaDisplaylink implements Job {
         if (displaylinkState.usbConnection == null) {
           throw new RuntimeException("Failed to open USB device connection");
         } else {
-          State.log("Successfully opened USB device connection");
+          State.log("successfully opened USB device connection");
         }
         displaylinkState.displaylinkConnection2 =
             usbManager.openDevice(displaylinkState.displaylinkDevice2);
         if (displaylinkState.displaylinkConnection2 == null) {
           throw new RuntimeException("Failed to open second USB device connection");
         } else {
-          State.log("Successfully opened second USB device connection");
+          State.log("successfully opened second USB device connection");
         }
       } else {
-        State.log("Second USB device connection already exists");
+        State.log("second USB device connection already exists");
       }
     }
     if (displaylinkState.usbConnection.getRawDescriptors() == null) {
@@ -189,12 +189,12 @@ public class ProjectViaDisplaylink implements Job {
     }
     if (usbManager.hasPermission(displaylinkState.displaylinkDevice2)) {
       State.log(
-          "Second USB device permission already granted: "
+          "second USB device permission already granted: "
               + displaylinkState.displaylinkDevice2.getDeviceName());
       return true;
     } else if (device2UsbRequested) {
       State.log(
-          "Skipping task, second USB device permission not granted: "
+          "skipping task, second USB device permission not granted: "
               + displaylinkState.displaylinkDevice2.getDeviceName());
       return false;
     }
@@ -206,7 +206,7 @@ public class ProjectViaDisplaylink implements Job {
             new Intent(SunshineService.ACTION_USB_PERMISSION),
             PendingIntent.FLAG_IMMUTABLE);
     usbManager.requestPermission(displaylinkState.displaylinkDevice2, pendingIntent);
-    throw new YieldException("Waiting for second USB permission");
+    throw new YieldException("waiting for second USB permission");
   }
 
   private boolean _initializeNativeDriver(Context context, DisplaylinkState displaylinkState)
@@ -255,7 +255,7 @@ public class ProjectViaDisplaylink implements Job {
         if (resultCode != 0) {
           throw new RuntimeException("Failed to attach second USB device: " + resultCode);
         } else {
-          State.log("Second USB device attached successfully");
+          State.log("second USB device attached successfully");
         }
       }
     } else {
@@ -263,7 +263,7 @@ public class ProjectViaDisplaylink implements Job {
     }
 
     if (displaylinkState.monitorInfo == null) {
-      State.log("No display info found, please connect a display and try again");
+      State.log("no display info found, please connect a display and try again");
       return false;
     }
     return true;
@@ -272,7 +272,7 @@ public class ProjectViaDisplaylink implements Job {
   private boolean _requestMediaProjectionPermission(
       Context context, DisplaylinkState displaylinkState) throws YieldException {
     if (State.displaylinkState.getVirtualDisplay() != null) {
-      State.log("Virtual display already exists, skipping projection permission request");
+      State.log("virtual display already exists, skipping projection permission request");
       return true;
     }
     if (State.getMediaProjection() != null) {
@@ -280,16 +280,16 @@ public class ProjectViaDisplaylink implements Job {
       return true;
     }
     if (mediaProjectionRequested) {
-      State.log("Skipping task, screen projection permission not granted");
+      State.log("skipping task, screen projection permission not granted");
       return false;
     }
     displaylinkState.stopVirtualDisplay();
     mediaProjectionRequested = true;
-    MirrorMainActivity mirrorMainActivity = State.getCurrentActivity();
+    MainActivity mirrorMainActivity = State.getCurrentActivity();
     if (mirrorMainActivity == null) {
       return false;
     }
     mirrorMainActivity.startMediaProjectionService();
-    throw new YieldException("Waiting for projection permission");
+    throw new YieldException("waiting for projection permission");
   }
 }

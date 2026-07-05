@@ -35,15 +35,14 @@ public class FetchLogAndShare implements Job {
         Shizuku.peekUserService(State.userServiceArgs, State.userServiceConnection);
         Shizuku.bindUserService(State.userServiceArgs, State.userServiceConnection);
         State.resumeJobLater(State.MODE_UTILITY, 1000);
-        throw new YieldException("Waiting for user service to start");
+        throw new YieldException("waiting for user service");
       }
-      Toast.makeText(State.getContext(), R.string.cannot_start_user_service, Toast.LENGTH_SHORT)
-          .show();
+      Toast.makeText(context, R.string.cannot_start_user_service, Toast.LENGTH_SHORT).show();
       return;
     }
 
     try {
-      File logFile = new File(State.getContext().getCacheDir(), "Mirror.log");
+      File logFile = new File(context.getCacheDir(), "Mirror.log");
       try (ParcelFileDescriptor sink =
           ParcelFileDescriptor.open(
               logFile,
@@ -54,25 +53,21 @@ public class FetchLogAndShare implements Job {
       }
 
       if (logFile.length() == 0) {
-        Toast.makeText(State.getContext(), R.string.no_logs_to_export, Toast.LENGTH_SHORT)
-            .show();
+        Toast.makeText(context, R.string.no_logs_to_export, Toast.LENGTH_SHORT).show();
         return;
       }
 
       Intent shareIntent = new Intent(Intent.ACTION_SEND);
       shareIntent.setType("text/plain");
       Uri fileUri =
-          FileProvider.getUriForFile(
-              State.getContext(), State.getContext().getPackageName() + ".provider", logFile);
+          FileProvider.getUriForFile(context, context.getPackageName() + ".provider", logFile);
       shareIntent.putExtra(Intent.EXTRA_STREAM, fileUri);
       shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-      State.getContext()
-          .startActivity(
-              Intent.createChooser(
-                  shareIntent, State.getContext().getString(R.string.share_log_file)));
+      context.startActivity(
+          Intent.createChooser(shareIntent, context.getString(R.string.share_log_file)));
 
     } catch (RemoteException | IOException e) {
-      Toast.makeText(State.getContext(), R.string.log_export_failed, Toast.LENGTH_LONG).show();
+      Toast.makeText(context, R.string.log_export_failed, Toast.LENGTH_LONG).show();
       throw new RuntimeException(e);
     }
   }

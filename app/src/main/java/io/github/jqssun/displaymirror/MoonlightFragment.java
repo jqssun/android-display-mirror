@@ -14,8 +14,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import androidx.fragment.app.Fragment;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.materialswitch.MaterialSwitch;
+import io.github.jqssun.displaymirror.dialog.ManualClientInputDialog;
 import io.github.jqssun.displaymirror.job.AutoRotateAndScaleForDisplaylink;
 import io.github.jqssun.displaymirror.job.ConnectToClient;
 import io.github.jqssun.displaymirror.job.ExitAll;
@@ -48,14 +48,14 @@ public class MoonlightFragment extends Fragment {
     View view = inflater.inflate(R.layout.fragment_moonlight, container, false);
     preferences = requireContext().getSharedPreferences(Pref.PREF_NAME, Context.MODE_PRIVATE);
 
-    statusIcon = view.findViewById(R.id.moonlightStatusIcon);
-    statusTitle = view.findViewById(R.id.moonlightStatusTitle);
-    statusDetail = view.findViewById(R.id.moonlightStatusDetail);
-    startBtn = view.findViewById(R.id.startBtn);
-    stopBtn = view.findViewById(R.id.stopBtn);
-    manageDisplayBtn = view.findViewById(R.id.manageDisplayBtn);
+    statusIcon = view.findViewById(R.id.moonlight_status_icon);
+    statusTitle = view.findViewById(R.id.moonlight_status_title);
+    statusDetail = view.findViewById(R.id.moonlight_status_detail);
+    startBtn = view.findViewById(R.id.start_btn);
+    stopBtn = view.findViewById(R.id.stop_btn);
+    manageDisplayBtn = view.findViewById(R.id.manage_display_btn);
 
-    startBtn.setOnClickListener(v -> ((MirrorMainActivity) requireActivity()).startMirroring());
+    startBtn.setOnClickListener(v -> ((MainActivity) requireActivity()).startMirroring());
     stopBtn.setOnClickListener(
         v -> {
           if (AutoRotateAndScaleForDisplaylink.instance != null) {
@@ -65,9 +65,9 @@ public class MoonlightFragment extends Fragment {
         });
     manageDisplayBtn.setOnClickListener(
         v ->
-            ((MirrorMainActivity) requireActivity())
+            ((MainActivity) requireActivity())
                 .manageDisplayInExtend(
-                    State.getMoonlightManagedDisplayId(), MirrorMainActivity.SCREEN_MOONLIGHT));
+                    State.getMoonlightManagedDisplayId(), MainActivity.SCREEN_MOONLIGHT));
 
     // moonlight settings
     _initMoonlightSettings(view);
@@ -79,7 +79,7 @@ public class MoonlightFragment extends Fragment {
   @Override
   public void onResume() {
     super.onResume();
-    ((MirrorMainActivity) requireActivity()).refresh();
+    ((MainActivity) requireActivity()).refresh();
   }
 
   @Override
@@ -89,7 +89,7 @@ public class MoonlightFragment extends Fragment {
   }
 
   private void _initMoonlightSettings(View view) {
-    EditText deviceNameEditText = view.findViewById(R.id.deviceNameEditText);
+    EditText deviceNameEditText = view.findViewById(R.id.device_name_edit_text);
     deviceNameEditText.setText(Pref.getMoonlightDeviceName());
     deviceNameEditText.setOnFocusChangeListener(
         (v, hasFocus) -> {
@@ -105,18 +105,18 @@ public class MoonlightFragment extends Fragment {
         });
 
     MaterialSwitch inputToExternalDisplayCheckbox =
-        view.findViewById(R.id.inputToExternalDisplayCheckbox);
+        view.findViewById(R.id.input_to_external_display_checkbox);
     inputToExternalDisplayCheckbox.setChecked(Pref.getInputToExternalDisplay());
     inputToExternalDisplayCheckbox.setOnCheckedChangeListener(
         (b, c) -> preferences.edit().putBoolean(Pref.KEY_INPUT_TO_EXTERNAL_DISPLAY, c).apply());
 
-    MaterialSwitch showCursorCheckbox = view.findViewById(R.id.showMoonlightCursorCheckbox);
-    MaterialSwitch autoConnectCheckbox = view.findViewById(R.id.autoConnectClientCheckbox);
-    LinearLayout clientConnectionContainer = view.findViewById(R.id.clientConnectionContainer);
-    Spinner clientSpinner = view.findViewById(R.id.clientSpinner);
-    MaterialButton connectClientButton = view.findViewById(R.id.connectClientButton);
+    MaterialSwitch showCursorCheckbox = view.findViewById(R.id.show_moonlight_cursor_checkbox);
+    MaterialSwitch autoConnectCheckbox = view.findViewById(R.id.auto_connect_client_checkbox);
+    LinearLayout clientConnectionContainer = view.findViewById(R.id.client_connection_container);
+    Spinner clientSpinner = view.findViewById(R.id.client_spinner);
+    MaterialButton connectClientButton = view.findViewById(R.id.connect_client_button);
     MaterialSwitch disableRemoteSubmixCheckbox =
-        view.findViewById(R.id.disableRemoteSubmixCheckbox);
+        view.findViewById(R.id.disable_remote_submix_checkbox);
 
     showCursorCheckbox.setChecked(Pref.getShowMoonlightCursor());
     showCursorCheckbox.setOnCheckedChangeListener(
@@ -141,7 +141,7 @@ public class MoonlightFragment extends Fragment {
           String selectedClient = (String) clientSpinner.getSelectedItem();
           if (selectedClient != null && !selectedClient.isEmpty()) {
             if (selectedClient.equals(getString(R.string.manual_input))) {
-              _showManualInputDialog();
+              ManualClientInputDialog.show(requireContext());
             } else {
               preferences.edit().putString(Pref.KEY_SELECTED_CLIENT, selectedClient).apply();
               int pin = (int) (Math.random() * 9000) + 1000;
@@ -155,8 +155,8 @@ public class MoonlightFragment extends Fragment {
     disableRemoteSubmixCheckbox.setOnCheckedChangeListener(
         (b, c) -> preferences.edit().putBoolean(Pref.KEY_DISABLE_REMOTE_SUBMIX, c).apply());
 
-    MaterialSwitch autoMatchCheckbox = view.findViewById(R.id.autoMatchAspectRatioCheckbox);
-    MaterialSwitch preventAutoLockCheckbox = view.findViewById(R.id.preventAutoLockCheckbox);
+    MaterialSwitch autoMatchCheckbox = view.findViewById(R.id.auto_match_aspect_ratio_checkbox);
+    MaterialSwitch preventAutoLockCheckbox = view.findViewById(R.id.prevent_auto_lock_checkbox);
 
     boolean hasShizuku = ShizukuUtils.hasPermission();
 
@@ -239,30 +239,4 @@ public class MoonlightFragment extends Fragment {
     }
   }
 
-  private void _showManualInputDialog() {
-    View dialogView =
-        LayoutInflater.from(requireContext()).inflate(R.layout.dialog_manual_client_input, null);
-    EditText ipEditText = dialogView.findViewById(R.id.ipEditText);
-    EditText portEditText = dialogView.findViewById(R.id.portEditText);
-    portEditText.setText("42515");
-
-    TvFocus.attach(new MaterialAlertDialogBuilder(requireContext())
-        .setTitle(R.string.manual_input_client_title)
-        .setView(dialogView)
-        .setPositiveButton(
-            R.string.ok,
-            (dialog, which) -> {
-              String ip = ipEditText.getText().toString().trim();
-              String port = portEditText.getText().toString().trim();
-              if (!ip.isEmpty()) {
-                String addr = port.isEmpty() ? ip : ip + ":" + port;
-                preferences.edit().putString(Pref.KEY_SELECTED_CLIENT, addr).apply();
-                int pin = (int) (Math.random() * 9000) + 1000;
-                SunshineServer.suppressPin = String.valueOf(pin);
-                ConnectToClient.connect(pin);
-              }
-            })
-        .setNegativeButton(R.string.cancel, null)
-        .show());
-  }
 }

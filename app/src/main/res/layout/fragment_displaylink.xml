@@ -13,7 +13,7 @@
 
         <!-- Status -->
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/libStatusCard"
+            android:id="@+id/lib_status_card"
             style="@style/Widget.Material3.CardView.Elevated"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -29,7 +29,7 @@
                 android:padding="16dp">
 
                 <ImageView
-                    android:id="@+id/libStatusIcon"
+                    android:id="@+id/lib_status_icon"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:layout_marginEnd="16dp"
@@ -43,14 +43,14 @@
                     android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/libStatusTitle"
+                        android:id="@+id/lib_status_title"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textAppearance="?attr/textAppearanceTitleMedium"
                         android:textColor="?attr/colorOnPrimaryContainer" />
 
                     <TextView
-                        android:id="@+id/libStatusDetail"
+                        android:id="@+id/lib_status_detail"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
@@ -63,7 +63,7 @@
         </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/manageDisplayBtn"
+            android:id="@+id/manage_display_btn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
@@ -83,14 +83,14 @@
             android:textColor="?colorPrimary" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/downloadApkBtn"
+            android:id="@+id/download_apk_btn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
             android:text="@string/auto_import_displaylink_libs" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/importApkBtn"
+            android:id="@+id/import_apk_btn"
             style="@style/Widget.Material3.Button.TonalButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -107,7 +107,7 @@
             android:hint="@string/displaylink_apk_url_label">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/apkUrlEditText"
+                android:id="@+id/apk_url_edit_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textUri"
@@ -126,7 +126,7 @@
             android:textColor="?colorPrimary" />
 
         <TextView
-            android:id="@+id/currentResolutionText"
+            android:id="@+id/current_resolution_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingHorizontal="16dp"
@@ -134,7 +134,7 @@
             android:textAppearance="?attr/textAppearanceBodyMedium" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/resolutionButton"
+            android:id="@+id/resolution_button"
             style="@style/Widget.Material3.Button.TonalButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

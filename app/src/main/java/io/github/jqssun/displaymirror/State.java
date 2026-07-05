@@ -32,7 +32,7 @@ public class State {
   public static final String MODE_UTILITY = "utility"; // for non-mode jobs like FetchLogAndShare
 
   // weak reference to avoid leaking the activity
-  private static WeakReference<MirrorMainActivity> currentActivity = new WeakReference<>(null);
+  private static WeakReference<MainActivity> currentActivity = new WeakReference<>(null);
   public static final MutableLiveData<MirrorUiState> uiState =
       new MutableLiveData<>(new MirrorUiState());
   public static String serverUuid;
@@ -51,14 +51,14 @@ public class State {
   public static volatile IUserService userService;
   public static Set<String> discoveredMirrorClients = new HashSet<>();
 
-  public static MirrorMainActivity getCurrentActivity() {
+  public static MainActivity getCurrentActivity() {
     if (currentActivity == null) {
       return null;
     }
     return currentActivity.get();
   }
 
-  public static void setCurrentActivity(MirrorMainActivity activity) {
+  public static void setCurrentActivity(MainActivity activity) {
     currentActivity = new WeakReference<>(activity);
   }
 
@@ -69,7 +69,7 @@ public class State {
           State.log("user service connected");
           State.userService = IUserService.Stub.asInterface(binder);
           if (State.currentActivity != null && State.currentActivity.get() != null) {
-            MirrorMainActivity context = State.currentActivity.get();
+            MainActivity context = State.currentActivity.get();
             context.runOnUiThread(
                 () -> {
                   State.resumeJob();
@@ -79,7 +79,7 @@ public class State {
           if (preferences != null
               && preferences.getInt("AUTO_GRANT_PERMISSION", 0) != BuildConfig.VERSION_CODE) {
             preferences.edit().putInt("AUTO_GRANT_PERMISSION", BuildConfig.VERSION_CODE).apply();
-            State.log("Granted media projection and overlay permissions");
+            State.log("granted media projection and overlay permissions");
             try {
               State.userService.executeCommand(
                   "appops set io.github.jqssun.displaymirror PROJECT_MEDIA allow");
@@ -121,25 +121,25 @@ public class State {
   public static void startNewJob(String mode, Job job) {
     if (jobs.containsKey(mode)) {
       State.log(
-          "Task " + jobs.get(mode).getClass().getSimpleName() + " is already running for " + mode);
+          "task " + jobs.get(mode).getClass().getSimpleName() + " is already running for " + mode);
       return;
     }
     jobs.put(mode, job);
     // keep legacy alias pointing at most recent job for backward compat
     currentJob = job;
     try {
-      State.log("Starting task " + job.getClass().getSimpleName() + " [" + mode + "]");
+      State.log("starting task " + job.getClass().getSimpleName() + " [" + mode + "]");
       job.start();
-      State.log("Task " + job.getClass().getSimpleName() + " completed [" + mode + "]");
+      State.log("task " + job.getClass().getSimpleName() + " completed [" + mode + "]");
       jobs.remove(mode);
       if (currentJob == job) currentJob = null;
     } catch (YieldException e) {
       State.log(
-          "Task " + job.getClass().getSimpleName() + " yielded [" + mode + "], " + e.getMessage());
+          "task " + job.getClass().getSimpleName() + " yielded [" + mode + "], " + e.getMessage());
     } catch (RuntimeException e) {
-      State.log("Task " + job.getClass().getSimpleName() + " failed [" + mode + "]");
+      State.log("task " + job.getClass().getSimpleName() + " failed [" + mode + "]");
       String stackTrace = android.util.Log.getStackTraceString(e);
-      State.log("Stack trace: " + stackTrace);
+      State.log("stacktrace: " + stackTrace);
       jobs.remove(mode);
       if (currentJob == job) currentJob = null;
     }
@@ -156,18 +156,18 @@ public class State {
     if (currentJob == null) return;
     Job job = currentJob;
     try {
-      State.log("Resuming task " + job.getClass().getSimpleName());
+      State.log("resuming task " + job.getClass().getSimpleName());
       job.start();
-      State.log("Task " + job.getClass().getSimpleName() + " completed");
+      State.log("task " + job.getClass().getSimpleName() + " completed");
       // remove from mode map
       jobs.values().remove(job);
       if (currentJob == job) currentJob = null;
     } catch (YieldException e) {
-      State.log("Task " + job.getClass().getSimpleName() + " yielded, " + e.getMessage());
+      State.log("task " + job.getClass().getSimpleName() + " yielded, " + e.getMessage());
     } catch (RuntimeException e) {
-      State.log("Task " + job.getClass().getSimpleName() + " failed to resume");
+      State.log("task " + job.getClass().getSimpleName() + " failed to resume");
       String stackTrace = android.util.Log.getStackTraceString(e);
-      State.log("Stack trace: " + stackTrace);
+      State.log("stacktrace: " + stackTrace);
       jobs.values().remove(job);
       if (currentJob == job) currentJob = null;
     }
@@ -182,18 +182,18 @@ public class State {
     }
     currentJob = job; // update legacy alias
     try {
-      State.log("Resuming task " + job.getClass().getSimpleName() + " [" + mode + "]");
+      State.log("resuming task " + job.getClass().getSimpleName() + " [" + mode + "]");
       job.start();
-      State.log("Task " + job.getClass().getSimpleName() + " completed [" + mode + "]");
+      State.log("task " + job.getClass().getSimpleName() + " completed [" + mode + "]");
       jobs.remove(mode);
       if (currentJob == job) currentJob = null;
     } catch (YieldException e) {
       State.log(
-          "Task " + job.getClass().getSimpleName() + " yielded [" + mode + "], " + e.getMessage());
+          "task " + job.getClass().getSimpleName() + " yielded [" + mode + "], " + e.getMessage());
     } catch (RuntimeException e) {
-      State.log("Task " + job.getClass().getSimpleName() + " failed to resume [" + mode + "]");
+      State.log("task " + job.getClass().getSimpleName() + " failed to resume [" + mode + "]");
       String stackTrace = android.util.Log.getStackTraceString(e);
-      State.log("Stack trace: " + stackTrace);
+      State.log("stacktrace: " + stackTrace);
       jobs.remove(mode);
       if (currentJob == job) currentJob = null;
     }
@@ -340,7 +340,7 @@ public class State {
   }
 
   public static void refreshMainActivity() {
-    MirrorMainActivity mirrorMainActivity = currentActivity.get();
+    MainActivity mirrorMainActivity = currentActivity.get();
     if (mirrorMainActivity != null) {
       mirrorMainActivity.runOnUiThread(mirrorMainActivity::refresh);
     }

@@ -73,7 +73,7 @@ public class MirrorDisplaylinkMonitor {
     if (device.getVendorId() == 6121 && State.displaylinkDeviceName == null) {
       State.displaylinkDeviceName = device.getDeviceName();
       State.displaylinkState.device = device;
-      State.log("Found DisplayLink device: " + device.getProductName());
+      State.log("found DisplayLink device: " + device.getProductName());
     }
     if (device.getDeviceName().equals(State.displaylinkDeviceName)) {
       State.displaylinkState.virtualDisplayArgs =

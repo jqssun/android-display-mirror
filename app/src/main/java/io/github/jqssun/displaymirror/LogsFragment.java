@@ -26,7 +26,7 @@ public class LogsFragment extends Fragment {
       LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.fragment_logs, container, false);
 
-    logRecyclerView = view.findViewById(R.id.logRecyclerView);
+    logRecyclerView = view.findViewById(R.id.log_recycler_view);
     logAdapter = new LogAdapter(State.logs);
     logRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
     logRecyclerView.setAdapter(logAdapter);

@@ -36,11 +36,11 @@ public class SettingsFragment extends Fragment {
   }
 
   private void _initSettings(View view) {
-    MaterialSwitch trustedDisplayCheckbox = view.findViewById(R.id.trustedDisplayCheckbox);
-    MaterialSwitch autoRotateCheckbox = view.findViewById(R.id.autoRotateCheckbox);
-    MaterialSwitch autoScaleCheckbox = view.findViewById(R.id.autoScaleCheckbox);
+    MaterialSwitch trustedDisplayCheckbox = view.findViewById(R.id.trusted_display_checkbox);
+    MaterialSwitch autoRotateCheckbox = view.findViewById(R.id.auto_rotate_checkbox);
+    MaterialSwitch autoScaleCheckbox = view.findViewById(R.id.auto_scale_checkbox);
     MaterialButton manageSystemDisplaySettingsBtn =
-        view.findViewById(R.id.manageSystemDisplaySettingsBtn);
+        view.findViewById(R.id.manage_system_display_settings_btn);
 
     boolean hasShizuku = ShizukuUtils.hasPermission();
     trustedDisplayCheckbox.setChecked(hasShizuku && Pref.getTrustedDisplay());
@@ -56,10 +56,10 @@ public class SettingsFragment extends Fragment {
     autoScaleCheckbox.setOnCheckedChangeListener(
         (b, c) -> preferences.edit().putBoolean(Pref.KEY_AUTO_SCALE, c).apply());
     manageSystemDisplaySettingsBtn.setOnClickListener(
-        v -> ((MirrorMainActivity) requireActivity()).openExtendSettings());
+        v -> ((MainActivity) requireActivity()).openExtendSettings());
 
     // about
-    TextView versionText = view.findViewById(R.id.versionText);
+    TextView versionText = view.findViewById(R.id.version_text);
     try {
       String ver =
           requireContext()
@@ -71,7 +71,7 @@ public class SettingsFragment extends Fragment {
     } catch (Exception e) {
       versionText.setText(R.string.version_unknown);
     }
-    view.findViewById(R.id.websiteLink)
+    view.findViewById(R.id.website_link)
         .setOnClickListener(
             v ->
                 startActivity(
@@ -79,14 +79,14 @@ public class SettingsFragment extends Fragment {
                         Intent.ACTION_VIEW,
                         Uri.parse("https://github.com/jqssun/android-display-mirror"))));
 
-    view.findViewById(R.id.shizukuBtn)
+    view.findViewById(R.id.shizuku_btn)
         .setOnClickListener(
             v ->
                 startActivity(
                     new Intent(
                         Intent.ACTION_VIEW, Uri.parse("https://github.com/rikkaapps/shizuku"))));
 
-    view.findViewById(R.id.exitBtn)
+    view.findViewById(R.id.exit_btn)
         .setOnClickListener(
             v -> {
               io.github.jqssun.displaymirror.job.AutoRotateAndScaleForDisplaylink.instance = null;

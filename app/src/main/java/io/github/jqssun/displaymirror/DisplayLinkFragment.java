@@ -6,17 +6,14 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.Spinner;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import io.github.jqssun.displaymirror.dialog.ResolutionSettingsDialog;
 
 public class DisplayLinkFragment extends Fragment {
   private SharedPreferences preferences;
@@ -46,7 +43,7 @@ public class DisplayLinkFragment extends Fragment {
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
     preferences = requireContext().getSharedPreferences(Pref.PREF_NAME, Context.MODE_PRIVATE);
-    manageDisplayBtn = view.findViewById(R.id.manageDisplayBtn);
+    manageDisplayBtn = view.findViewById(R.id.manage_display_btn);
     _init(view);
     State.uiState.observe(getViewLifecycleOwner(), state -> _updateManageDisplayButton());
   }
@@ -63,27 +60,27 @@ public class DisplayLinkFragment extends Fragment {
     State.logVersion.observe(getViewLifecycleOwner(), v -> _updateLibStatus(view));
     _updateManageDisplayButton();
 
-    MaterialButton downloadApkBtn = view.findViewById(R.id.downloadApkBtn);
-    MaterialButton importApkBtn = view.findViewById(R.id.importApkBtn);
+    MaterialButton downloadApkBtn = view.findViewById(R.id.download_apk_btn);
+    MaterialButton importApkBtn = view.findViewById(R.id.import_apk_btn);
     manageDisplayBtn.setOnClickListener(
         v ->
-            ((MirrorMainActivity) requireActivity())
+            ((MainActivity) requireActivity())
                 .manageDisplayInExtend(
-                    State.getDisplaylinkVirtualDisplayId(), MirrorMainActivity.SCREEN_DISPLAYLINK));
+                    State.getDisplaylinkVirtualDisplayId(), MainActivity.SCREEN_DISPLAYLINK));
 
     downloadApkBtn.setOnClickListener(
-        v -> ((MirrorMainActivity) requireActivity()).downloadDisplayLink(downloadApkBtn));
+        v -> ((MainActivity) requireActivity()).downloadDisplayLink(downloadApkBtn));
 
-    importApkBtn.setOnClickListener(v -> ((MirrorMainActivity) requireActivity()).importApk());
+    importApkBtn.setOnClickListener(v -> ((MainActivity) requireActivity()).importApk());
 
     // resolution
-    TextView currentResolutionText = view.findViewById(R.id.currentResolutionText);
+    TextView currentResolutionText = view.findViewById(R.id.current_resolution_text);
     _updateResolutionText(currentResolutionText);
-    MaterialButton resolutionButton = view.findViewById(R.id.resolutionButton);
+    MaterialButton resolutionButton = view.findViewById(R.id.resolution_button);
     resolutionButton.setOnClickListener(v -> _showResolutionDialog(currentResolutionText));
 
     // APK URL
-    EditText apkUrlEditText = view.findViewById(R.id.apkUrlEditText);
+    EditText apkUrlEditText = view.findViewById(R.id.apk_url_edit_text);
     apkUrlEditText.setText(Pref.getDisplaylinkApkUrl());
     apkUrlEditText.setOnFocusChangeListener(
         (v, hasFocus) -> {
@@ -99,9 +96,9 @@ public class DisplayLinkFragment extends Fragment {
   }
 
   private void _updateLibStatus(View view) {
-    TextView title = view.findViewById(R.id.libStatusTitle);
-    TextView detail = view.findViewById(R.id.libStatusDetail);
-    ImageView icon = view.findViewById(R.id.libStatusIcon);
+    TextView title = view.findViewById(R.id.lib_status_title);
+    TextView detail = view.findViewById(R.id.lib_status_detail);
+    ImageView icon = view.findViewById(R.id.lib_status_icon);
     boolean imported = ApkImporter.areLibsImported(requireContext());
     title.setText(
         imported
@@ -125,80 +122,8 @@ public class DisplayLinkFragment extends Fragment {
   }
 
   private void _showResolutionDialog(TextView currentResolutionText) {
-    View dialogView =
-        LayoutInflater.from(requireContext()).inflate(R.layout.dialog_resolution_settings, null);
-    EditText widthEditText = dialogView.findViewById(R.id.widthEditText);
-    EditText heightEditText = dialogView.findViewById(R.id.heightEditText);
-    EditText refreshRateEditText = dialogView.findViewById(R.id.refreshRateEditText);
-    Spinner presetSpinner = dialogView.findViewById(R.id.resolutionPresetSpinner);
-
-    widthEditText.setText(String.valueOf(Pref.getDisplaylinkWidth()));
-    heightEditText.setText(String.valueOf(Pref.getDisplaylinkHeight()));
-    refreshRateEditText.setText(String.valueOf(Pref.getDisplaylinkRefreshRate()));
-
-    String[] presets = {getString(R.string.quick_presets), "1080p", "1440p", "2160p", "Apple iPad"};
-    ArrayAdapter<String> presetAdapter =
-        new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, presets);
-    presetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-    presetSpinner.setAdapter(presetAdapter);
-    presetSpinner.setOnItemSelectedListener(
-        new AdapterView.OnItemSelectedListener() {
-          @Override
-          public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-            switch (position) {
-              case 1:
-                widthEditText.setText("1920");
-                heightEditText.setText("1080");
-                refreshRateEditText.setText("60");
-                break;
-              case 2:
-                widthEditText.setText("2560");
-                heightEditText.setText("1440");
-                refreshRateEditText.setText("60");
-                break;
-              case 3:
-                widthEditText.setText("3840");
-                heightEditText.setText("2160");
-                refreshRateEditText.setText("60");
-                break;
-              case 4:
-                widthEditText.setText("2048");
-                heightEditText.setText("1536");
-                refreshRateEditText.setText("60");
-                break;
-            }
-          }
-
-          @Override
-          public void onNothingSelected(AdapterView<?> parent) {}
-        });
-
-    TvFocus.attach(new MaterialAlertDialogBuilder(requireContext())
-        .setTitle(R.string.displaylink_resolution_title)
-        .setView(dialogView)
-        .setPositiveButton(
-            R.string.ok,
-            (dialog, which) -> {
-              try {
-                int w = Integer.parseInt(widthEditText.getText().toString());
-                int h = Integer.parseInt(heightEditText.getText().toString());
-                int r =
-                    Math.max(
-                        24,
-                        Math.min(240, Integer.parseInt(refreshRateEditText.getText().toString())));
-                preferences
-                    .edit()
-                    .putInt(Pref.KEY_DISPLAYLINK_WIDTH, w)
-                    .putInt(Pref.KEY_DISPLAYLINK_HEIGHT, h)
-                    .putInt(Pref.KEY_DISPLAYLINK_REFRESH_RATE, r)
-                    .apply();
-                _updateResolutionText(currentResolutionText);
-              } catch (NumberFormatException e) {
-                /* ignore */
-              }
-            })
-        .setNegativeButton(R.string.cancel, null)
-        .show());
+    ResolutionSettingsDialog.show(
+        requireContext(), () -> _updateResolutionText(currentResolutionText));
   }
 
   private void _updateManageDisplayButton() {

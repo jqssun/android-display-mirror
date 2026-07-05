@@ -8,7 +8,7 @@ import android.os.Build;
 import android.util.Log;
 import android.view.Display;
 import io.github.jqssun.displaymirror.MirrorActivity;
-import io.github.jqssun.displaymirror.MirrorMainActivity;
+import io.github.jqssun.displaymirror.MainActivity;
 import io.github.jqssun.displaymirror.State;
 
 public class ProjectViaMirror implements Job {
@@ -56,15 +56,15 @@ public class ProjectViaMirror implements Job {
       return true;
     }
     if (mediaProjectionRequested) {
-      State.log("Skipping task, screen projection permission not granted");
+      State.log("skipping task, screen projection permission not granted");
       return false;
     }
     mediaProjectionRequested = true;
-    MirrorMainActivity mirrorMainActivity = State.getCurrentActivity();
+    MainActivity mirrorMainActivity = State.getCurrentActivity();
     if (mirrorMainActivity == null) {
       return false;
     }
     mirrorMainActivity.startMediaProjectionService();
-    throw new YieldException("Waiting for projection permission");
+    throw new YieldException("waiting for projection permission");
   }
 }

@@ -19,7 +19,7 @@ public class ConnectToClient {
     String clientIpAndPort = Pref.getSelectedClient();
     String[] parts = clientIpAndPort.split(":");
     if (parts.length < 2) {
-      State.log("Invalid client address (missing port): " + clientIpAndPort);
+      State.log("invalid client address (missing port): " + clientIpAndPort);
       return;
     }
     String clientIp = parts[0];
@@ -27,12 +27,12 @@ public class ConnectToClient {
     try {
       clientPort = Integer.parseInt(parts[1]);
     } catch (Exception e) {
-      State.log("Invalid client address: " + clientIpAndPort + "  " + e);
+      State.log("invalid client address: " + clientIpAndPort + "  " + e);
       return;
     }
     String serverIp = _findServerIpInSameSubnet(clientIp);
     if (serverIp == null) {
-      State.log("Cannot find local IP on the same subnet as client");
+      State.log("cannot find local IP on the same subnet as client");
       return;
     }
     if (State.serverUuid == null) {
@@ -47,7 +47,7 @@ public class ConnectToClient {
             + "\", \"uuid\": \""
             + State.serverUuid
             + "\"}\n";
-    State.log("Sending auto-start request to: " + clientIp + ":" + clientPort);
+    State.log("sending auto-start request to: " + clientIp + ":" + clientPort);
 
     final String finalClientIp = clientIp;
     final int finalClientPort = clientPort;
@@ -114,7 +114,7 @@ public class ConnectToClient {
         }
       }
     } catch (SocketException e) {
-      State.log("Failed to find matching IP: " + e);
+      State.log("failed to find matching IP: " + e);
     }
 
     return null;

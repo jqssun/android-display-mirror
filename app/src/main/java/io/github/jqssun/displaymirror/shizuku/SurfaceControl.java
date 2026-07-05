@@ -90,8 +90,8 @@ public final class SurfaceControl {
 
   private static Method getGetBuiltInDisplayMethod() throws NoSuchMethodException {
     if (getBuiltInDisplayMethod == null) {
-      // the method signature has changed in Android 10
-      // <https://github.com/Genymobile/scrcpy/issues/586>
+      // the method signature has changed in Android 10:
+      // https://github.com/Genymobile/scrcpy/issues/586
       if (Build.VERSION.SDK_INT < AndroidVersions.API_29_ANDROID_10) {
         getBuiltInDisplayMethod = CLASS.getMethod("getBuiltInDisplay", int.class);
       } else {

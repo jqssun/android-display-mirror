@@ -1,6 +1,6 @@
 package io.github.jqssun.displaymirror.job;
 
-import static io.github.jqssun.displaymirror.MirrorMainActivity.REQUEST_RECORD_AUDIO_PERMISSION;
+import static io.github.jqssun.displaymirror.MainActivity.REQUEST_RECORD_AUDIO_PERMISSION;
 
 import android.Manifest;
 import android.content.Context;
@@ -14,7 +14,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 import androidx.core.app.ActivityCompat;
-import io.github.jqssun.displaymirror.MirrorMainActivity;
+import io.github.jqssun.displaymirror.MainActivity;
 import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.State;
 
@@ -28,7 +28,7 @@ public class SunshineAudio {
       int framesPerPacket = (int) (48000 * packetDuration / 1000.0f);
       AudioRecordProxy audioRecordProxy = new AudioRecordProxy();
       if (!_startRecording()) {
-        State.log("Failed to start audio recording via Shizuku, falling back to normal audio");
+        State.log("failed to start audio recording via Shizuku, falling back to normal audio");
       } else {
         SunshineServer.startAudioRecording(audioRecordProxy, framesPerPacket);
         return false;
@@ -40,16 +40,16 @@ public class SunshineAudio {
     // check audio settings permission
     if (context.checkSelfPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS)
         != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-      State.log("No audio control permission, cannot mute");
+      State.log("no audio control permission, cannot mute");
     }
     AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
     audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_MUTE, 0);
     if (audioManager.isStreamMute(AudioManager.STREAM_MUSIC)) {
       isMuted = true;
-      State.log("Muting phone audio at client's request");
+      State.log("muting phone audio at client's request");
       _registerVolumeChangeListener(context, audioManager);
     } else {
-      State.log("Failed to set mute");
+      State.log("failed to set mute");
     }
     return false;
   }
@@ -96,7 +96,7 @@ public class SunshineAudio {
     }
     AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
     if (!audioManager.isStreamMute(AudioManager.STREAM_MUSIC)) {
-      State.log("Volume change detected, reapplying mute");
+      State.log("volume change detected, reapplying mute");
       audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_MUTE, 0);
     }
   }
@@ -157,11 +157,11 @@ public class SunshineAudio {
 
     } else {
       if (audioPermissionRequested) {
-        State.log("Skipping task, audio recording permission not granted");
+        State.log("skipping task, audio recording permission not granted");
         return true;
       }
       audioPermissionRequested = true;
-      MirrorMainActivity activity = State.getCurrentActivity();
+      MainActivity activity = State.getCurrentActivity();
       if (activity == null) {
         return true;
       }
@@ -169,7 +169,7 @@ public class SunshineAudio {
           activity,
           new String[] {Manifest.permission.RECORD_AUDIO},
           REQUEST_RECORD_AUDIO_PERMISSION);
-      throw new YieldException("Waiting for audio recording permission");
+      throw new YieldException("waiting for audio recording permission");
     }
     return false;
   }
@@ -183,7 +183,7 @@ public class SunshineAudio {
       }
     }
     if (isMuted && context != null) {
-      State.log("Restoring volume");
+      State.log("restoring volume");
       isMuted = false;
       AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
       audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_UNMUTE, 0);

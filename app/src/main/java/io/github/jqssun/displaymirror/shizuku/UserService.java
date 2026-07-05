@@ -14,11 +14,9 @@ import android.os.RemoteException;
 import android.system.Os;
 import android.util.Log;
 import android.view.Display;
-import android.view.Surface;
 import androidx.annotation.Keep;
 import androidx.annotation.Nullable;
 import io.github.jqssun.displaymirror.job.AndroidVersions;
-import io.github.jqssun.displaymirror.job.CreateVirtualDisplay;
 import rikka.shizuku.SystemServiceHelper;
 
 public class UserService extends IUserService.Stub {
@@ -258,21 +256,6 @@ public class UserService extends IUserService.Stub {
       volumeKeyThread.interrupt();
       volumeKeyThread = null;
     }
-  }
-
-  @Override
-  public int createVirtualDisplay(Surface surface) throws RemoteException {
-    Ln.i("try to createVirtualDisplay");
-    try {
-      return DisplayManager.create()
-          .createNewVirtualDisplay(
-              "test", 1920, 1080, 160, surface, CreateVirtualDisplay.getFlags(true, true))
-          .getDisplay()
-          .getDisplayId();
-    } catch (Throwable e) {
-      Ln.e("failed to create virtual display", e);
-    }
-    return 0;
   }
 
   @Override

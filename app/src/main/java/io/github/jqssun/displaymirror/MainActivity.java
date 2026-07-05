@@ -16,8 +16,6 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -30,7 +28,7 @@ import io.github.jqssun.displaymirror.job.AcquireShizuku;
 import org.lsposed.hiddenapibypass.HiddenApiBypass;
 import rikka.shizuku.Shizuku;
 
-public class MirrorMainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity {
   public static final String ACTION_OPEN_OVERVIEW =
       "io.github.jqssun.displaymirror.action.OPEN_OVERVIEW";
   public static final String ACTION_OPEN_SCREEN =
@@ -76,13 +74,13 @@ public class MirrorMainActivity extends AppCompatActivity {
           result -> {
             if (result.getResultCode() == RESULT_OK && result.getData() != null) {
               Intent data = result.getData();
-              State.log("User granted screen projection permission");
+              State.log("user granted projection permission");
               lastCheckTime = System.currentTimeMillis();
               if (SunshineService.instance == null) {
                 Intent svc = new Intent(this, SunshineService.class);
                 svc.putExtra("data", data);
                 startForegroundService(svc);
-                State.log("Starting SunshineService");
+                State.log("starting SunshineService");
               } else {
                 MediaProjectionManager mpm =
                     (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
@@ -105,7 +103,7 @@ public class MirrorMainActivity extends AppCompatActivity {
                 State.resumeJob();
               }
             } else {
-              State.log("User denied screen projection permission");
+              State.log("user denied projection permission");
               refresh();
               State.resumeJob();
             }
@@ -159,7 +157,7 @@ public class MirrorMainActivity extends AppCompatActivity {
     if (requestCode == REQUEST_RECORD_AUDIO_PERMISSION) {
       State.resumeJob();
     } else {
-      State.log("Unknown permission request code: " + requestCode);
+      State.log("unknown permission request code: " + requestCode);
     }
   }
 
@@ -170,11 +168,11 @@ public class MirrorMainActivity extends AppCompatActivity {
               + (grantResult == PackageManager.PERMISSION_GRANTED ? "granted" : "denied"));
       State.resumeJob();
     } else {
-      State.log("Unknown Shizuku request code: " + requestCode);
+      State.log("unknown Shizuku request code: " + requestCode);
     }
   }
 
-  private final Shizuku.OnRequestPermissionResultListener REQUEST_PERMISSION_RESULT_LISTENER =
+  private final Shizuku.OnRequestPermissionResultListener requestPermissionResultListener =
       this::_onRequestShizukuPermissionsResult;
 
   @Override
@@ -196,7 +194,7 @@ public class MirrorMainActivity extends AppCompatActivity {
     State.setCurrentActivity(this);
     getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-    Shizuku.addRequestPermissionResultListener(REQUEST_PERMISSION_RESULT_LISTENER);
+    Shizuku.addRequestPermissionResultListener(requestPermissionResultListener);
     Shizuku.addBinderReceivedListenerSticky(_binderReceivedListener);
     Shizuku.addBinderDeadListener(_binderDeadListener);
 
@@ -209,26 +207,13 @@ public class MirrorMainActivity extends AppCompatActivity {
     navController = navHostFragment.getNavController();
     bottomNav = findViewById(R.id.bottom_nav);
     View navHost = findViewById(R.id.nav_host_fragment);
-    ViewCompat.setOnApplyWindowInsetsListener(
-        bottomNav,
-        (v, insets) -> {
-          int navBarBottom = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom;
-          v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), navBarBottom);
-          return insets;
-        });
-    bottomNav
-        .getViewTreeObserver()
-        .addOnGlobalLayoutListener(
-            () -> {
-              int h = bottomNav.getHeight();
-              if (navHost.getPaddingBottom() != h) {
-                navHost.setPadding(
-                    navHost.getPaddingLeft(),
-                    navHost.getPaddingTop(),
-                    navHost.getPaddingRight(),
-                    h);
-              }
-            });
+    bottomNav.addOnLayoutChangeListener(
+        (v, l, t, r, b, ol, ot, orr, ob) ->
+            navHost.setPadding(
+                navHost.getPaddingLeft(),
+                navHost.getPaddingTop(),
+                navHost.getPaddingRight(),
+                b - t));
     MaterialToolbar toolbar = findViewById(R.id.toolbar);
     setSupportActionBar(toolbar);
     AppBarConfiguration appBarConfig =
@@ -292,7 +277,7 @@ public class MirrorMainActivity extends AppCompatActivity {
   @Override
   protected void onDestroy() {
     super.onDestroy();
-    Shizuku.removeRequestPermissionResultListener(REQUEST_PERMISSION_RESULT_LISTENER);
+    Shizuku.removeRequestPermissionResultListener(requestPermissionResultListener);
     Shizuku.removeBinderReceivedListener(_binderReceivedListener);
     Shizuku.removeBinderDeadListener(_binderDeadListener);
     State.setCurrentActivity(null);
@@ -422,7 +407,7 @@ public class MirrorMainActivity extends AppCompatActivity {
                         Toast.makeText(
                                 this, getString(R.string.import_failed, err), Toast.LENGTH_LONG)
                             .show();
-                        State.log("Download import error: " + err);
+                        State.log("download import error: " + err);
                       }
                       refresh();
                     });
@@ -436,7 +421,7 @@ public class MirrorMainActivity extends AppCompatActivity {
                               getString(R.string.import_failed, e.getMessage()),
                               Toast.LENGTH_LONG)
                           .show();
-                      State.log("Download exception: " + e.getMessage());
+                      State.log("download exception: " + e.getMessage());
                     });
               }
             })

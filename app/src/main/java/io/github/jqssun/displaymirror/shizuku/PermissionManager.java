@@ -5,7 +5,6 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserHandleHidden;
 import android.permission.IPermissionManager;
-import android.util.Log;
 import dev.rikka.tools.refine.Refine;
 import io.github.jqssun.displaymirror.BuildConfig;
 import io.github.jqssun.displaymirror.State;
@@ -15,7 +14,7 @@ public class PermissionManager {
     try {
       return _grant(permissionName);
     } catch (Throwable e) {
-      State.log("Authorization failed: " + e);
+      State.log("grant failed: " + e);
       return false;
     }
   }
@@ -29,22 +28,22 @@ public class PermissionManager {
       IPackageManager packageManager = ServiceUtils.getPackageManager();
       packageManager.grantRuntimePermission(
           packageName, permissionName, userHandleHidden.getIdentifier());
-      Log.i("PermissionManager", "Successfully granted " + permissionName + " permission");
+      State.log("granted " + permissionName);
       return true;
     } else {
       try {
         permissionManager.grantRuntimePermission(
             packageName, permissionName, "0", userHandleHidden.getIdentifier());
-        Log.i("PermissionManager", "Successfully granted " + permissionName + " permission");
+        State.log("granted " + permissionName);
         return true;
       } catch (Throwable e) {
         try {
           permissionManager.grantRuntimePermission(
               packageName, permissionName, userHandleHidden.getIdentifier());
-          Log.i("PermissionManager", "Successfully granted " + permissionName + " permission");
+          State.log("granted " + permissionName);
           return true;
         } catch (Throwable e2) {
-          State.log("Failed to grant permission: " + e2.getMessage());
+          State.log("grant failed: " + e2.getMessage());
         }
       }
     }

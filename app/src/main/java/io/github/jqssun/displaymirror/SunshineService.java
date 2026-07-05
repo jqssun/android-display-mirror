@@ -98,12 +98,12 @@ public class SunshineService extends Service {
           (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
       Intent data = intent.getParcelableExtra("data");
       if (mediaProjectionManager == null || data == null) {
-        State.log("Failed to get media projection service or data");
+        State.log("failed to get media projection service or data");
         return START_NOT_STICKY;
       }
       State.setMediaProjection(mediaProjectionManager.getMediaProjection(RESULT_OK, data));
       if (State.getMediaProjection() == null) {
-        State.log("Failed to get media projection");
+        State.log("failed to get media projection");
         return START_NOT_STICKY;
       }
       State.getMediaProjection()
@@ -164,11 +164,11 @@ public class SunshineService extends Service {
                         })
                     .start();
                 if (ipAddresses.isEmpty()) {
-                  State.log("Unable to get WiFi IP address");
+                  State.log("unable to get WiFi IP address");
                 } else {
-                  State.log("Publishing Moonlight service name: " + sunshineName);
+                  State.log("publishing Moonlight service name: " + sunshineName);
                   for (String addr : ipAddresses) {
-                    State.log("Publishing Moonlight IP: " + addr);
+                    State.log("publishing Moonlight IP: " + addr);
                   }
                 }
               } catch (Exception e) {
@@ -194,7 +194,7 @@ public class SunshineService extends Service {
     handler.postDelayed(
         () -> {
           if (ShizukuUtils.hasPermission() && State.userService == null) {
-            State.log("try start shizuku user service");
+            State.log("try start Shizuku user service");
             State.bindUserService();
             handler.postDelayed(
                 () -> {
@@ -266,10 +266,10 @@ public class SunshineService extends Service {
         SunshineServer.enableH265();
         return true;
       }
-      State.log("Device does not support H.265/HEVC encoding");
+      State.log("device does not support H.265/HEVC encoding");
       return false;
     } catch (Exception e) {
-      State.log("Error checking H.265 encoding support: " + e.getMessage());
+      State.log("error checking H.265 encoding support: " + e.getMessage());
       return false;
     }
   }

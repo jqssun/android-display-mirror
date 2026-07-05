@@ -117,14 +117,14 @@ public class SunshineMouse {
     }
 
     State.log(
-        "Primary display size defaultDisplayWidth: "
+        "primary display size defaultDisplayWidth: "
             + defaultDisplayWidth
             + " defaultDisplayHeight: "
             + defaultDisplayHeight);
-    State.log("Client screen size screenWidth: " + screenWidth + " screenHeight: " + screenHeight);
+    State.log("client screen size screenWidth: " + screenWidth + " screenHeight: " + screenHeight);
     if (State.mirrorVirtualDisplay == null) {
       State.log(
-          "Mirror mode portraitMirrorWidth: "
+          "mirror mode portraitMirrorWidth: "
               + portraitMirrorWidth
               + " portraitMirrorHeight: "
               + portraitMirrorHeight

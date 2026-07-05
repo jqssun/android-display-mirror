@@ -25,12 +25,12 @@ public class AcquireShizuku implements Job {
       }
     } else {
       if (hasRequestedPermission) {
-        State.log("Failed to acquire Shizuku permission");
+        State.log("failed to acquire Shizuku permission");
         return;
       }
       hasRequestedPermission = true;
       Shizuku.requestPermission(SHIZUKU_PERMISSION_REQUEST_CODE);
-      throw new YieldException("Waiting for Shizuku permission");
+      throw new YieldException("waiting for Shizuku permission");
     }
   }
 

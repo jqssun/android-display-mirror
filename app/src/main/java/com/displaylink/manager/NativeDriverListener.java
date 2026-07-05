@@ -19,7 +19,7 @@ public class NativeDriverListener {
     new Handler(Looper.getMainLooper())
         .post(
             () -> {
-              State.log("Display connected, Encoder ID: " + encoderId);
+              State.log("display connected, Encoder ID: " + encoderId);
             });
   }
 
@@ -30,9 +30,9 @@ public class NativeDriverListener {
             () -> {
               DisplaylinkState displaylinkState = State.displaylinkState;
               if (displaylinkState == null) {
-                State.log("Display disconnected, but USB device not found");
+                State.log("display disconnected, but USB device not found");
               } else {
-                State.log("Display disconnected, closing USB state");
+                State.log("display disconnected, closing USB state");
                 displaylinkState.encoderId = 0;
                 displaylinkState.monitorInfo = null;
               }

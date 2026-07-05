@@ -13,7 +13,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.Display;
-import io.github.jqssun.displaymirror.MirrorMainActivity;
+import io.github.jqssun.displaymirror.MainActivity;
 import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.State;
 import io.github.jqssun.displaymirror.SunshineService;
@@ -36,7 +36,7 @@ public class MirrorDisplayMonitor {
         new DisplayManager.DisplayListener() {
           @Override
           public void onDisplayAdded(int displayId) {
-            State.log("Display added, displayId: " + displayId);
+            State.log("display added, displayId: " + displayId);
             Display display = displayManager.getDisplay(displayId);
             if (display != null) {
               _handleNewDisplay(display);
@@ -52,9 +52,9 @@ public class MirrorDisplayMonitor {
                         State.getCurrentActivity().finish();
                       }
                       Intent intent =
-                          new Intent(SunshineService.instance, MirrorMainActivity.class);
-                      intent.setAction(MirrorMainActivity.ACTION_OPEN_SCREEN);
-                      intent.putExtra(MirrorMainActivity.EXTRA_SCREEN, targetScreen);
+                          new Intent(SunshineService.instance, MainActivity.class);
+                      intent.setAction(MainActivity.ACTION_OPEN_SCREEN);
+                      intent.putExtra(MainActivity.EXTRA_SCREEN, targetScreen);
                       intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                       ActivityOptions options = ActivityOptions.makeBasic();
                       options.setLaunchDisplayId(Display.DEFAULT_DISPLAY);
@@ -65,7 +65,7 @@ public class MirrorDisplayMonitor {
 
           @Override
           public void onDisplayRemoved(int displayId) {
-            State.log("Display removed, displayId: " + displayId);
+            State.log("display removed, displayId: " + displayId);
             if (displayId == State.lastSingleAppDisplay) {
               State.clearLastSingleAppDisplay();
             }
@@ -108,26 +108,26 @@ public class MirrorDisplayMonitor {
   }
 
   private static String _resolveTargetScreen(int displayId) {
-    MirrorMainActivity currentActivity = State.getCurrentActivity();
+    MainActivity currentActivity = State.getCurrentActivity();
     if (currentActivity != null) {
       String currentScreen = currentActivity.getCurrentScreen();
-      if (MirrorMainActivity.SCREEN_MOONLIGHT.equals(currentScreen)
-          || MirrorMainActivity.SCREEN_AIRPLAY.equals(currentScreen)
-          || MirrorMainActivity.SCREEN_DISPLAYLINK.equals(currentScreen)) {
+      if (MainActivity.SCREEN_MOONLIGHT.equals(currentScreen)
+          || MainActivity.SCREEN_AIRPLAY.equals(currentScreen)
+          || MainActivity.SCREEN_DISPLAYLINK.equals(currentScreen)) {
         return currentScreen;
       }
     }
 
     if (displayId == State.getDisplaylinkVirtualDisplayId()) {
-      return MirrorMainActivity.SCREEN_DISPLAYLINK;
+      return MainActivity.SCREEN_DISPLAYLINK;
     }
     if (displayId == State.getAirPlayVirtualDisplayId()) {
-      return MirrorMainActivity.SCREEN_AIRPLAY;
+      return MainActivity.SCREEN_AIRPLAY;
     }
     if (displayId == State.getMirrorVirtualDisplayId() || displayId == State.lastSingleAppDisplay) {
-      return MirrorMainActivity.SCREEN_MOONLIGHT;
+      return MainActivity.SCREEN_MOONLIGHT;
     }
-    return MirrorMainActivity.SCREEN_MOONLIGHT;
+    return MainActivity.SCREEN_MOONLIGHT;
   }
 
   private static void _handleDisableUsbAudio(Context context) {
@@ -146,9 +146,9 @@ public class MirrorDisplayMonitor {
         if (device.getType() == AudioDeviceInfo.TYPE_HDMI) {
           try {
             audioManager.setWiredDeviceConnectionState(device, 0, "com.android.shell");
-            State.log("Disabled audio output device: " + device);
+            State.log("disabled audio output device: " + device);
           } catch (Throwable e) {
-            State.log("Failed to disable audio output device: " + e);
+            State.log("failed to disable audio output device: " + e);
           }
         }
       }
@@ -160,24 +160,24 @@ public class MirrorDisplayMonitor {
             audioManager.setWiredDeviceConnectionState(
                 device.getType(), 0, _getDeviceAddress(device), "", "com.android.shell");
             State.log(
-                "Disabled audio output device: "
+                "disabled audio output device: "
                     + device.getType()
                     + ", "
                     + device.getProductName());
           } catch (Throwable e) {
-            State.log("Failed to disable audio output device: " + e);
+            State.log("failed to disable audio output device: " + e);
           }
         } else if (device.getType() == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER) {
           try {
             audioManager.setWiredDeviceConnectionState(
                 device.getType(), 1, _getDeviceAddress(device), "", "com.android.shell");
             State.log(
-                "Enabled audio output device: "
+                "enabled audio output device: "
                     + device.getType()
                     + ", "
                     + device.getProductName());
           } catch (Throwable e) {
-            State.log("Failed to enable audio output device: " + e);
+            State.log("failed to enable audio output device: " + e);
           }
         }
       }

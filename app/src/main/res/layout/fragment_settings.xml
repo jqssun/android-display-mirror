@@ -27,7 +27,7 @@
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/trusted_display" android:textAppearance="?attr/textAppearanceBodyLarge" />
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/trusted_display_desc" android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="?colorOnSurfaceVariant" />
             </LinearLayout>
-            <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/trustedDisplayCheckbox" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+            <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/trusted_display_checkbox" android:layout_width="wrap_content" android:layout_height="wrap_content" />
         </LinearLayout>
 
         <!-- Auto rotate -->
@@ -36,7 +36,7 @@
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/auto_rotate" android:textAppearance="?attr/textAppearanceBodyLarge" />
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/auto_rotate_desc" android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="?colorOnSurfaceVariant" />
             </LinearLayout>
-            <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/autoRotateCheckbox" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+            <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/auto_rotate_checkbox" android:layout_width="wrap_content" android:layout_height="wrap_content" />
         </LinearLayout>
 
         <!-- Auto scale -->
@@ -45,11 +45,11 @@
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/auto_scale_remove_bars" android:textAppearance="?attr/textAppearanceBodyLarge" />
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/auto_scale_remove_bars_desc" android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="?colorOnSurfaceVariant" />
             </LinearLayout>
-            <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/autoScaleCheckbox" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+            <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/auto_scale_checkbox" android:layout_width="wrap_content" android:layout_height="wrap_content" />
         </LinearLayout>
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/manageSystemDisplaySettingsBtn"
+            android:id="@+id/manage_system_display_settings_btn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
@@ -58,7 +58,7 @@
 
         <!-- About -->
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/aboutCard"
+            android:id="@+id/about_card"
             style="@style/Widget.Material3.CardView.Outlined"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -72,13 +72,13 @@
                 android:padding="16dp">
 
                 <TextView
-                    android:id="@+id/versionText"
+                    android:id="@+id/version_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textAppearance="?attr/textAppearanceBodyLarge" />
 
                 <TextView
-                    android:id="@+id/websiteLink"
+                    android:id="@+id/website_link"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
@@ -97,7 +97,7 @@
             android:paddingBottom="16dp">
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/shizukuBtn"
+                android:id="@+id/shizuku_btn"
                 style="@style/Widget.Material3.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -109,7 +109,7 @@
                 android:layout_weight="1" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/exitBtn"
+                android:id="@+id/exit_btn"
                 style="@style/Widget.Material3.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

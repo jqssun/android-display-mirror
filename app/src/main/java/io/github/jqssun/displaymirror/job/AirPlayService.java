@@ -5,7 +5,7 @@ import android.media.projection.MediaProjection;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
-import io.github.jqssun.displaymirror.MirrorMainActivity;
+import io.github.jqssun.displaymirror.MainActivity;
 import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.State;
 import java.net.InetAddress;
@@ -97,7 +97,7 @@ public class AirPlayService {
                 // now request projection: only after AirPlay handshake succeeded
                 mainHandler.post(
                     () -> {
-                      MirrorMainActivity activity = State.getCurrentActivity();
+                      MainActivity activity = State.getCurrentActivity();
                       if (activity != null) {
                         activity.requestAirPlayProjection();
                       } else {

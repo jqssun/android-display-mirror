@@ -59,7 +59,7 @@ public class CreateVirtualDisplay {
         new Handler(Looper.getMainLooper())
             .post(
                 () -> {
-                  State.log("Cannot use single-app projection without Shizuku permission");
+                  State.log("cannot use single-app projection without Shizuku permission");
                 });
         return null;
       }

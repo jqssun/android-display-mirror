@@ -12,7 +12,7 @@
 
         <!-- Permissions status -->
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/permissionsStatusCard"
+            android:id="@+id/permissions_status_card"
             style="@style/Widget.Material3.CardView.Elevated"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -28,7 +28,7 @@
                 android:padding="16dp">
 
                 <ImageView
-                    android:id="@+id/permissionsStatusIcon"
+                    android:id="@+id/permissions_status_icon"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:layout_marginEnd="16dp"
@@ -43,7 +43,7 @@
                     android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/permissionsStatusTitle"
+                        android:id="@+id/permissions_status_title"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/permissions_not_granted"
@@ -51,7 +51,7 @@
                         android:textColor="?attr/colorOnPrimaryContainer" />
 
                     <TextView
-                        android:id="@+id/permissionsStatusDetail"
+                        android:id="@+id/permissions_status_detail"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
@@ -99,7 +99,7 @@
                     android:textAppearance="?attr/textAppearanceBodyLarge" />
 
                 <TextView
-                    android:id="@+id/shizukuStatus"
+                    android:id="@+id/shizuku_status"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
@@ -108,7 +108,7 @@
             </LinearLayout>
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/shizukuPermissionBtn"
+                android:id="@+id/shizuku_permission_btn"
                 style="@style/Widget.Material3.Button.TonalButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -140,7 +140,7 @@
                     android:textAppearance="?attr/textAppearanceBodyLarge" />
 
                 <TextView
-                    android:id="@+id/overlayStatus"
+                    android:id="@+id/overlay_status"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
@@ -149,7 +149,7 @@
             </LinearLayout>
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/overlayPermissionBtn"
+                android:id="@+id/overlay_permission_btn"
                 style="@style/Widget.Material3.Button.TonalButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -170,7 +170,7 @@
 
         <!-- Moonlight -->
         <LinearLayout
-            android:id="@+id/moonlightCard"
+            android:id="@+id/moonlight_card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:minHeight="56dp"
@@ -183,7 +183,7 @@
             android:focusable="true">
 
             <ImageView
-                android:id="@+id/moonlightIcon"
+                android:id="@+id/moonlight_icon"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginEnd="16dp"
@@ -203,7 +203,7 @@
                     android:textAppearance="?attr/textAppearanceBodyLarge" />
 
                 <TextView
-                    android:id="@+id/moonlightStatus"
+                    android:id="@+id/moonlight_status"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
@@ -222,7 +222,7 @@
 
         <!-- AirPlay -->
         <LinearLayout
-            android:id="@+id/airplayCard"
+            android:id="@+id/airplay_card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:minHeight="56dp"
@@ -235,7 +235,7 @@
             android:focusable="true">
 
             <ImageView
-                android:id="@+id/airplayIcon"
+                android:id="@+id/airplay_icon"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginEnd="16dp"
@@ -255,7 +255,7 @@
                     android:textAppearance="?attr/textAppearanceBodyLarge" />
 
                 <TextView
-                    android:id="@+id/airplayStatus"
+                    android:id="@+id/airplay_status"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
@@ -274,7 +274,7 @@
 
         <!-- DisplayLink -->
         <LinearLayout
-            android:id="@+id/displaylinkCard"
+            android:id="@+id/displaylink_card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:minHeight="56dp"
@@ -287,7 +287,7 @@
             android:focusable="true">
 
             <ImageView
-                android:id="@+id/displaylinkIcon"
+                android:id="@+id/displaylink_icon"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginEnd="16dp"
@@ -307,7 +307,7 @@
                     android:textAppearance="?attr/textAppearanceBodyLarge" />
 
                 <TextView
-                    android:id="@+id/displaylinkStatus"
+                    android:id="@+id/displaylink_status"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
@@ -337,7 +337,7 @@
 
         <!-- Touchscreen control -->
         <LinearLayout
-            android:id="@+id/touchscreenRow"
+            android:id="@+id/touchscreen_row"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:minHeight="56dp"
@@ -370,7 +370,7 @@
                     android:textAppearance="?attr/textAppearanceBodyLarge" />
 
                 <TextView
-                    android:id="@+id/touchscreenStatus"
+                    android:id="@+id/touchscreen_status"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"

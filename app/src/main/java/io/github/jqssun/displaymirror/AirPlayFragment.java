@@ -5,7 +5,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
@@ -13,9 +12,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.android.material.textfield.TextInputEditText;
+import io.github.jqssun.displaymirror.dialog.PinDialog;
 import io.github.jqssun.displaymirror.job.AirPlayService;
 import java.util.List;
 
@@ -44,21 +43,21 @@ public class AirPlayFragment extends Fragment {
       LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.fragment_airplay, container, false);
 
-    statusTitle = view.findViewById(R.id.airplayStatusTitle);
-    statusDetail = view.findViewById(R.id.airplayStatusDetail);
-    statusIcon = view.findViewById(R.id.airplayStatusIcon);
-    scanBtn = view.findViewById(R.id.airplayScanBtn);
-    deviceSpinner = view.findViewById(R.id.airplayDeviceSpinner);
-    connectBtn = view.findViewById(R.id.airplayConnectBtn);
-    manageDisplayBtn = view.findViewById(R.id.manageDisplayBtn);
+    statusTitle = view.findViewById(R.id.airplay_status_title);
+    statusDetail = view.findViewById(R.id.airplay_status_detail);
+    statusIcon = view.findViewById(R.id.airplay_status_icon);
+    scanBtn = view.findViewById(R.id.airplay_scan_btn);
+    deviceSpinner = view.findViewById(R.id.airplay_device_spinner);
+    connectBtn = view.findViewById(R.id.airplay_connect_btn);
+    manageDisplayBtn = view.findViewById(R.id.manage_display_btn);
 
-    manualLayout = view.findViewById(R.id.airplayManualLayout);
-    manualIp = view.findViewById(R.id.airplayManualIp);
-    manualPort = view.findViewById(R.id.airplayManualPort);
-    MaterialButton manualBtn = view.findViewById(R.id.airplayManualBtn);
-    MaterialButton manualConnectBtn = view.findViewById(R.id.airplayManualConnectBtn);
+    manualLayout = view.findViewById(R.id.airplay_manual_layout);
+    manualIp = view.findViewById(R.id.airplay_manual_ip);
+    manualPort = view.findViewById(R.id.airplay_manual_port);
+    MaterialButton manualBtn = view.findViewById(R.id.airplay_manual_btn);
+    MaterialButton manualConnectBtn = view.findViewById(R.id.airplay_manual_connect_btn);
 
-    MaterialSwitch appleReceiverSwitch = view.findViewById(R.id.airplayAppleReceiverSwitch);
+    MaterialSwitch appleReceiverSwitch = view.findViewById(R.id.airplay_apple_receiver_switch);
     appleReceiverSwitch.setChecked(Pref.getAirPlayAppleReceiver());
     airplaylib.Airplaylib.setAppleReceiver(Pref.getAirPlayAppleReceiver());
     appleReceiverSwitch.setOnCheckedChangeListener(
@@ -67,7 +66,7 @@ public class AirPlayFragment extends Fragment {
           airplaylib.Airplaylib.setAppleReceiver(c);
         });
 
-    MaterialSwitch airplay1ModeSwitch = view.findViewById(R.id.airplay1ModeSwitch);
+    MaterialSwitch airplay1ModeSwitch = view.findViewById(R.id.airplay1_mode_switch);
     airplay1ModeSwitch.setChecked(Pref.getAirPlay1Mode());
     airplaylib.Airplaylib.setAirPlay1Mode(Pref.getAirPlay1Mode());
     airplay1ModeSwitch.setOnCheckedChangeListener(
@@ -77,9 +76,9 @@ public class AirPlayFragment extends Fragment {
         });
     manageDisplayBtn.setOnClickListener(
         v ->
-            ((MirrorMainActivity) requireActivity())
+            ((MainActivity) requireActivity())
                 .manageDisplayInExtend(
-                    State.getAirPlayVirtualDisplayId(), MirrorMainActivity.SCREEN_AIRPLAY));
+                    State.getAirPlayVirtualDisplayId(), MainActivity.SCREEN_AIRPLAY));
 
     manualBtn.setOnClickListener(
         v -> {
@@ -223,34 +222,15 @@ public class AirPlayFragment extends Fragment {
   }
 
   private void _showPinDialog(AirPlayService.AirPlayDevice dev) {
-    com.google.android.material.textfield.TextInputLayout inputLayout =
-        new com.google.android.material.textfield.TextInputLayout(
-            requireContext(), null, com.google.android.material.R.attr.textInputOutlinedStyle);
-    inputLayout.setHint(R.string.airplay_pin_hint);
-    com.google.android.material.textfield.TextInputEditText pinInput =
-        new com.google.android.material.textfield.TextInputEditText(inputLayout.getContext());
-    inputLayout.addView(pinInput);
-    int pad = (int) (16 * getResources().getDisplayMetrics().density);
-    FrameLayout container = new FrameLayout(requireContext());
-    container.setPadding(pad, pad / 2, pad, 0);
-    container.addView(inputLayout);
-
-    TvFocus.attach(new MaterialAlertDialogBuilder(requireContext())
-        .setTitle(getString(R.string.airplay_connect_title, dev.name))
-        .setView(container)
-        .setPositiveButton(
-            R.string.connect,
-            (dialog, which) -> {
-              String pin = pinInput.getText().toString().trim();
-              _pendingDevice = dev;
-              _updateStatus(
-                  R.drawable.ic_sync,
-                  R.string.airplay_connecting,
-                  R.string.airplay_connecting_detail);
-              AirPlayService.getInstance().connect(dev.ip, dev.port, pin, 0, 0, 30);
-            })
-        .setNegativeButton(R.string.cancel, null)
-        .show());
+    PinDialog.showConnect(
+        requireContext(),
+        getString(R.string.airplay_connect_title, dev.name),
+        pin -> {
+          _pendingDevice = dev;
+          _updateStatus(
+              R.drawable.ic_sync, R.string.airplay_connecting, R.string.airplay_connecting_detail);
+          AirPlayService.getInstance().connect(dev.ip, dev.port, pin, 0, 0, 30);
+        });
   }
 
   private void _updateStatus(int iconRes, int titleRes, int detailRes) {
