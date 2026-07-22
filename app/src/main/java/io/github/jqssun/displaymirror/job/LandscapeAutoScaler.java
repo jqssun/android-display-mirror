@@ -50,7 +50,7 @@ public class LandscapeAutoScaler {
       android.opengl.Matrix.scaleM(landscapeMvpMatrix, 0, scale, scale, 1.0f);
 
       android.util.Log.d(
-          "MirrorActivity",
+          "LandscapeAutoScaler",
           String.format(
               "Applying scale transform: scaleX=%.2f, scaleY=%.2f, final scale=%.2f",
               scaleX, scaleY, scale));
@@ -139,7 +139,7 @@ public class LandscapeAutoScaler {
             && bottomBlackHeight > 0;
 
     android.util.Log.d(
-        "MirrorActivity",
+        "LandscapeAutoScaler",
         String.format(
             "Left bar: %d, right bar: %d, top bar: %d, bottom bar: %d, h-symmetric: %b, v-symmetric: %b",
             leftBlackWidth,

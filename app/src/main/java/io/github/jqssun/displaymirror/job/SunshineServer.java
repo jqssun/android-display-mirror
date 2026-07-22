@@ -6,7 +6,7 @@ import android.os.Looper;
 import android.view.Surface;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import io.github.jqssun.displaymirror.dialog.PinDialog;
-import io.github.jqssun.displaymirror.MoonlightCursorOverlay;
+import io.github.jqssun.displaymirror.SunshineCursorOverlay;
 import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.R;
 import io.github.jqssun.displaymirror.State;
@@ -71,8 +71,8 @@ public class SunshineServer {
         .post(
             () -> {
               State.startNewJob(
-                  State.MODE_MOONLIGHT,
-                  new ProjectViaMoonlight(
+                  State.MODE_SUNSHINE,
+                  new ProjectViaSunshine(
                       width, height, frameRate, packetDuration, surface, shouldMute));
             });
   }
@@ -81,15 +81,15 @@ public class SunshineServer {
     new Handler(Looper.getMainLooper())
         .post(
             () -> {
-              State.log("stopping Moonlight projection");
-              MoonlightCursorOverlay.hide();
+              State.log("stopping Sunshine projection");
+              SunshineCursorOverlay.hide();
               CreateVirtualDisplay.powerOnScreen();
               CreateVirtualDisplay.restoreAspectRatio();
-              if (SunshineMouse.autoRotateAndScaleForMoonlight != null) {
-                SunshineMouse.autoRotateAndScaleForMoonlight.stop();
-                SunshineMouse.autoRotateAndScaleForMoonlight = null;
+              if (SunshineMouse.autoRotateAndScaleForSunshine != null) {
+                SunshineMouse.autoRotateAndScaleForSunshine.stop();
+                SunshineMouse.autoRotateAndScaleForSunshine = null;
               }
-              State.stopMirrorVirtualDisplay();
+              State.stopSunshineVirtualDisplay();
               Context context = State.getContext();
               ExitAll.execute(context, true);
             });
@@ -130,7 +130,7 @@ public class SunshineServer {
 
   public static void setMirrorServerUuid(String uuid) {
     State.serverUuid = uuid;
-    if (!Pref.doNotAutoStartMoonlight) {
+    if (!Pref.doNotAutoStartSunshine) {
       new Handler(Looper.getMainLooper())
           .postDelayed(
               () -> {

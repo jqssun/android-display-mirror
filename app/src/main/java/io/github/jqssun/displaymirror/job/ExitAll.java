@@ -5,15 +5,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import io.github.jqssun.displaymirror.BuildConfig;
+import io.github.jqssun.displaymirror.CastPlaceholderActivity;
 import io.github.jqssun.displaymirror.State;
-import io.github.jqssun.displaymirror.SunshineService;
+import io.github.jqssun.displaymirror.ProjectionService;
 
 public class ExitAll {
   public static void execute(Context context, boolean restart) {
-    if (SunshineService.instance != null) {
-      SunshineService.instance.releaseWakeLock();
+    CastPlaceholderActivity.dismiss();
+    if (ProjectionService.instance != null) {
+      ProjectionService.instance.releaseWakeLock();
     }
     boolean wasSunshineStarted = SunshineServer.exitServer();
+    AirPlayService.getInstance().disconnect();
     CreateVirtualDisplay.restoreAspectRatio();
     SunshineAudio.restoreVolume(context);
     State.unbindUserService();
@@ -29,17 +32,16 @@ public class ExitAll {
       ComponentName componentName = intent.getComponent();
       Intent mainIntent = Intent.makeRestartActivityTask(componentName);
       mainIntent.setPackage(context.getPackageName());
-      mainIntent.putExtra("DoNotAutoStartMoonlight", true);
+      mainIntent.putExtra("DoNotAutoStartSunshine", true);
       context.startActivity(mainIntent);
     }
 
-    State.stopMirrorVirtualDisplay();
-    State.clearLastSingleAppDisplay();
+    State.stopSunshineVirtualDisplay();
     State.setAirPlayVirtualDisplayId(-1);
     State.displaylinkState.destroy();
 
     if (context != null) {
-      context.stopService(new Intent(context, SunshineService.class));
+      context.stopService(new Intent(context, ProjectionService.class));
     }
     System.exit(0);
     try {

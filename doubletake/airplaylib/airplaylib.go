@@ -43,6 +43,38 @@ type Session struct {
 	airplay1Stored bool
 	airplay1Width  int
 	airplay1Height int
+
+	streamWidth  int
+	streamHeight int
+}
+
+// encode resolution (receiver display when known), read by the Android side
+func (s *Session) StreamWidth() int {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.streamWidth
+}
+
+func (s *Session) StreamHeight() int {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.streamHeight
+}
+
+// airplay1's software decoder needs landscape, <=1280x720, even dimensions
+func clampAirPlay1(w, h int) (int, int) {
+	if h > w {
+		w, h = h, w
+	}
+	if w > 1280 {
+		h = h * 1280 / w
+		w = 1280
+	}
+	if h > 720 {
+		w = w * 720 / h
+		h = 720
+	}
+	return w &^ 1, h &^ 1
 }
 
 func NewSession(handler EventHandler) *Session {
@@ -91,6 +123,20 @@ func (s *Session) Connect(host string, port int, pin string, width int, height i
 
 		s.mu.Lock()
 		s.client = client
+		s.mu.Unlock()
+
+		// match the receiver's display; airplay1 keeps caller dims + clamp
+		if !airplay.AirPlay1Mode {
+			if rw, rh := client.ReceiverDisplaySize(); rw > 0 && rh > 0 {
+				s.logf("[AIRPLAY] using receiver display %dx%d (caller requested %dx%d)", rw, rh, width, height)
+				width, height = rw, rh
+			}
+		} else {
+			width, height = clampAirPlay1(width, height)
+		}
+		s.mu.Lock()
+		s.streamWidth = width
+		s.streamHeight = height
 		s.mu.Unlock()
 
 		if airplay.AirPlay1Mode {

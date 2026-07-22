@@ -15,13 +15,13 @@ import io.github.jqssun.displaymirror.State;
 import io.github.jqssun.displaymirror.shizuku.ServiceUtils;
 import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
 
-// translates a moonlight controller state into android gamepad input.
+// translates a sunshine controller state into android gamepad input.
 // digital buttons inject as key events (so the dpad drives ui navigation),
 // while sticks and triggers inject as a joystick motion event.
 public class SunshineGamepad {
   private static final String TAG = "SunshineGamepad";
 
-  // moonlight buttonFlags, see moonlight-common-c Limelight.h
+  // sunshine buttonFlags, see sunshine-common-c Limelight.h
   private static final int UP = 0x0001;
   private static final int DOWN = 0x0002;
   private static final int LEFT = 0x0004;
@@ -40,7 +40,7 @@ public class SunshineGamepad {
 
   private static final int DPAD_MASK = UP | DOWN | LEFT | RIGHT;
 
-  // {moonlight flag, android keycode}
+  // {sunshine flag, android keycode}
   private static final int[][] BUTTONS = {
     {UP, KeyEvent.KEYCODE_DPAD_UP},
     {DOWN, KeyEvent.KEYCODE_DPAD_DOWN},
@@ -127,7 +127,7 @@ public class SunshineGamepad {
     props.toolType = MotionEvent.TOOL_TYPE_UNKNOWN;
 
     MotionEvent.PointerCoords c = new MotionEvent.PointerCoords();
-    // moonlight stick y is positive-up, android joystick y is positive-down
+    // sunshine stick y is positive-up, android joystick y is positive-down
     c.setAxisValue(MotionEvent.AXIS_X, _stick(lsX));
     c.setAxisValue(MotionEvent.AXIS_Y, -_stick(lsY));
     // right stick: AXIS_Z/RZ is the common mapping, RX/RY covers other controllers

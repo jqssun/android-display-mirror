@@ -9,19 +9,19 @@ public class Pref {
 
   // display
   public static final String KEY_TRUSTED_DISPLAY = "trusted_display";
+  public static final String KEY_PROJECTION_BACKED = "projection_backed";
   public static final String KEY_AUTO_ROTATE = "auto_rotate";
   public static final String KEY_AUTO_SCALE = "auto_scale";
-  public static final String KEY_DISABLE_USB_AUDIO = "disable_usb_audio";
-
-  // moonlight
-  public static final String KEY_INPUT_TO_EXTERNAL_DISPLAY = "input_to_external_display";
   public static final String KEY_AUTO_MATCH_ASPECT_RATIO = "auto_match_aspect_ratio";
   public static final String KEY_PREVENT_AUTO_LOCK = "prevent_auto_lock";
-  public static final String KEY_SHOW_MOONLIGHT_CURSOR = "show_moonlight_cursor";
+
+  // sunshine
+  public static final String KEY_INPUT_TO_EXTERNAL_DISPLAY = "input_to_external_display";
+  public static final String KEY_SHOW_SUNSHINE_CURSOR = "show_sunshine_cursor";
   public static final String KEY_AUTO_CONNECT_CLIENT = "auto_connect_client";
   public static final String KEY_SELECTED_CLIENT = "selected_client";
   public static final String KEY_DISABLE_REMOTE_SUBMIX = "disable_remote_submix";
-  public static final String KEY_MOONLIGHT_DEVICE_NAME = "moonlight_device_name";
+  public static final String KEY_SUNSHINE_DEVICE_NAME = "sunshine_device_name";
 
   // airplay
   public static final String KEY_AIRPLAY_APPLE_RECEIVER = "airplay_apple_receiver";
@@ -35,10 +35,15 @@ public class Pref {
   public static final String DEFAULT_DISPLAYLINK_APK_URL =
       "https://www.synaptics.com/sites/default/files/exe_files/2024-12/DisplayLink%C2%AE%20USB%20Graphics%20Software%20for%20Android%204.2.0-EXE.apk";
 
-  public static boolean doNotAutoStartMoonlight;
+  public static boolean doNotAutoStartSunshine;
 
   public static boolean getTrustedDisplay() {
     return getBoolean(KEY_TRUSTED_DISPLAY, true);
+  }
+
+  // when on, bind a MediaProjection so the display mirrors the screen
+  public static boolean getProjectionBacked() {
+    return getBoolean(KEY_PROJECTION_BACKED, false);
   }
 
   public static boolean getAutoRotate() {
@@ -47,10 +52,6 @@ public class Pref {
 
   public static boolean getAutoScale() {
     return getBoolean(KEY_AUTO_SCALE, true);
-  }
-
-  public static boolean getDisableUsbAudio() {
-    return getBoolean(KEY_DISABLE_USB_AUDIO, false);
   }
 
   public static boolean getInputToExternalDisplay() {
@@ -65,8 +66,8 @@ public class Pref {
     return getBoolean(KEY_PREVENT_AUTO_LOCK, false);
   }
 
-  public static boolean getShowMoonlightCursor() {
-    return getBoolean(KEY_SHOW_MOONLIGHT_CURSOR, false);
+  public static boolean getShowSunshineCursor() {
+    return getBoolean(KEY_SHOW_SUNSHINE_CURSOR, false);
   }
 
   public static boolean getAutoConnectClient() {
@@ -81,12 +82,12 @@ public class Pref {
     return getBoolean(KEY_DISABLE_REMOTE_SUBMIX, false);
   }
 
-  public static String getMoonlightDeviceName() {
-    String name = getString(KEY_MOONLIGHT_DEVICE_NAME, "");
-    return name.isEmpty() ? getDefaultMoonlightDeviceName() : name;
+  public static String getSunshineDeviceName() {
+    String name = getString(KEY_SUNSHINE_DEVICE_NAME, "");
+    return name.isEmpty() ? getDefaultSunshineDeviceName() : name;
   }
 
-  public static String getDefaultMoonlightDeviceName() {
+  public static String getDefaultSunshineDeviceName() {
     return "Mirror-" + Build.MANUFACTURER + "-" + Build.MODEL;
   }
 

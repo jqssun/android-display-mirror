@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.pm.IPackageManager;
 import android.hardware.display.IDisplayManager;
 import android.hardware.input.IInputManager;
-import android.media.IAudioService;
 import android.permission.IPermissionManager;
 import android.view.IWindowManager;
 import rikka.shizuku.ShizukuBinderWrapper;
@@ -17,7 +16,6 @@ public class ServiceUtils {
   private static IInputManager inputManager;
   private static IPermissionManager permissionManager;
   private static IPackageManager packageManager;
-  private static IAudioService audioManager;
   private static IActivityTaskManager activityTaskManager;
 
   public static void invalidate() {
@@ -26,7 +24,6 @@ public class ServiceUtils {
     inputManager = null;
     permissionManager = null;
     packageManager = null;
-    audioManager = null;
     activityTaskManager = null;
   }
 
@@ -57,9 +54,6 @@ public class ServiceUtils {
     packageManager =
         IPackageManager.Stub.asInterface(
             new ShizukuBinderWrapper(SystemServiceHelper.getSystemService("package")));
-    audioManager =
-        IAudioService.Stub.asInterface(
-            new ShizukuBinderWrapper(SystemServiceHelper.getSystemService(Context.AUDIO_SERVICE)));
     activityTaskManager =
         IActivityTaskManager.Stub.asInterface(
             new ShizukuBinderWrapper(SystemServiceHelper.getSystemService("activity_task")));
@@ -88,11 +82,6 @@ public class ServiceUtils {
   public static IPackageManager getPackageManager() {
     if (packageManager == null) _init();
     return packageManager;
-  }
-
-  public static IAudioService getAudioManager() {
-    if (audioManager == null) _init();
-    return audioManager;
   }
 
   public static IActivityTaskManager getActivityTaskManager() {

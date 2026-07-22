@@ -5,6 +5,7 @@ import android.media.projection.MediaProjection;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import io.github.jqssun.displaymirror.CastPlaceholderActivity;
 import io.github.jqssun.displaymirror.MainActivity;
 import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.State;
@@ -39,7 +40,7 @@ public class AirPlayService {
   private final List<AirPlayDevice> devices = new ArrayList<>();
   private boolean connected;
   private AirPlayEncoder encoder;
-  private MediaProjection pendingProjection;
+  private MediaProjection projection;
   // pending connect params, used after projection is granted
   private String pendingHost;
   private int pendingPort;
@@ -99,7 +100,7 @@ public class AirPlayService {
                     () -> {
                       MainActivity activity = State.getCurrentActivity();
                       if (activity != null) {
-                        activity.requestAirPlayProjection();
+                        activity.startAirPlayProjection();
                       } else {
                         State.log("AirPlay: no activity for projection request");
                       }
@@ -249,21 +250,19 @@ public class AirPlayService {
     session.connect(host, port, pin, pendingWidth, pendingHeight, pendingFps);
   }
 
-  // step 2: Called from AirPlayForegroundService after projection is granted
-  public void onProjectionReady(MediaProjection projection) {
+  // step 2: projection ready
+  public void onProjectionReady() {
     State.log("AirPlay: projection granted, starting encoder");
-    pendingProjection = projection;
+    // createForStream nulls State's slot
+    projection = State.getMediaProjection();
     _startEncoder();
   }
 
   private void _startEncoder() {
-    if (pendingProjection == null) {
-      State.log("AirPlay: no projection for encoder");
-      return;
-    }
+    int width = session != null ? (int) session.streamWidth() : 0;
+    int height = session != null ? (int) session.streamHeight() : 0;
     encoder = new AirPlayEncoder();
-    encoder.start(pendingProjection, pendingFps);
-    pendingProjection = null;
+    encoder.start(width, height, pendingFps);
     if (session != null && encoder.screenWidth > 0 && encoder.screenHeight > 0) {
       session.setAirPlay1FrameSize(encoder.screenWidth, encoder.screenHeight);
     }
@@ -276,7 +275,6 @@ public class AirPlayService {
 
   public void disconnect() {
     _stopEncoder();
-    pendingProjection = null;
     if (session != null) {
       session.disconnect();
       session = null;
@@ -285,14 +283,23 @@ public class AirPlayService {
   }
 
   private void _stopEncoder() {
+    CastPlaceholderActivity.dismiss();
     if (encoder != null) {
       encoder.stop();
       encoder = null;
     }
+    if (projection != null) {
+      projection.stop();
+      if (State.mediaProjectionInUse == projection) {
+        State.mediaProjectionInUse = null;
+      }
+      projection = null;
+    }
+    CreateVirtualDisplay.powerOnScreen();
   }
 
   // called from native C++ via JNI for each Sunshine-encoded video frame
-  // this is the piggyback path when Moonlight is also connected
+  // this is the piggyback path when Sunshine is also connected
   public static void onNativeVideoFrame(byte[] annexBData, boolean isKeyframe) {
     if (instance != null && instance.connected && instance.session != null) {
       instance.session.sendFrame(annexBData, isKeyframe);

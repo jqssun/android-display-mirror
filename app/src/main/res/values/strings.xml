@@ -1,7 +1,7 @@
 <resources>
     <!-- Tabs -->
     <string name="overview">Overview</string>
-    <string name="tab_moonlight">Moonlight (Sunshine)</string>
+    <string name="tab_sunshine">Sunshine (Moonlight)</string>
     <string name="tab_logs">Logs</string>
     <string name="export">Export</string>
     <string name="clear">Clear</string>
@@ -24,19 +24,19 @@
     <string name="section_display">Streaming</string>
 
     <string name="section_input">Input</string>
-    <string name="section_moonlight">Moonlight Settings</string>
+    <string name="section_sunshine">Sunshine Settings</string>
     <string name="section_displaylink_libraries">DisplayLink Libraries</string>
 
-    <string name="section_moonlight_controls">Controls</string>
+    <string name="section_sunshine_controls">Controls</string>
     <string name="start">Start Sunshine Server</string>
     <string name="stop">Stop</string>
-    <!-- Moonlight status -->
-    <string name="moonlight_status_idle">Moonlight not running</string>
-    <string name="moonlight_status_idle_detail">Tap Start to begin streaming</string>
-    <string name="moonlight_status_waiting">Waiting for connection</string>
-    <string name="moonlight_status_waiting_detail">Connect from Moonlight client</string>
-    <string name="moonlight_status_casting">Moonlight active</string>
-    <string name="moonlight_status_casting_detail">Streaming to connected client</string>
+    <!-- Sunshine status -->
+    <string name="sunshine_status_idle">Sunshine not running</string>
+    <string name="sunshine_status_idle_detail">Tap Start to begin streaming</string>
+    <string name="sunshine_status_waiting">Waiting for connection</string>
+    <string name="sunshine_status_waiting_detail">Connect from Moonlight client</string>
+    <string name="sunshine_status_casting">Sunshine active</string>
+    <string name="sunshine_status_casting_detail">Streaming to connected client</string>
 
     <!-- Display interaction -->
     <string name="touchscreen_control">Touchscreen</string>
@@ -87,23 +87,26 @@
     <string name="overlay_status">Display over other apps</string>
     <string name="trusted_display">Create as trusted virtual display</string>
     <string name="trusted_display_desc">Create the virtual display as a trusted display. This enables other apps to set keyboard policy and other features. Requires Shizuku.</string>
+    <string name="mirror_only">Mirror only</string>
+    <string name="mirror_only_desc">Always mirror the built-in screen to the external display using MediaProjection. Launching apps onto the display will not be possible.</string>
+    <string name="cast_placeholder_message">Please select an application to cast via "Manage This Display"</string>
     <string name="auto_rotate">Rotate stream with device</string>
     <string name="auto_rotate_desc">When the device is rotated, recreate the stream to match the new orientation.</string>
     <string name="auto_scale_remove_bars">Fill stream to remove black bars</string>
     <string name="auto_scale_remove_bars_desc">Crop and scale the captured screen to fill the stream resolution, removing letterbox bars.</string>
     <string name="input_to_external_display">Send input to external display</string>
     <string name="input_to_external_display_desc">Route remote keyboard, mouse, touch, and controller input to the external display instead of the device screen.</string>
-    <string name="auto_match_aspect_ratio">Match Moonlight aspect ratio</string>
+    <string name="auto_match_aspect_ratio">Match display aspect ratio</string>
     <string name="auto_match_aspect_ratio_desc">Adjust main screen aspect ratio to match the external display resolution.</string>
     <string name="prevent_auto_lock">Prevent auto-lock</string>
     <string name="prevent_auto_lock_desc">Modifies the system screen timeout setting.</string>
     <string name="no_audio_try_no_remote_submix">Disable REMOTE_SUBMIX</string>
     <string name="no_audio_try_no_remote_submix_desc">Fix audio issues in Moonlight.</string>
-    <string name="auto_connect_moonlight">Auto-connect Moonlight (Beta)</string>
-    <string name="auto_connect_moonlight_desc">Proactively send a JSON connect request to the Moonlight client. Requires a fork with the autostart listener. Not compatible with standard Moonlight.</string>
-    <string name="show_moonlight_cursor">Show cursor location</string>
-    <string name="show_moonlight_cursor_desc">Show a cursor overlay on the device screen for Moonlight mouse input.</string>
-    <string name="moonlight_device_name">Device name</string>
+    <string name="auto_connect_sunshine">Auto-connect Moonlight (Beta)</string>
+    <string name="auto_connect_sunshine_desc">Proactively send a JSON connect request to the Moonlight client. Requires a fork with the autostart listener. Not compatible with standard Moonlight.</string>
+    <string name="show_sunshine_cursor">Show cursor location</string>
+    <string name="show_sunshine_cursor_desc">Show a cursor overlay on the device screen for Moonlight mouse input.</string>
+    <string name="sunshine_device_name">Device name</string>
     <string name="section_airplay_controls">Controls</string>
     <string name="section_airplay">AirPlay Settings</string>
     <string name="airplay_apple_receiver">Support for 1st party receivers (Beta)</string>
@@ -132,9 +135,8 @@
     <string name="manual_input_client_title">Manual input client</string>
 
     <!-- MainActivity status -->
-    <!-- SunshineService notification -->
     <string name="mirror_app_name">Mirror</string>
-    <string name="sunshine_service_running">Sunshine service is running</string>
+    <string name="projection_service_running">Screen projection active</string>
 
     <!-- SunshineServer PIN dialog -->
     <string name="enter_pin_title">Enter 4-digit PIN code</string>

@@ -25,6 +25,9 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
 import com.topjohnwu.superuser.Shell;
 import io.github.jqssun.displaymirror.job.AcquireShizuku;
+import io.github.jqssun.displaymirror.job.AirPlayService;
+import io.github.jqssun.displaymirror.job.MirrorDisplaylinkMonitor;
+import io.github.jqssun.displaymirror.job.SunshineHost;
 import org.lsposed.hiddenapibypass.HiddenApiBypass;
 import rikka.shizuku.Shizuku;
 
@@ -44,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
   public static final String EXTRA_SCREEN = "screen";
   public static final String EXTRA_SOURCE_SCREEN = "source_screen";
   public static final String SCREEN_OVERVIEW = "overview";
-  public static final String SCREEN_MOONLIGHT = "moonlight";
+  public static final String SCREEN_SUNSHINE = "sunshine";
   public static final String SCREEN_AIRPLAY = "airplay";
   public static final String SCREEN_DISPLAYLINK = "displaylink";
   public static final String SCREEN_SETTINGS = "settings";
@@ -67,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
   private OnBackPressedCallback crossAppBackCallback;
   private String crossAppLandingScreen;
   private long lastCheckTime = 0;
+  private boolean pendingSunshineStart = false;
 
   private final ActivityResultLauncher<Intent> mediaProjectionLauncher =
       registerForActivityResult(
@@ -76,11 +80,11 @@ public class MainActivity extends AppCompatActivity {
               Intent data = result.getData();
               State.log("user granted projection permission");
               lastCheckTime = System.currentTimeMillis();
-              if (SunshineService.instance == null) {
-                Intent svc = new Intent(this, SunshineService.class);
+              if (ProjectionService.instance == null) {
+                Intent svc = new Intent(this, ProjectionService.class);
                 svc.putExtra("data", data);
                 startForegroundService(svc);
-                State.log("starting SunshineService");
+                State.log("starting ProjectionService");
               } else {
                 MediaProjectionManager mpm =
                     (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
@@ -101,22 +105,18 @@ public class MainActivity extends AppCompatActivity {
                         },
                         null);
                 State.resumeJob();
+                State.fireProjectionReady();
+              }
+              if (pendingSunshineStart) {
+                pendingSunshineStart = false;
+                SunshineHost.start(this);
               }
             } else {
               State.log("user denied projection permission");
+              pendingSunshineStart = false;
+              State.setProjectionReadyCallback(null);
               refresh();
               State.resumeJob();
-            }
-          });
-
-  private final ActivityResultLauncher<Intent> airplayProjectionLauncher =
-      registerForActivityResult(
-          new ActivityResultContracts.StartActivityForResult(),
-          result -> {
-            if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-              Intent svc = new Intent(this, AirPlayForegroundService.class);
-              svc.putExtra("data", result.getData());
-              startForegroundService(svc);
             }
           });
 
@@ -234,6 +234,8 @@ public class MainActivity extends AppCompatActivity {
         (controller, destination, arguments) -> _updateCrossAppBackState());
     _handleLaunchIntent(getIntent());
 
+    MirrorDisplaylinkMonitor.init(this);
+
     State.uiState.observe(this, state -> {});
   }
 
@@ -283,29 +285,24 @@ public class MainActivity extends AppCompatActivity {
     State.setCurrentActivity(null);
   }
 
-  public void startMirroring() {
+  public void startSunshine() {
     AcquireShizuku.notifyIfUidDropped();
-    if (SunshineService.instance == null) {
+    if (SunshineHost.isRunning()) {
+      refresh();
+      return;
+    }
+    if (ProjectionService.instance == null) {
+      pendingSunshineStart = true;
       startMediaProjectionService();
     } else {
-      State.log("SunshineService already running");
+      SunshineHost.start(this);
       refresh();
     }
   }
 
-  public void requestAirPlayProjection() {
-    MediaProjectionManager mpm =
-        (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
-    if (mpm != null) {
-      Intent captureIntent;
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-        captureIntent =
-            mpm.createScreenCaptureIntent(MediaProjectionConfig.createConfigForDefaultDisplay());
-      } else {
-        captureIntent = mpm.createScreenCaptureIntent();
-      }
-      airplayProjectionLauncher.launch(captureIntent);
-    }
+  public void startAirPlayProjection() {
+    State.setProjectionReadyCallback(() -> AirPlayService.getInstance().onProjectionReady());
+    startMediaProjectionService();
   }
 
   public void startMediaProjectionService() {
@@ -330,9 +327,9 @@ public class MainActivity extends AppCompatActivity {
       return;
     }
 
-    boolean doNotAutoStartMoonlight = intent.getBooleanExtra("DoNotAutoStartMoonlight", false);
-    if (doNotAutoStartMoonlight) {
-      Pref.doNotAutoStartMoonlight = true;
+    boolean doNotAutoStartSunshine = intent.getBooleanExtra("DoNotAutoStartSunshine", false);
+    if (doNotAutoStartSunshine) {
+      Pref.doNotAutoStartSunshine = true;
     }
 
     String action = intent.getAction();
@@ -362,21 +359,12 @@ public class MainActivity extends AppCompatActivity {
     if (current != null && current.errorStatusText != null) {
       return;
     }
-    boolean isScreenMirroring =
-        State.mirrorVirtualDisplay != null
-            || State.displaylinkState.getVirtualDisplay() != null
-            || State.lastSingleAppDisplay != 0;
-
     MirrorUiState newUiState = new MirrorUiState();
-
-    if (SunshineService.instance == null) {
-      newUiState.startBtnVisibility = true;
-    } else if (isScreenMirroring) {
+    if (SunshineHost.isRunning()) {
       newUiState.stopBtnVisibility = true;
     } else {
-      newUiState.stopBtnVisibility = true;
+      newUiState.startBtnVisibility = true;
     }
-
     State.uiState.setValue(newUiState);
   }
 
@@ -502,7 +490,7 @@ public class MainActivity extends AppCompatActivity {
   }
 
   private String _normalizeMirrorScreen(String screen) {
-    if (SCREEN_MOONLIGHT.equals(screen)
+    if (SCREEN_SUNSHINE.equals(screen)
         || SCREEN_AIRPLAY.equals(screen)
         || SCREEN_DISPLAYLINK.equals(screen)
         || SCREEN_SETTINGS.equals(screen)) {
@@ -513,8 +501,8 @@ public class MainActivity extends AppCompatActivity {
 
   private int _getMirrorDestinationId(String screen) {
     switch (_normalizeMirrorScreen(screen)) {
-      case SCREEN_MOONLIGHT:
-        return R.id.moonlight_fragment;
+      case SCREEN_SUNSHINE:
+        return R.id.sunshine_fragment;
       case SCREEN_AIRPLAY:
         return R.id.airplay_fragment;
       case SCREEN_DISPLAYLINK:
@@ -579,8 +567,8 @@ public class MainActivity extends AppCompatActivity {
       return SCREEN_OVERVIEW;
     }
     int destinationId = navController.getCurrentDestination().getId();
-    if (destinationId == R.id.moonlight_fragment) {
-      return SCREEN_MOONLIGHT;
+    if (destinationId == R.id.sunshine_fragment) {
+      return SCREEN_SUNSHINE;
     }
     if (destinationId == R.id.airplay_fragment) {
       return SCREEN_AIRPLAY;

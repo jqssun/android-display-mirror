@@ -17,10 +17,10 @@ import android.view.MotionEventHidden;
 import android.view.Surface;
 import androidx.annotation.NonNull;
 import dev.rikka.tools.refine.Refine;
-import io.github.jqssun.displaymirror.MoonlightCursorOverlay;
+import io.github.jqssun.displaymirror.SunshineCursorOverlay;
 import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.State;
-import io.github.jqssun.displaymirror.SunshineService;
+import io.github.jqssun.displaymirror.ProjectionService;
 import io.github.jqssun.displaymirror.shizuku.ServiceUtils;
 import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
 import java.util.ArrayList;
@@ -31,7 +31,7 @@ import java.util.Set;
 
 public class SunshineMouse {
   private static String TAG = "SunshineMouse";
-  public static AutoRotateAndScaleForMoonlight autoRotateAndScaleForMoonlight;
+  public static AutoRotateAndScaleForSunshine autoRotateAndScaleForSunshine;
   private static IInputManager inputManager;
   private static float defaultDisplayWidth;
   private static float defaultDisplayHeight;
@@ -48,8 +48,8 @@ public class SunshineMouse {
 
   public static void setShowCursor(boolean show) {
     showCursor = show;
-    if (show) MoonlightCursorOverlay.show();
-    else MoonlightCursorOverlay.hide();
+    if (show) SunshineCursorOverlay.show();
+    else SunshineCursorOverlay.hide();
   }
 
   public static void initialize(int width, int height) {
@@ -64,15 +64,15 @@ public class SunshineMouse {
     screenHeight = height;
     autoRotate = Pref.getAutoRotate();
     autoScale = Pref.getAutoScale();
-    showCursor = Pref.getShowMoonlightCursor();
+    showCursor = Pref.getShowSunshineCursor();
     if (showCursor) {
-      MoonlightCursorOverlay.show();
+      SunshineCursorOverlay.show();
     }
 
     DisplayManager displayManager =
         (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
     Display defaultDisplay = displayManager.getDisplay(Display.DEFAULT_DISPLAY);
-    if (State.mirrorVirtualDisplay == null
+    if (State.sunshineVirtualDisplay == null
         && Pref.getAutoMatchAspectRatio()
         && ShizukuUtils.hasPermission()) {
       CreateVirtualDisplay.changeAspectRatio(width, height);
@@ -122,7 +122,7 @@ public class SunshineMouse {
             + " defaultDisplayHeight: "
             + defaultDisplayHeight);
     State.log("client screen size screenWidth: " + screenWidth + " screenHeight: " + screenHeight);
-    if (State.mirrorVirtualDisplay == null) {
+    if (State.sunshineVirtualDisplay == null) {
       State.log(
           "mirror mode portraitMirrorWidth: "
               + portraitMirrorWidth
@@ -162,7 +162,7 @@ public class SunshineMouse {
 
   private static Point _translateMirrorMode(float x, float y) {
     boolean isLandscape =
-        SunshineService.instance.getResources().getConfiguration().orientation
+        ProjectionService.instance.getResources().getConfiguration().orientation
             == Configuration.ORIENTATION_LANDSCAPE;
     float xInScreen = x * screenWidth;
     float yInScreen = y * screenHeight;
@@ -237,7 +237,7 @@ public class SunshineMouse {
   }
 
   private static @NonNull Point _translateVirtualDisplay(float x, float y) {
-    int displayRotation = State.mirrorVirtualDisplay.getDisplay().getRotation();
+    int displayRotation = State.sunshineVirtualDisplay.getDisplay().getRotation();
     Point point = new Point();
     switch (displayRotation) {
       case Surface.ROTATION_0:
@@ -279,7 +279,7 @@ public class SunshineMouse {
     }
     if (showCursor) {
       Point cursorPoint = _translateMirrorMode(x, y);
-      MoonlightCursorOverlay.update(cursorPoint.x, cursorPoint.y);
+      SunshineCursorOverlay.update(cursorPoint.x, cursorPoint.y);
     }
   }
 
@@ -301,7 +301,7 @@ public class SunshineMouse {
     }
     if (showCursor) {
       Point cursorScreenPoint = _translateMirrorMode(cursorPos.x, cursorPos.y);
-      MoonlightCursorOverlay.update(cursorScreenPoint.x, cursorScreenPoint.y);
+      SunshineCursorOverlay.update(cursorScreenPoint.x, cursorScreenPoint.y);
     }
   }
 
@@ -425,8 +425,8 @@ public class SunshineMouse {
   }
 
   private static void _injectEvent(String prefix, MotionEvent event) {
-    if (autoScale && autoRotateAndScaleForMoonlight != null) {
-      autoRotateAndScaleForMoonlight.exitScale();
+    if (autoScale && autoRotateAndScaleForSunshine != null) {
+      autoRotateAndScaleForSunshine.exitScale();
     }
     if (inputManager != null) {
       MotionEventHidden motionEventHidden = Refine.unsafeCast(event);

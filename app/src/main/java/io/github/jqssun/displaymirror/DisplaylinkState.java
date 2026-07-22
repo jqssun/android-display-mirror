@@ -5,6 +5,7 @@ import android.hardware.display.VirtualDisplay;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.media.ImageReader;
+import android.media.projection.MediaProjection;
 import android.os.Handler;
 import android.os.HandlerThread;
 import com.displaylink.manager.NativeDriver;
@@ -23,6 +24,7 @@ public class DisplaylinkState {
   public MonitorInfo monitorInfo;
   public ImageReader imageReader;
   public VirtualDisplayArgs virtualDisplayArgs = new VirtualDisplayArgs();
+  public MediaProjection projection;
   private VirtualDisplay virtualDisplay;
   public HandlerThread handlerThread;
   public Handler handler;
@@ -73,6 +75,14 @@ public class DisplaylinkState {
       virtualDisplay.setSurface(dummy.getSurface());
       dummy.close();
       stopVirtualDisplay();
+    }
+    // skip if ExitAll already stopped it
+    if (projection != null) {
+      if (projection == State.mediaProjectionInUse) {
+        projection.stop();
+        State.mediaProjectionInUse = null;
+      }
+      projection = null;
     }
     monitorInfo = null;
     encoderId = 0;

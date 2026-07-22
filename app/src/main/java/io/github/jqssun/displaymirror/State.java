@@ -26,9 +26,8 @@ import rikka.shizuku.Shizuku;
 
 public class State {
   // job modes: each mode gets its own independent job slot
-  public static final String MODE_MOONLIGHT = "moonlight";
+  public static final String MODE_SUNSHINE = "sunshine";
   public static final String MODE_DISPLAYLINK = "displaylink";
-  public static final String MODE_MIRROR = "mirror";
   public static final String MODE_UTILITY = "utility"; // for non-mode jobs like FetchLogAndShare
 
   // weak reference to avoid leaking the activity
@@ -43,11 +42,10 @@ public class State {
   public static DisplaylinkState displaylinkState = new DisplaylinkState();
   private static MediaProjection mediaProjection;
   public static MediaProjection mediaProjectionInUse;
-  public static int lastSingleAppDisplay;
   private static int airPlayVirtualDisplayId = -1;
   private static Surface airPlaySurface;
   public static String displaylinkDeviceName;
-  public static VirtualDisplay mirrorVirtualDisplay;
+  public static VirtualDisplay sunshineVirtualDisplay;
   public static volatile IUserService userService;
   public static Set<String> discoveredMirrorClients = new HashSet<>();
 
@@ -94,6 +92,13 @@ public class State {
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
           State.log("user service disconnected");
+          State.userService = null;
+        }
+
+        @Override
+        public void onBindingDied(ComponentName componentName) {
+          State.log("user service binding died");
+          State.userService = null;
         }
       };
 
@@ -226,6 +231,21 @@ public class State {
     logVersion.postValue(_logVersion.incrementAndGet());
   }
 
+  private static Runnable projectionReadyCallback;
+
+  // one-shot, fired when projection is set
+  public static void setProjectionReadyCallback(Runnable callback) {
+    projectionReadyCallback = callback;
+  }
+
+  public static void fireProjectionReady() {
+    Runnable callback = projectionReadyCallback;
+    projectionReadyCallback = null;
+    if (callback != null) {
+      callback.run();
+    }
+  }
+
   public static MediaProjection getMediaProjection() {
     return mediaProjection;
   }
@@ -277,56 +297,37 @@ public class State {
     refreshMainActivity();
   }
 
-  public static int getMoonlightManagedDisplayId() {
-    int mirrorDisplayId = getMirrorVirtualDisplayId();
-    if (mirrorDisplayId > 0) {
-      return mirrorDisplayId;
-    }
-    return lastSingleAppDisplay > 0 ? lastSingleAppDisplay : -1;
-  }
 
-  public static void setLastSingleAppDisplay(int displayId) {
-    if (lastSingleAppDisplay == displayId) {
+  public static void setSunshineVirtualDisplay(VirtualDisplay virtualDisplay) {
+    if (sunshineVirtualDisplay == virtualDisplay) {
       return;
     }
-    lastSingleAppDisplay = displayId;
+    sunshineVirtualDisplay = virtualDisplay;
     refreshMainActivity();
   }
 
-  public static void clearLastSingleAppDisplay() {
-    setLastSingleAppDisplay(0);
-  }
-
-  public static void setMirrorVirtualDisplay(VirtualDisplay virtualDisplay) {
-    if (mirrorVirtualDisplay == virtualDisplay) {
-      return;
-    }
-    mirrorVirtualDisplay = virtualDisplay;
-    refreshMainActivity();
-  }
-
-  public static void stopMirrorVirtualDisplay() {
-    if (mirrorVirtualDisplay != null) {
-      mirrorVirtualDisplay.release();
-      mirrorVirtualDisplay = null;
+  public static void stopSunshineVirtualDisplay() {
+    if (sunshineVirtualDisplay != null) {
+      sunshineVirtualDisplay.release();
+      sunshineVirtualDisplay = null;
       refreshMainActivity();
     }
   }
 
-  public static int getMirrorVirtualDisplayId() {
-    if (mirrorVirtualDisplay == null) {
+  public static int getSunshineVirtualDisplayId() {
+    if (sunshineVirtualDisplay == null) {
       return -1;
     }
-    return mirrorVirtualDisplay.getDisplay().getDisplayId();
+    return sunshineVirtualDisplay.getDisplay().getDisplayId();
   }
 
   public static boolean inputToExternalDisplay() {
-    return mirrorVirtualDisplay != null && Pref.getInputToExternalDisplay();
+    return sunshineVirtualDisplay != null && Pref.getInputToExternalDisplay();
   }
 
   public static int getInputDisplayId() {
     return inputToExternalDisplay()
-        ? mirrorVirtualDisplay.getDisplay().getDisplayId()
+        ? sunshineVirtualDisplay.getDisplay().getDisplayId()
         : Display.DEFAULT_DISPLAY;
   }
 
@@ -357,8 +358,8 @@ public class State {
     if (currentActivity != null && currentActivity.get() != null) {
       return currentActivity.get();
     }
-    if (SunshineService.instance != null) {
-      return SunshineService.instance;
+    if (ProjectionService.instance != null) {
+      return ProjectionService.instance;
     }
     return null;
   }

@@ -13,7 +13,7 @@
 
         <!-- Status -->
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/moonlight_status_card"
+            android:id="@+id/sunshine_status_card"
             style="@style/Widget.Material3.CardView.Elevated"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -29,7 +29,7 @@
                 android:padding="16dp">
 
                 <ImageView
-                    android:id="@+id/moonlight_status_icon"
+                    android:id="@+id/sunshine_status_icon"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:layout_marginEnd="16dp"
@@ -44,19 +44,19 @@
                     android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/moonlight_status_title"
+                        android:id="@+id/sunshine_status_title"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/moonlight_status_idle"
+                        android:text="@string/sunshine_status_idle"
                         android:textAppearance="?attr/textAppearanceTitleMedium"
                         android:textColor="?attr/colorOnPrimaryContainer" />
 
                     <TextView
-                        android:id="@+id/moonlight_status_detail"
+                        android:id="@+id/sunshine_status_detail"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="@string/moonlight_status_idle_detail"
+                        android:text="@string/sunshine_status_idle_detail"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
                         android:textColor="?attr/colorOnPrimaryContainer" />
                 </LinearLayout>
@@ -72,7 +72,7 @@
             android:paddingHorizontal="16dp"
             android:paddingTop="16dp"
             android:paddingBottom="4dp"
-            android:text="@string/section_moonlight_controls"
+            android:text="@string/section_sunshine_controls"
             android:textAppearance="?attr/textAppearanceLabelLarge"
             android:textColor="?colorPrimary" />
 
@@ -103,14 +103,14 @@
             android:text="@string/manage_this_display"
             android:visibility="gone" />
 
-        <!-- Moonlight Settings -->
+        <!-- Sunshine Settings -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingHorizontal="16dp"
             android:paddingTop="16dp"
             android:paddingBottom="4dp"
-            android:text="@string/section_moonlight"
+            android:text="@string/section_sunshine"
             android:textAppearance="?attr/textAppearanceLabelLarge"
             android:textColor="?colorPrimary" />
 
@@ -121,7 +121,7 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
             android:layout_marginTop="8dp"
-            android:hint="@string/moonlight_device_name">
+            android:hint="@string/sunshine_device_name">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/device_name_edit_text"
@@ -143,17 +143,17 @@
         <!-- Show cursor -->
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingHorizontal="16dp" android:paddingVertical="12dp">
             <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="16dp" android:orientation="vertical">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/show_moonlight_cursor" android:textAppearance="?attr/textAppearanceBodyLarge" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/show_moonlight_cursor_desc" android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="?colorOnSurfaceVariant" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/show_sunshine_cursor" android:textAppearance="?attr/textAppearanceBodyLarge" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/show_sunshine_cursor_desc" android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="?colorOnSurfaceVariant" />
             </LinearLayout>
-            <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/show_moonlight_cursor_checkbox" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+            <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/show_sunshine_cursor_checkbox" android:layout_width="wrap_content" android:layout_height="wrap_content" />
         </LinearLayout>
 
         <!-- Auto-connect -->
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingHorizontal="16dp" android:paddingVertical="12dp">
             <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="16dp" android:orientation="vertical">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/auto_connect_moonlight" android:textAppearance="?attr/textAppearanceBodyLarge" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/auto_connect_moonlight_desc" android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="?colorOnSurfaceVariant" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/auto_connect_sunshine" android:textAppearance="?attr/textAppearanceBodyLarge" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/auto_connect_sunshine_desc" android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="?colorOnSurfaceVariant" />
             </LinearLayout>
             <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/auto_connect_client_checkbox" android:layout_width="wrap_content" android:layout_height="wrap_content" />
         </LinearLayout>
@@ -190,24 +190,6 @@
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/no_audio_try_no_remote_submix_desc" android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="?colorOnSurfaceVariant" />
             </LinearLayout>
             <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/disable_remote_submix_checkbox" android:layout_width="wrap_content" android:layout_height="wrap_content" />
-        </LinearLayout>
-
-        <!-- Match aspect ratio -->
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingHorizontal="16dp" android:paddingVertical="12dp">
-            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="16dp" android:orientation="vertical">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/auto_match_aspect_ratio" android:textAppearance="?attr/textAppearanceBodyLarge" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/auto_match_aspect_ratio_desc" android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="?colorOnSurfaceVariant" />
-            </LinearLayout>
-            <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/auto_match_aspect_ratio_checkbox" android:layout_width="wrap_content" android:layout_height="wrap_content" />
-        </LinearLayout>
-
-        <!-- Prevent auto-lock -->
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingHorizontal="16dp" android:paddingVertical="12dp">
-            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="16dp" android:orientation="vertical">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/prevent_auto_lock" android:textAppearance="?attr/textAppearanceBodyLarge" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/prevent_auto_lock_desc" android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="?colorOnSurfaceVariant" />
-            </LinearLayout>
-            <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/prevent_auto_lock_checkbox" android:layout_width="wrap_content" android:layout_height="wrap_content" />
         </LinearLayout>
 
     </LinearLayout>

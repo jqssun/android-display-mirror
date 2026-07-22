@@ -175,11 +175,6 @@ public class AirPlayFragment extends Fragment {
         v -> {
           if (airplay.isConnected()) {
             airplay.disconnect();
-            if (getContext() != null) {
-              getContext()
-                  .stopService(
-                      new android.content.Intent(getContext(), AirPlayForegroundService.class));
-            }
             return;
           }
           AirPlayService.AirPlayDevice dev = _getSelectedDevice();

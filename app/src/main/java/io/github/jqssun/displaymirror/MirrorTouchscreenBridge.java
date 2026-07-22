@@ -16,7 +16,7 @@ public final class MirrorTouchscreenBridge {
   public static final Uri DISPLAYS_URI = Uri.parse("content://" + AUTHORITY + "/displays");
   public static final String COLUMN_DISPLAY_ID = "display_id";
   public static final String COLUMN_TYPE = "type";
-  public static final String TYPE_MOONLIGHT = "moonlight";
+  public static final String TYPE_SUNSHINE = "sunshine";
   public static final String TYPE_DISPLAYLINK = "displaylink";
   public static final String TYPE_AIRPLAY = "airplay";
 
@@ -38,9 +38,9 @@ public final class MirrorTouchscreenBridge {
     List<TargetInfo> targets = new ArrayList<>();
     _addTarget(
         targets,
-        State.getMirrorVirtualDisplayId(),
-        TYPE_MOONLIGHT,
-        State.mirrorVirtualDisplay != null ? State.mirrorVirtualDisplay.getSurface() : null);
+        State.getSunshineVirtualDisplayId(),
+        TYPE_SUNSHINE,
+        State.sunshineVirtualDisplay != null ? State.sunshineVirtualDisplay.getSurface() : null);
     _addTarget(
         targets,
         State.getDisplaylinkVirtualDisplayId(),

@@ -12,7 +12,6 @@ import io.github.jqssun.displaymirror.ApkImporter;
 import io.github.jqssun.displaymirror.DisplaylinkState;
 import io.github.jqssun.displaymirror.MainActivity;
 import io.github.jqssun.displaymirror.State;
-import io.github.jqssun.displaymirror.SunshineService;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -120,7 +119,7 @@ public class ProjectViaDisplaylink implements Job {
           PendingIntent.getBroadcast(
               context,
               0,
-              new Intent(SunshineService.ACTION_USB_PERMISSION),
+              new Intent(MirrorDisplaylinkMonitor.ACTION_USB_PERMISSION),
               PendingIntent.FLAG_IMMUTABLE);
       usbManager.requestPermission(device, pendingIntent);
       throw new YieldException("waiting for USB permission");
@@ -203,7 +202,7 @@ public class ProjectViaDisplaylink implements Job {
         PendingIntent.getBroadcast(
             context,
             0,
-            new Intent(SunshineService.ACTION_USB_PERMISSION),
+            new Intent(MirrorDisplaylinkMonitor.ACTION_USB_PERMISSION),
             PendingIntent.FLAG_IMMUTABLE);
     usbManager.requestPermission(displaylinkState.displaylinkDevice2, pendingIntent);
     throw new YieldException("waiting for second USB permission");

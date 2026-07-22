@@ -59,10 +59,9 @@
                 android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
                 android:resource="@xml/device_filter"/>
         </activity>
-        
+
         <activity
-            android:name=".MirrorActivity"
-            android:launchMode="singleTask"
+            android:name=".CastPlaceholderActivity"
             android:exported="false"
             android:theme="@style/AppTheme" />
 
@@ -102,17 +101,10 @@
             android:permission="io.github.jqssun.displaymirror.permission.TOUCHSCREEN_BRIDGE" />
         
         <service
-            android:name=".SunshineService"
+            android:name=".ProjectionService"
             android:foregroundServiceType="mediaProjection"
             android:enabled="true"
             android:exported="false" />
-
-        <service
-            android:name=".AirPlayForegroundService"
-            android:foregroundServiceType="mediaProjection"
-            android:enabled="true"
-            android:exported="false" />
-
 
     </application>
 

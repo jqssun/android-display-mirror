@@ -61,7 +61,7 @@ public class SunshineAudio {
     volumeChangeListener =
         focusChange -> {
           // if still projecting and should stay muted, check and re-mute
-          if (State.mirrorVirtualDisplay != null && isMuted) {
+          if (State.sunshineVirtualDisplay != null && isMuted) {
             _checkAndRestoreMute();
           }
         };
@@ -81,7 +81,7 @@ public class SunshineAudio {
               public void onChange(boolean selfChange) {
                 super.onChange(selfChange);
                 // if still projecting and should stay muted, check and re-mute
-                if (State.mirrorVirtualDisplay != null && isMuted) {
+                if (State.sunshineVirtualDisplay != null && isMuted) {
                   _checkAndRestoreMute();
                 }
               }

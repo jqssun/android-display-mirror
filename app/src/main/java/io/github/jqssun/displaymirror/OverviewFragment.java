@@ -19,6 +19,7 @@ import com.google.android.material.color.MaterialColors;
 import com.google.android.material.transition.MaterialSharedAxis;
 import io.github.jqssun.displaymirror.job.AcquireShizuku;
 import io.github.jqssun.displaymirror.job.AirPlayService;
+import io.github.jqssun.displaymirror.job.SunshineHost;
 import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
 
 public class OverviewFragment extends Fragment {
@@ -44,9 +45,9 @@ public class OverviewFragment extends Fragment {
     _initShizuku(view);
     _initOverlay(view);
 
-    view.findViewById(R.id.moonlight_card)
+    view.findViewById(R.id.sunshine_card)
         .setOnClickListener(
-            v -> Navigation.findNavController(v).navigate(R.id.action_overview_to_moonlight));
+            v -> Navigation.findNavController(v).navigate(R.id.action_overview_to_sunshine));
     view.findViewById(R.id.airplay_card)
         .setOnClickListener(
             v -> Navigation.findNavController(v).navigate(R.id.action_overview_to_airplay));
@@ -139,24 +140,22 @@ public class OverviewFragment extends Fragment {
     int inactiveColor =
         MaterialColors.getColor(view, com.google.android.material.R.attr.colorOnSurfaceVariant);
 
-    // moonlight
-    TextView moonlightStatus = view.findViewById(R.id.moonlight_status);
-    ImageView moonlightIcon = view.findViewById(R.id.moonlight_icon);
-    boolean moonlightActive = SunshineService.instance != null;
-    boolean moonlightProjecting =
-        moonlightActive
-            && (State.mirrorVirtualDisplay != null
-                || State.displaylinkState.getVirtualDisplay() != null
-                || State.lastSingleAppDisplay != 0);
-    if (moonlightProjecting) {
-      moonlightStatus.setText(R.string.moonlight_status_casting);
-    } else if (moonlightActive) {
-      moonlightStatus.setText(R.string.moonlight_status_waiting);
+    // sunshine
+    TextView sunshineStatus = view.findViewById(R.id.sunshine_status);
+    ImageView sunshineIcon = view.findViewById(R.id.sunshine_icon);
+    boolean sunshineActive = SunshineHost.isRunning();
+    boolean sunshineProjecting =
+        sunshineActive
+            && State.sunshineVirtualDisplay != null;
+    if (sunshineProjecting) {
+      sunshineStatus.setText(R.string.sunshine_status_casting);
+    } else if (sunshineActive) {
+      sunshineStatus.setText(R.string.sunshine_status_waiting);
     } else {
-      moonlightStatus.setText(R.string.moonlight_status_idle);
+      sunshineStatus.setText(R.string.sunshine_status_idle);
     }
-    moonlightIcon.setImageTintList(
-        ColorStateList.valueOf(moonlightProjecting ? activeColor : inactiveColor));
+    sunshineIcon.setImageTintList(
+        ColorStateList.valueOf(sunshineProjecting ? activeColor : inactiveColor));
 
     // airplay
     TextView airplayStatus = view.findViewById(R.id.airplay_status);

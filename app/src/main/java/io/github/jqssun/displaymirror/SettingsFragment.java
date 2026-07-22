@@ -37,8 +37,11 @@ public class SettingsFragment extends Fragment {
 
   private void _initSettings(View view) {
     MaterialSwitch trustedDisplayCheckbox = view.findViewById(R.id.trusted_display_checkbox);
+    MaterialSwitch mirrorOnlyCheckbox = view.findViewById(R.id.mirror_only_checkbox);
     MaterialSwitch autoRotateCheckbox = view.findViewById(R.id.auto_rotate_checkbox);
     MaterialSwitch autoScaleCheckbox = view.findViewById(R.id.auto_scale_checkbox);
+    MaterialSwitch autoMatchCheckbox = view.findViewById(R.id.auto_match_aspect_ratio_checkbox);
+    MaterialSwitch preventAutoLockCheckbox = view.findViewById(R.id.prevent_auto_lock_checkbox);
     MaterialButton manageSystemDisplaySettingsBtn =
         view.findViewById(R.id.manage_system_display_settings_btn);
 
@@ -48,6 +51,10 @@ public class SettingsFragment extends Fragment {
     trustedDisplayCheckbox.setOnCheckedChangeListener(
         (b, c) -> preferences.edit().putBoolean(Pref.KEY_TRUSTED_DISPLAY, c).apply());
 
+    mirrorOnlyCheckbox.setChecked(Pref.getProjectionBacked());
+    mirrorOnlyCheckbox.setOnCheckedChangeListener(
+        (b, c) -> preferences.edit().putBoolean(Pref.KEY_PROJECTION_BACKED, c).apply());
+
     autoRotateCheckbox.setChecked(Pref.getAutoRotate());
     autoScaleCheckbox.setChecked(Pref.getAutoScale());
 
@@ -55,6 +62,17 @@ public class SettingsFragment extends Fragment {
         (b, c) -> preferences.edit().putBoolean(Pref.KEY_AUTO_ROTATE, c).apply());
     autoScaleCheckbox.setOnCheckedChangeListener(
         (b, c) -> preferences.edit().putBoolean(Pref.KEY_AUTO_SCALE, c).apply());
+
+    autoMatchCheckbox.setChecked(Pref.getAutoMatchAspectRatio());
+    autoMatchCheckbox.setEnabled(hasShizuku);
+    autoMatchCheckbox.setOnCheckedChangeListener(
+        (b, c) -> preferences.edit().putBoolean(Pref.KEY_AUTO_MATCH_ASPECT_RATIO, c).apply());
+
+    preventAutoLockCheckbox.setChecked(Pref.getPreventAutoLock());
+    preventAutoLockCheckbox.setEnabled(hasShizuku);
+    preventAutoLockCheckbox.setOnCheckedChangeListener(
+        (b, c) -> preferences.edit().putBoolean(Pref.KEY_PREVENT_AUTO_LOCK, c).apply());
+
     manageSystemDisplaySettingsBtn.setOnClickListener(
         v -> ((MainActivity) requireActivity()).openExtendSettings());
 

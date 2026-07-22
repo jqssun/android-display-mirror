@@ -1,12 +1,10 @@
 package io.github.jqssun.displaymirror.job;
 
 import android.content.Context;
-import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
-import android.media.projection.MediaProjection;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Surface;
@@ -27,56 +25,27 @@ public class AirPlayEncoder {
   public int screenHeight;
   public int screenDpi;
 
-  public void start(MediaProjection projection, int fps) {
+  public void start(int width, int height, int fps) {
     if (running) return;
     running = true;
 
     try {
-      // get actual screen dimensions
-      Context ctx = State.getContext();
-      if (ctx == null) {
-        running = false;
-        return;
+      if (width <= 0 || height <= 0) {
+        Context ctx = State.getContext();
+        if (ctx == null) {
+          running = false;
+          return;
+        }
+        DisplayMetrics dm = new DisplayMetrics();
+        ((WindowManager) ctx.getSystemService(Context.WINDOW_SERVICE))
+            .getDefaultDisplay()
+            .getRealMetrics(dm);
+        width = dm.widthPixels;
+        height = dm.heightPixels;
       }
-      DisplayMetrics dm = new DisplayMetrics();
-      ((WindowManager) ctx.getSystemService(Context.WINDOW_SERVICE))
-          .getDefaultDisplay()
-          .getRealMetrics(dm);
-      screenWidth = dm.widthPixels;
-      screenHeight = dm.heightPixels;
-      screenDpi = dm.densityDpi;
-
-      if (Pref.getAirPlay1Mode()) {
-        // portrait input buffers segfault the fallback software
-        // decoder and 1080p IDRs overflow its 2 MiB input ceiling
-        // so swap to landscape and cap at 1280x720
-        if (screenHeight > screenWidth) {
-          int tmp = screenWidth;
-          screenWidth = screenHeight;
-          screenHeight = tmp;
-        }
-        if (screenWidth > 1280) {
-          screenHeight = (int) ((long) screenHeight * 1280L / screenWidth);
-          screenWidth = 1280;
-        }
-        if (screenHeight > 720) {
-          screenWidth = (int) ((long) screenWidth * 720L / screenHeight);
-          screenHeight = 720;
-        }
-        screenWidth &= ~1;
-        screenHeight &= ~1;
-      }
-
-      // android 14+ requires a callback registered before createVirtualDisplay
-      projection.registerCallback(
-          new MediaProjection.Callback() {
-            @Override
-            public void onStop() {
-              State.log("AirPlay MediaProjection stopped");
-              stop();
-            }
-          },
-          new android.os.Handler(android.os.Looper.getMainLooper()));
+      screenWidth = width;
+      screenHeight = height;
+      screenDpi = 160;
 
       MediaFormat format =
           MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, screenWidth, screenHeight);
@@ -104,15 +73,15 @@ public class AirPlayEncoder {
       codec.start();
 
       virtualDisplay =
-          projection.createVirtualDisplay(
-              "AirPlayMirror",
-              screenWidth,
-              screenHeight,
-              screenDpi,
-              DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC,
-              inputSurface,
-              null,
-              null);
+          CreateVirtualDisplay.createForStream(
+              new VirtualDisplayArgs("AirPlay", screenWidth, screenHeight, fps, screenDpi, false),
+              inputSurface);
+      if (virtualDisplay == null) {
+        State.log("AirPlay: failed to create virtual display");
+        State.clearAirPlayTouchTarget();
+        running = false;
+        return;
+      }
       State.setAirPlayTouchTarget(virtualDisplay.getDisplay().getDisplayId(), inputSurface);
 
       encodeThread = new Thread(this::_encodeLoop, "AirPlayEncode");

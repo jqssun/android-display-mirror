@@ -266,7 +266,7 @@ public class AutoRotateAndScaleForDisplaylink {
     // check FBO status
     int status = GLES20.glCheckFramebufferStatus(GLES20.GL_FRAMEBUFFER);
     if (status != GLES20.GL_FRAMEBUFFER_COMPLETE) {
-      android.util.Log.e("MirrorActivity", "FBO creation failed, status: " + status);
+      android.util.Log.e("AutoRotateAndScaleForDisplaylink", "FBO creation failed, status: " + status);
     }
     GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, fbo[0]);
 
@@ -320,6 +320,7 @@ public class AutoRotateAndScaleForDisplaylink {
         isLandscape = true;
       }
       currentSurface = isLandscape ? landscapeInputSurface : portraitInputSurface;
+      displaylinkState.projection = State.getMediaProjection();
       displaylinkState.createdVirtualDisplay(
           State.getMediaProjection()
               .createVirtualDisplay(

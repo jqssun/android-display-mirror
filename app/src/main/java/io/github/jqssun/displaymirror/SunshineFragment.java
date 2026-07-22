@@ -19,13 +19,13 @@ import io.github.jqssun.displaymirror.dialog.ManualClientInputDialog;
 import io.github.jqssun.displaymirror.job.AutoRotateAndScaleForDisplaylink;
 import io.github.jqssun.displaymirror.job.ConnectToClient;
 import io.github.jqssun.displaymirror.job.ExitAll;
+import io.github.jqssun.displaymirror.job.SunshineHost;
 import io.github.jqssun.displaymirror.job.SunshineMouse;
 import io.github.jqssun.displaymirror.job.SunshineServer;
-import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MoonlightFragment extends Fragment {
+public class SunshineFragment extends Fragment {
   private MaterialButton startBtn, stopBtn, manageDisplayBtn;
   private ImageView statusIcon;
   private TextView statusTitle, statusDetail;
@@ -45,17 +45,17 @@ public class MoonlightFragment extends Fragment {
   @Override
   public View onCreateView(
       LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-    View view = inflater.inflate(R.layout.fragment_moonlight, container, false);
+    View view = inflater.inflate(R.layout.fragment_sunshine, container, false);
     preferences = requireContext().getSharedPreferences(Pref.PREF_NAME, Context.MODE_PRIVATE);
 
-    statusIcon = view.findViewById(R.id.moonlight_status_icon);
-    statusTitle = view.findViewById(R.id.moonlight_status_title);
-    statusDetail = view.findViewById(R.id.moonlight_status_detail);
+    statusIcon = view.findViewById(R.id.sunshine_status_icon);
+    statusTitle = view.findViewById(R.id.sunshine_status_title);
+    statusDetail = view.findViewById(R.id.sunshine_status_detail);
     startBtn = view.findViewById(R.id.start_btn);
     stopBtn = view.findViewById(R.id.stop_btn);
     manageDisplayBtn = view.findViewById(R.id.manage_display_btn);
 
-    startBtn.setOnClickListener(v -> ((MainActivity) requireActivity()).startMirroring());
+    startBtn.setOnClickListener(v -> ((MainActivity) requireActivity()).startSunshine());
     stopBtn.setOnClickListener(
         v -> {
           if (AutoRotateAndScaleForDisplaylink.instance != null) {
@@ -67,10 +67,10 @@ public class MoonlightFragment extends Fragment {
         v ->
             ((MainActivity) requireActivity())
                 .manageDisplayInExtend(
-                    State.getMoonlightManagedDisplayId(), MainActivity.SCREEN_MOONLIGHT));
+                    State.getSunshineVirtualDisplayId(), MainActivity.SCREEN_SUNSHINE));
 
-    // moonlight settings
-    _initMoonlightSettings(view);
+    // sunshine settings
+    _initSunshineSettings(view);
 
     State.uiState.observe(getViewLifecycleOwner(), this::_updateUI);
     return view;
@@ -88,19 +88,19 @@ public class MoonlightFragment extends Fragment {
     SunshineServer.suppressPin = null;
   }
 
-  private void _initMoonlightSettings(View view) {
+  private void _initSunshineSettings(View view) {
     EditText deviceNameEditText = view.findViewById(R.id.device_name_edit_text);
-    deviceNameEditText.setText(Pref.getMoonlightDeviceName());
+    deviceNameEditText.setText(Pref.getSunshineDeviceName());
     deviceNameEditText.setOnFocusChangeListener(
         (v, hasFocus) -> {
           if (!hasFocus) {
             String name = deviceNameEditText.getText().toString().trim();
             if (name.isEmpty()) {
-              name = Pref.getDefaultMoonlightDeviceName();
+              name = Pref.getDefaultSunshineDeviceName();
               deviceNameEditText.setText(name);
             }
-            String stored = name.equals(Pref.getDefaultMoonlightDeviceName()) ? "" : name;
-            preferences.edit().putString(Pref.KEY_MOONLIGHT_DEVICE_NAME, stored).apply();
+            String stored = name.equals(Pref.getDefaultSunshineDeviceName()) ? "" : name;
+            preferences.edit().putString(Pref.KEY_SUNSHINE_DEVICE_NAME, stored).apply();
           }
         });
 
@@ -110,7 +110,7 @@ public class MoonlightFragment extends Fragment {
     inputToExternalDisplayCheckbox.setOnCheckedChangeListener(
         (b, c) -> preferences.edit().putBoolean(Pref.KEY_INPUT_TO_EXTERNAL_DISPLAY, c).apply());
 
-    MaterialSwitch showCursorCheckbox = view.findViewById(R.id.show_moonlight_cursor_checkbox);
+    MaterialSwitch showCursorCheckbox = view.findViewById(R.id.show_sunshine_cursor_checkbox);
     MaterialSwitch autoConnectCheckbox = view.findViewById(R.id.auto_connect_client_checkbox);
     LinearLayout clientConnectionContainer = view.findViewById(R.id.client_connection_container);
     Spinner clientSpinner = view.findViewById(R.id.client_spinner);
@@ -118,10 +118,10 @@ public class MoonlightFragment extends Fragment {
     MaterialSwitch disableRemoteSubmixCheckbox =
         view.findViewById(R.id.disable_remote_submix_checkbox);
 
-    showCursorCheckbox.setChecked(Pref.getShowMoonlightCursor());
+    showCursorCheckbox.setChecked(Pref.getShowSunshineCursor());
     showCursorCheckbox.setOnCheckedChangeListener(
         (b, c) -> {
-          preferences.edit().putBoolean(Pref.KEY_SHOW_MOONLIGHT_CURSOR, c).apply();
+          preferences.edit().putBoolean(Pref.KEY_SHOW_SUNSHINE_CURSOR, c).apply();
           SunshineMouse.setShowCursor(c);
         });
 
@@ -154,21 +154,6 @@ public class MoonlightFragment extends Fragment {
     disableRemoteSubmixCheckbox.setChecked(Pref.getDisableRemoteSubmix());
     disableRemoteSubmixCheckbox.setOnCheckedChangeListener(
         (b, c) -> preferences.edit().putBoolean(Pref.KEY_DISABLE_REMOTE_SUBMIX, c).apply());
-
-    MaterialSwitch autoMatchCheckbox = view.findViewById(R.id.auto_match_aspect_ratio_checkbox);
-    MaterialSwitch preventAutoLockCheckbox = view.findViewById(R.id.prevent_auto_lock_checkbox);
-
-    boolean hasShizuku = ShizukuUtils.hasPermission();
-
-    autoMatchCheckbox.setChecked(Pref.getAutoMatchAspectRatio());
-    autoMatchCheckbox.setOnCheckedChangeListener(
-        (b, c) -> preferences.edit().putBoolean(Pref.KEY_AUTO_MATCH_ASPECT_RATIO, c).apply());
-    if (!hasShizuku) autoMatchCheckbox.setEnabled(false);
-
-    preventAutoLockCheckbox.setChecked(Pref.getPreventAutoLock());
-    preventAutoLockCheckbox.setOnCheckedChangeListener(
-        (b, c) -> preferences.edit().putBoolean(Pref.KEY_PREVENT_AUTO_LOCK, c).apply());
-    if (!hasShizuku) preventAutoLockCheckbox.setEnabled(false);
   }
 
   private void _updateUI(MirrorUiState state) {
@@ -181,27 +166,23 @@ public class MoonlightFragment extends Fragment {
       return;
     }
 
-    // update status card based on state
-    if (SunshineService.instance == null) {
+    if (!SunshineHost.isRunning()) {
       statusIcon.setImageResource(R.drawable.ic_error);
-      statusTitle.setText(R.string.moonlight_status_idle);
-      statusDetail.setText(R.string.moonlight_status_idle_detail);
+      statusTitle.setText(R.string.sunshine_status_idle);
+      statusDetail.setText(R.string.sunshine_status_idle_detail);
     } else {
-      boolean isProjecting =
-          State.mirrorVirtualDisplay != null
-              || State.displaylinkState.getVirtualDisplay() != null
-              || State.lastSingleAppDisplay != 0;
+      boolean isProjecting = State.sunshineVirtualDisplay != null;
       if (isProjecting) {
         statusIcon.setImageResource(R.drawable.ic_check_circle);
-        statusTitle.setText(R.string.moonlight_status_casting);
-        statusDetail.setText(R.string.moonlight_status_casting_detail);
+        statusTitle.setText(R.string.sunshine_status_casting);
+        statusDetail.setText(R.string.sunshine_status_casting_detail);
       } else {
         statusIcon.setImageResource(R.drawable.ic_sync);
-        statusTitle.setText(R.string.moonlight_status_waiting);
+        statusTitle.setText(R.string.sunshine_status_waiting);
         StringBuilder detail =
-            new StringBuilder(getString(R.string.moonlight_status_waiting_detail));
+            new StringBuilder(getString(R.string.sunshine_status_waiting_detail));
         try {
-          for (String ip : SunshineService.getAllWifiIpAddresses(requireContext())) {
+          for (String ip : SunshineHost.getWifiIpAddresses(requireContext())) {
             detail.append("\nIP: ").append(ip);
           }
         } catch (Throwable e) {
@@ -213,8 +194,7 @@ public class MoonlightFragment extends Fragment {
 
     startBtn.setVisibility(state.startBtnVisibility ? View.VISIBLE : View.GONE);
     stopBtn.setVisibility(state.stopBtnVisibility ? View.VISIBLE : View.GONE);
-    int managedDisplayId = State.getMoonlightManagedDisplayId();
-    manageDisplayBtn.setVisibility(managedDisplayId > 0 ? View.VISIBLE : View.GONE);
+    manageDisplayBtn.setVisibility(State.getSunshineVirtualDisplayId() > 0 ? View.VISIBLE : View.GONE);
   }
 
   private void _loadClientList(Spinner spinner) {

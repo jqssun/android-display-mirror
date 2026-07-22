@@ -11,7 +11,21 @@ import io.github.jqssun.displaymirror.State;
 
 public class MirrorDisplaylinkMonitor {
 
+  public static final String ACTION_USB_PERMISSION =
+      "io.github.jqssun.displaymirror.USB_PERMISSION";
+
   private static boolean registered = false;
+
+  private static final BroadcastReceiver usbPermissionReceiver =
+      new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+          if (ACTION_USB_PERMISSION.equals(intent.getAction())) {
+            State.resumeJob(State.MODE_DISPLAYLINK);
+          }
+        }
+      };
+
   private static final BroadcastReceiver usbDetachedReceiver =
       new BroadcastReceiver() {
         @Override
@@ -47,13 +61,15 @@ public class MirrorDisplaylinkMonitor {
       return;
     }
     registered = true;
-    IntentFilter detachedFilter = new IntentFilter(UsbManager.ACTION_USB_DEVICE_DETACHED);
-    context.registerReceiver(
-        usbDetachedReceiver, detachedFilter, null, null, Context.RECEIVER_EXPORTED);
+    Context appContext = context.getApplicationContext();
+    _register(appContext, usbDetachedReceiver, UsbManager.ACTION_USB_DEVICE_DETACHED);
+    _register(appContext, usbAttachedReceiver, UsbManager.ACTION_USB_DEVICE_ATTACHED);
+    _register(appContext, usbPermissionReceiver, ACTION_USB_PERMISSION);
+  }
 
-    IntentFilter attachedFilter = new IntentFilter(UsbManager.ACTION_USB_DEVICE_ATTACHED);
+  private static void _register(Context context, BroadcastReceiver receiver, String action) {
     context.registerReceiver(
-        usbAttachedReceiver, attachedFilter, null, null, Context.RECEIVER_EXPORTED);
+        receiver, new IntentFilter(action), null, null, Context.RECEIVER_EXPORTED);
   }
 
   public static void handleDisplaylink(Context context, UsbDevice device) {

@@ -1,6 +1,7 @@
 package io.github.jqssun.displaymirror.job;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.graphics.Point;
 import android.hardware.display.DisplayManagerGlobal;
 import android.hardware.display.IDisplayManager;
@@ -20,6 +21,7 @@ import android.view.IWindowManager;
 import android.view.Surface;
 import androidx.annotation.NonNull;
 import dev.rikka.tools.refine.Refine;
+import io.github.jqssun.displaymirror.CastPlaceholderActivity;
 import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.State;
 import io.github.jqssun.displaymirror.shizuku.ServiceUtils;
@@ -41,38 +43,68 @@ public class CreateVirtualDisplay {
   private static final int VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED = 1 << 12;
   private static final int VIRTUAL_DISPLAY_FLAG_TOUCH_FEEDBACK_DISABLED = 1 << 13;
   private static final int VIRTUAL_DISPLAY_FLAG_DEVICE_DISPLAY_GROUP = 1 << 15;
-  public static boolean isCreating = false;
 
   public static VirtualDisplay createVirtualDisplay(
       VirtualDisplayArgs virtualDisplayArgs, Surface surface) {
-    isCreating = true;
-    try {
-      if (ShizukuUtils.hasPermission()) {
-        VirtualDisplay virtualDisplay =
-            _createByShizuku(virtualDisplayArgs, surface, true, State.getMediaProjection());
-        android.util.Log.i(
-            "CreateVirtualDisplay",
-            "created virtual display: " + virtualDisplay.getDisplay().getDisplayId());
-        State.setMediaProjection(null);
-        return virtualDisplay;
-      } else {
-        new Handler(Looper.getMainLooper())
-            .post(
-                () -> {
-                  State.log("cannot use single-app projection without Shizuku permission");
-                });
-        return null;
+    if (ShizukuUtils.hasPermission()) {
+      VirtualDisplay virtualDisplay = _createByShizuku(virtualDisplayArgs, surface, true);
+      android.util.Log.i(
+          "CreateVirtualDisplay",
+          "created virtual display: " + virtualDisplay.getDisplay().getDisplayId());
+      State.setMediaProjection(null);
+      if (!Pref.getProjectionBacked()) {
+        _showCastPlaceholder(virtualDisplay.getDisplay().getDisplayId());
       }
-    } finally {
-      isCreating = false;
+      return virtualDisplay;
+    } else {
+      new Handler(Looper.getMainLooper())
+          .post(
+              () -> {
+                State.log("cannot use single-app projection without Shizuku permission");
+              });
+      return null;
     }
   }
 
+  public static VirtualDisplay createForStream(VirtualDisplayArgs args, Surface surface) {
+    if (ShizukuUtils.hasPermission() && Pref.getTrustedDisplay()) {
+      try {
+        return createVirtualDisplay(args, surface);
+      } catch (Throwable e) {
+        State.log("trusted display creation failed, falling back to untrusted: " + e.getMessage());
+      }
+    }
+    MediaProjection projection = State.getMediaProjection();
+    if (projection == null) {
+      return null;
+    }
+    VirtualDisplay display =
+        projection.createVirtualDisplay(
+            args.virtualDisplayName,
+            args.width,
+            args.height,
+            args.dpi,
+            VIRTUAL_DISPLAY_FLAG_PUBLIC,
+            surface,
+            null,
+            null);
+    State.setMediaProjection(null);
+    return display;
+  }
+
+  // an own-content display is black until an app is launched; show a placeholder so the user
+  // knows to pick one in Extend. delayed so the display is registered in WM before we launch.
+  private static void _showCastPlaceholder(int displayId) {
+    Context context = State.getContext();
+    if (context == null) {
+      return;
+    }
+    new Handler(Looper.getMainLooper())
+        .postDelayed(() -> CastPlaceholderActivity.launchOnDisplay(context, displayId), 300);
+  }
+
   private static @NonNull VirtualDisplay _createByShizuku(
-      VirtualDisplayArgs virtualDisplayArgs,
-      Surface surface,
-      boolean ownContentOnly,
-      MediaProjection mediaProjection) {
+      VirtualDisplayArgs virtualDisplayArgs, Surface surface, boolean ownContentOnly) {
     int virtualDisplayWidth = virtualDisplayArgs.width;
     IDisplayManager displayManager = ServiceUtils.getDisplayManager();
     int flags = getFlags(ownContentOnly, virtualDisplayArgs.rotatesWithContent);
@@ -87,10 +119,14 @@ public class CreateVirtualDisplay {
       // config = null
     }
     IVirtualDisplayCallback callback = new VirtualDisplayCallback();
+    // binding a MediaProjection makes the display mirror-only (shouldOnlyMirror) and unable to
+    // host launched apps on android 17; only do it when the user opts into projection-backed
+    // mirroring, otherwise keep it null so shell owns a trusted own-content display
     IMediaProjection projection = null;
-    if (mediaProjection != null) {
-      MediaProjectionHidden mediaProjectionHidden = Refine.unsafeCast(mediaProjection);
-      projection = mediaProjectionHidden.getProjection();
+    MediaProjection mediaProjection = State.getMediaProjection();
+    if (Pref.getProjectionBacked() && mediaProjection != null) {
+      MediaProjectionHidden hidden = Refine.unsafeCast(mediaProjection);
+      projection = hidden.getProjection();
     }
     int displayId = -1;
     String packageName = "com.android.shell";

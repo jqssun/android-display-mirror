@@ -10,8 +10,8 @@ import android.view.Gravity;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
-public class MoonlightCursorOverlay {
-  private static final String TAG = "MoonlightCursorOverlay";
+public class SunshineCursorOverlay {
+  private static final String TAG = "SunshineCursorOverlay";
   private static ImageView cursorView;
   private static WindowManager.LayoutParams cursorParams;
   private static WindowManager wm;

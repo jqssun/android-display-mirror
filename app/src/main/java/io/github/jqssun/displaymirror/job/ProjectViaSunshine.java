@@ -1,14 +1,12 @@
 package io.github.jqssun.displaymirror.job;
 
 import android.content.Context;
-import android.hardware.display.DisplayManager;
 import android.view.Surface;
 import io.github.jqssun.displaymirror.MainActivity;
 import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.State;
-import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
 
-public class ProjectViaMoonlight implements Job {
+public class ProjectViaSunshine implements Job {
   private final int width;
   private final int height;
   private final int frameRate;
@@ -17,7 +15,7 @@ public class ProjectViaMoonlight implements Job {
   private final boolean shouldSendAudio;
   private boolean mediaProjectionRequested;
 
-  public ProjectViaMoonlight(
+  public ProjectViaSunshine(
       int width,
       int height,
       int frameRate,
@@ -51,44 +49,19 @@ public class ProjectViaMoonlight implements Job {
     boolean autoRotate = Pref.getAutoRotate();
     boolean autoScale = Pref.getAutoScale();
     if (autoRotate || autoScale) {
-      SunshineMouse.autoRotateAndScaleForMoonlight =
-          new AutoRotateAndScaleForMoonlight(
-              new VirtualDisplayArgs("Moonlight", width, height, frameRate, 160, false));
-      SunshineMouse.autoRotateAndScaleForMoonlight.start(surface);
-    } else if (ShizukuUtils.hasPermission() && Pref.getTrustedDisplay()) {
-      try {
-        State.setMirrorVirtualDisplay(
-            CreateVirtualDisplay.createVirtualDisplay(
-                new VirtualDisplayArgs("Moonlight", width, height, frameRate, 160, false),
-                surface));
-        State.clearLastSingleAppDisplay();
-      } catch (Throwable e) {
-        State.log("trusted display creation failed, falling back to untrusted: " + e.getMessage());
-        _createUntrustedDisplay();
-      }
+      SunshineMouse.autoRotateAndScaleForSunshine =
+          new AutoRotateAndScaleForSunshine(
+              new VirtualDisplayArgs("Sunshine", width, height, frameRate, 160, false));
+      SunshineMouse.autoRotateAndScaleForSunshine.start(surface);
     } else {
-      _createUntrustedDisplay();
+      State.setSunshineVirtualDisplay(
+          CreateVirtualDisplay.createForStream(
+              new VirtualDisplayArgs("Sunshine", width, height, frameRate, 160, false), surface));
     }
   }
 
-  private void _createUntrustedDisplay() {
-    State.setMirrorVirtualDisplay(
-        State.getMediaProjection()
-            .createVirtualDisplay(
-                "Moonlight",
-                width,
-                height,
-                160,
-                DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC,
-                surface,
-                null,
-                null));
-    State.clearLastSingleAppDisplay();
-    State.setMediaProjection(null);
-  }
-
   private boolean _requestMediaProjectionPermission() throws YieldException {
-    if (State.mirrorVirtualDisplay != null) {
+    if (State.sunshineVirtualDisplay != null) {
       return true;
     }
     if (State.getMediaProjection() != null) {

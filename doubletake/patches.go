@@ -3,6 +3,8 @@ package airplay
 import (
 	"regexp"
 	"strconv"
+
+	"howett.net/plist"
 )
 
 /*
@@ -29,4 +31,35 @@ func parseTransportServerPort(transport string) int {
 		return port
 	}
 	return 0
+}
+
+/*
+receiver display resolution from GET /info; (0,0) if not advertised
+*/
+type receiverDisplay struct {
+	Width        int `plist:"width"`
+	Height       int `plist:"height"`
+	WidthPixels  int `plist:"widthPixels"`
+	HeightPixels int `plist:"heightPixels"`
+}
+
+func (c *AirPlayClient) ReceiverDisplaySize() (int, int) {
+	resp, err := c.httpRequest("GET", "/info", "application/x-apple-binary-plist", nil)
+	if err != nil {
+		return 0, 0
+	}
+	var info struct {
+		Displays []receiverDisplay `plist:"displays"`
+	}
+	if _, err := plist.Unmarshal(resp, &info); err != nil {
+		return 0, 0
+	}
+	if len(info.Displays) == 0 {
+		return 0, 0
+	}
+	d := info.Displays[0]
+	if d.WidthPixels > 0 && d.HeightPixels > 0 {
+		return d.WidthPixels, d.HeightPixels
+	}
+	return d.Width, d.Height
 }

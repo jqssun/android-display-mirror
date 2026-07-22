@@ -18,12 +18,11 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.State;
-import io.github.jqssun.displaymirror.SunshineService;
-import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
+import io.github.jqssun.displaymirror.ProjectionService;
 
-public class AutoRotateAndScaleForMoonlight {
+public class AutoRotateAndScaleForSunshine {
 
-  private static AutoRotateAndScaleForMoonlight instance;
+  private static AutoRotateAndScaleForSunshine instance;
   private final VirtualDisplayArgs virtualDisplayArgs;
   private int portraitInputTextureId = -1;
   private SurfaceTexture portraitInputSurfaceTexture = null;
@@ -47,15 +46,15 @@ public class AutoRotateAndScaleForMoonlight {
   private OrientationChangeCallback orientationChangeCallback;
   private boolean isLandscape;
 
-  public AutoRotateAndScaleForMoonlight(VirtualDisplayArgs virtualDisplayArgs) {
+  public AutoRotateAndScaleForSunshine(VirtualDisplayArgs virtualDisplayArgs) {
     this.virtualDisplayArgs = virtualDisplayArgs;
   }
 
   public static void stopVirtualDisplay() {
-    State.stopMirrorVirtualDisplay();
+    State.stopSunshineVirtualDisplay();
   }
 
-  public static AutoRotateAndScaleForMoonlight getInstance() {
+  public static AutoRotateAndScaleForSunshine getInstance() {
     return instance;
   }
 
@@ -82,9 +81,9 @@ public class AutoRotateAndScaleForMoonlight {
     }
 
     private void checkRotation() {
-      Context context = SunshineService.instance;
+      Context context = ProjectionService.instance;
       if (context == null) {
-        android.util.Log.d("AutoRotateAndScaleForMoonlight", "context is null");
+        android.util.Log.d("AutoRotateAndScaleForSunshine", "context is null");
         return;
       }
       boolean isLandscape =
@@ -93,24 +92,24 @@ public class AutoRotateAndScaleForMoonlight {
       Surface targetSurface = isLandscape ? landscapeInputSurface : portraitInputSurface;
 
       android.util.Log.d(
-          "AutoRotateAndScaleForMoonlight",
+          "AutoRotateAndScaleForSunshine",
           "main display changed, isLandscape: "
               + isLandscape
               + ", current isLandscape: "
-              + AutoRotateAndScaleForMoonlight.this.isLandscape);
-      AutoRotateAndScaleForMoonlight.this.isLandscape = isLandscape;
+              + AutoRotateAndScaleForSunshine.this.isLandscape);
+      AutoRotateAndScaleForSunshine.this.isLandscape = isLandscape;
 
-      if (State.mirrorVirtualDisplay != null) {
+      if (State.sunshineVirtualDisplay != null) {
         if (isLandscape) {
-          android.util.Log.d("AutoRotateAndScaleForMoonlight", "change to landscape");
-          State.mirrorVirtualDisplay.resize(
+          android.util.Log.d("AutoRotateAndScaleForSunshine", "change to landscape");
+          State.sunshineVirtualDisplay.resize(
               virtualDisplayArgs.width, virtualDisplayArgs.height, 160);
         } else {
-          android.util.Log.d("AutoRotateAndScaleForMoonlight", "change to portrait");
-          State.mirrorVirtualDisplay.resize(
+          android.util.Log.d("AutoRotateAndScaleForSunshine", "change to portrait");
+          State.sunshineVirtualDisplay.resize(
               virtualDisplayArgs.height, virtualDisplayArgs.width, 160);
         }
-        State.mirrorVirtualDisplay.setSurface(targetSurface);
+        State.sunshineVirtualDisplay.setSurface(targetSurface);
       }
     }
   }
@@ -143,14 +142,14 @@ public class AutoRotateAndScaleForMoonlight {
 
     // log display size info
     android.util.Log.d(
-        "AutoRotateAndScaleForMoonlight",
+        "AutoRotateAndScaleForSunshine",
         "Primary display size: " + defaultDisplayWidth + " x " + defaultDisplayHeight);
     android.util.Log.d(
-        "AutoRotateAndScaleForMoonlight",
+        "AutoRotateAndScaleForSunshine",
         "External display size: " + virtualDisplayArgs.width + " x " + virtualDisplayArgs.height);
 
     // create dedicated render thread
-    renderThread = new HandlerThread("MirrorActivityRenderThread");
+    renderThread = new HandlerThread("SunshineRenderThread");
     renderThread.start();
     renderHandler = new Handler(renderThread.getLooper());
 
@@ -256,7 +255,7 @@ public class AutoRotateAndScaleForMoonlight {
           landscapeInputSurface = new Surface(landscapeInputSurfaceTexture);
 
           // create virtual display using inputSurface
-          if (State.mirrorVirtualDisplay == null && State.getMediaProjection() != null) {
+          if (State.sunshineVirtualDisplay == null && State.getMediaProjection() != null) {
             stopVirtualDisplay();
             DisplayMetrics metrics = new DisplayMetrics();
             display.getRealMetrics(metrics);
@@ -264,58 +263,32 @@ public class AutoRotateAndScaleForMoonlight {
             if (!autoRotate) {
               isLandscape = true;
             }
-            android.util.Log.i("AutoRotateAndScaleForMoonlight", "isLandscape: " + isLandscape);
+            android.util.Log.i("AutoRotateAndScaleForSunshine", "isLandscape: " + isLandscape);
             Surface targetSurface = isLandscape ? landscapeInputSurface : portraitInputSurface;
             int w = isLandscape ? virtualDisplayArgs.width : virtualDisplayArgs.height;
             int h = isLandscape ? virtualDisplayArgs.height : virtualDisplayArgs.width;
-            if (ShizukuUtils.hasPermission() && Pref.getTrustedDisplay()) {
-              try {
-                State.setMirrorVirtualDisplay(
-                    CreateVirtualDisplay.createVirtualDisplay(
-                        new VirtualDisplayArgs(
-                            virtualDisplayArgs.virtualDisplayName,
-                            w,
-                            h,
-                            virtualDisplayArgs.refreshRate,
-                            virtualDisplayArgs.dpi,
-                            false),
-                        targetSurface));
-                State.clearLastSingleAppDisplay();
-              } catch (Throwable e) {
-                android.util.Log.w(
-                    "AutoRotateAndScaleForMoonlight",
-                    "Trusted display creation failed, falling back to untrusted: "
-                        + e.getMessage());
-                State.setMirrorVirtualDisplay(null);
-              }
-            }
-            if (State.mirrorVirtualDisplay == null && State.getMediaProjection() != null) {
-              State.setMirrorVirtualDisplay(
-                  State.getMediaProjection()
-                      .createVirtualDisplay(
-                          virtualDisplayArgs.virtualDisplayName,
-                          w,
-                          h,
-                          virtualDisplayArgs.dpi,
-                          DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC,
-                          targetSurface,
-                          null,
-                          null));
-              State.clearLastSingleAppDisplay();
-              State.setMediaProjection(null);
-            }
-          } else if (State.mirrorVirtualDisplay != null) {
+            State.setSunshineVirtualDisplay(
+                CreateVirtualDisplay.createForStream(
+                    new VirtualDisplayArgs(
+                        virtualDisplayArgs.virtualDisplayName,
+                        w,
+                        h,
+                        virtualDisplayArgs.refreshRate,
+                        virtualDisplayArgs.dpi,
+                        false),
+                    targetSurface));
+          } else if (State.sunshineVirtualDisplay != null) {
             DisplayMetrics metrics = new DisplayMetrics();
             display.getRealMetrics(metrics);
             boolean isLandscape = metrics.widthPixels > metrics.heightPixels;
             Surface targetSurface = isLandscape ? landscapeInputSurface : portraitInputSurface;
 
-            State.mirrorVirtualDisplay.setSurface(targetSurface);
+            State.sunshineVirtualDisplay.setSurface(targetSurface);
           }
         });
 
     State.log(
-        "autoRotateAndScaleForMoonlight started, autoRotate="
+        "autoRotateAndScaleForSunshine started, autoRotate="
             + autoRotate
             + ", autoScale="
             + autoScale);
@@ -484,7 +457,7 @@ public class AutoRotateAndScaleForMoonlight {
       int status = GLES20.glCheckFramebufferStatus(GLES20.GL_FRAMEBUFFER);
       if (status != GLES20.GL_FRAMEBUFFER_COMPLETE) {
         android.util.Log.e(
-            "AutoRotateAndScaleForMoonlight", "FBO creation failed, status: " + status);
+            "AutoRotateAndScaleForSunshine", "FBO creation failed, status: " + status);
       }
       GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
       this.landscapeAutoScaler =

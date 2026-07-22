@@ -168,9 +168,9 @@
             android:textAppearance="?attr/textAppearanceLabelLarge"
             android:textColor="?colorPrimary" />
 
-        <!-- Moonlight -->
+        <!-- Sunshine -->
         <LinearLayout
-            android:id="@+id/moonlight_card"
+            android:id="@+id/sunshine_card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:minHeight="56dp"
@@ -183,11 +183,11 @@
             android:focusable="true">
 
             <ImageView
-                android:id="@+id/moonlight_icon"
+                android:id="@+id/sunshine_icon"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginEnd="16dp"
-                android:src="@drawable/ic_moonlight"
+                android:src="@drawable/ic_sunshine"
                 app:tint="?colorOnSurfaceVariant" />
 
             <LinearLayout
@@ -199,11 +199,11 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/tab_moonlight"
+                    android:text="@string/tab_sunshine"
                     android:textAppearance="?attr/textAppearanceBodyLarge" />
 
                 <TextView
-                    android:id="@+id/moonlight_status"
+                    android:id="@+id/sunshine_status"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
