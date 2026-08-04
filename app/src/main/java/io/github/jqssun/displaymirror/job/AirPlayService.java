@@ -295,6 +295,7 @@ public class AirPlayService {
       }
       projection = null;
     }
+    CreateVirtualDisplay.restoreAspectRatio();
     CreateVirtualDisplay.powerOnScreen();
   }
 

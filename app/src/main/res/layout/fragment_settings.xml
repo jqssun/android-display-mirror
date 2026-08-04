@@ -30,40 +30,22 @@
             <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/trusted_display_checkbox" android:layout_width="wrap_content" android:layout_height="wrap_content" />
         </LinearLayout>
 
-        <!-- Mirror only (projection backed) -->
+        <!-- Rotate with content -->
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingHorizontal="16dp" android:paddingVertical="12dp">
             <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="16dp" android:orientation="vertical">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/mirror_only" android:textAppearance="?attr/textAppearanceBodyLarge" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/mirror_only_desc" android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="?colorOnSurfaceVariant" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/rotate_with_content" android:textAppearance="?attr/textAppearanceBodyLarge" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/rotate_with_content_desc" android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="?colorOnSurfaceVariant" />
             </LinearLayout>
-            <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/mirror_only_checkbox" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+            <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/rotate_with_content_checkbox" android:layout_width="wrap_content" android:layout_height="wrap_content" />
         </LinearLayout>
 
-        <!-- Auto rotate -->
+        <!-- Crop black borders -->
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingHorizontal="16dp" android:paddingVertical="12dp">
             <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="16dp" android:orientation="vertical">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/auto_rotate" android:textAppearance="?attr/textAppearanceBodyLarge" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/auto_rotate_desc" android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="?colorOnSurfaceVariant" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/crop_black_borders" android:textAppearance="?attr/textAppearanceBodyLarge" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/crop_black_borders_desc" android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="?colorOnSurfaceVariant" />
             </LinearLayout>
-            <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/auto_rotate_checkbox" android:layout_width="wrap_content" android:layout_height="wrap_content" />
-        </LinearLayout>
-
-        <!-- Auto scale -->
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingHorizontal="16dp" android:paddingVertical="12dp">
-            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="16dp" android:orientation="vertical">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/auto_scale_remove_bars" android:textAppearance="?attr/textAppearanceBodyLarge" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/auto_scale_remove_bars_desc" android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="?colorOnSurfaceVariant" />
-            </LinearLayout>
-            <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/auto_scale_checkbox" android:layout_width="wrap_content" android:layout_height="wrap_content" />
-        </LinearLayout>
-
-        <!-- Match aspect ratio -->
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingHorizontal="16dp" android:paddingVertical="12dp">
-            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="16dp" android:orientation="vertical">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/auto_match_aspect_ratio" android:textAppearance="?attr/textAppearanceBodyLarge" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/auto_match_aspect_ratio_desc" android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="?colorOnSurfaceVariant" />
-            </LinearLayout>
-            <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/auto_match_aspect_ratio_checkbox" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+            <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/crop_black_borders_checkbox" android:layout_width="wrap_content" android:layout_height="wrap_content" />
         </LinearLayout>
 
         <!-- Prevent auto-lock -->
@@ -73,6 +55,35 @@
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/prevent_auto_lock_desc" android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="?colorOnSurfaceVariant" />
             </LinearLayout>
             <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/prevent_auto_lock_checkbox" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <!-- Mirror -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="16dp"
+            android:paddingBottom="4dp"
+            android:text="@string/section_mirror"
+            android:textAppearance="?attr/textAppearanceLabelLarge"
+            android:textColor="?colorPrimary" />
+
+        <!-- Mirror only (projection backed) -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingHorizontal="16dp" android:paddingVertical="12dp">
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="16dp" android:orientation="vertical">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/mirror_only" android:textAppearance="?attr/textAppearanceBodyLarge" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/mirror_only_desc" android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="?colorOnSurfaceVariant" />
+            </LinearLayout>
+            <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/mirror_only_checkbox" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <!-- Match aspect ratio -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingHorizontal="16dp" android:paddingVertical="12dp">
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="16dp" android:orientation="vertical">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/auto_match_aspect_ratio" android:textAppearance="?attr/textAppearanceBodyLarge" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/auto_match_aspect_ratio_desc" android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="?colorOnSurfaceVariant" />
+            </LinearLayout>
+            <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/auto_match_aspect_ratio_checkbox" android:layout_width="wrap_content" android:layout_height="wrap_content" />
         </LinearLayout>
 
         <com.google.android.material.button.MaterialButton

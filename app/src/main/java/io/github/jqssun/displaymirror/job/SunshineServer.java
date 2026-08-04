@@ -85,9 +85,9 @@ public class SunshineServer {
               SunshineCursorOverlay.hide();
               CreateVirtualDisplay.powerOnScreen();
               CreateVirtualDisplay.restoreAspectRatio();
-              if (SunshineMouse.autoRotateAndScaleForSunshine != null) {
-                SunshineMouse.autoRotateAndScaleForSunshine.stop();
-                SunshineMouse.autoRotateAndScaleForSunshine = null;
+              if (SunshineMouse.pipeline != null) {
+                SunshineMouse.pipeline.stop();
+                SunshineMouse.pipeline = null;
               }
               State.stopSunshineVirtualDisplay();
               Context context = State.getContext();
@@ -134,7 +134,7 @@ public class SunshineServer {
       new Handler(Looper.getMainLooper())
           .postDelayed(
               () -> {
-                if (Pref.getAutoConnectClient() && !Pref.getSelectedClient().isEmpty()) {
+                if (Pref.getSunshineAutoConnectClient() && !Pref.getSunshineSelectedClient().isEmpty()) {
                   ConnectToClient.connect((int) (Math.random() * 9000) + 1000);
                 }
               },

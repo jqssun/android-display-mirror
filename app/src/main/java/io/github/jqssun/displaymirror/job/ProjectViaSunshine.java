@@ -46,17 +46,32 @@ public class ProjectViaSunshine implements Job {
     } else {
       State.log("client requested no audio capture, using phone speaker instead");
     }
-    boolean autoRotate = Pref.getAutoRotate();
-    boolean autoScale = Pref.getAutoScale();
-    if (autoRotate || autoScale) {
-      SunshineMouse.autoRotateAndScaleForSunshine =
-          new AutoRotateAndScaleForSunshine(
-              new VirtualDisplayArgs("Sunshine", width, height, frameRate, 160, false));
-      SunshineMouse.autoRotateAndScaleForSunshine.start(surface);
+    boolean rotateWithContent = Pref.getRotateWithContent();
+    boolean cropBlackBorders = Pref.getCropBlackBorders();
+    if (CreateVirtualDisplay.streamMirrors() && (rotateWithContent || cropBlackBorders)) {
+      SunshineMouse.pipeline =
+          new StreamRenderer(
+              new VirtualDisplayArgs("Sunshine", width, height, frameRate, 160, false),
+              rotateWithContent,
+              cropBlackBorders,
+              surface);
+      SunshineMouse.pipeline.start(
+          (input, w, h) -> {
+            if (State.sunshineVirtualDisplay == null && State.getMediaProjection() != null) {
+              State.setSunshineVirtualDisplay(
+                  CreateVirtualDisplay.createForStream(
+                      new VirtualDisplayArgs("Sunshine", w, h, frameRate, 160, false), input));
+            } else if (State.sunshineVirtualDisplay != null) {
+              State.sunshineVirtualDisplay.setSurface(input);
+            }
+            return State.sunshineVirtualDisplay;
+          });
     } else {
       State.setSunshineVirtualDisplay(
           CreateVirtualDisplay.createForStream(
-              new VirtualDisplayArgs("Sunshine", width, height, frameRate, 160, false), surface));
+              new VirtualDisplayArgs(
+                  "Sunshine", width, height, frameRate, 160, Pref.getRotateWithContent()),
+              surface));
     }
   }
 

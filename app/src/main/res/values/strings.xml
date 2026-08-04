@@ -22,6 +22,7 @@
     <!-- Settings section headers -->
     <string name="section_permissions">Permissions</string>
     <string name="section_display">Streaming</string>
+    <string name="section_mirror">Mirror</string>
 
     <string name="section_input">Input</string>
     <string name="section_sunshine">Sunshine Settings</string>
@@ -90,14 +91,14 @@
     <string name="mirror_only">Mirror only</string>
     <string name="mirror_only_desc">Always mirror the built-in screen to the external display using MediaProjection. Launching apps onto the display will not be possible.</string>
     <string name="cast_placeholder_message">Please select an application to cast via "Manage This Display"</string>
-    <string name="auto_rotate">Rotate stream with device</string>
-    <string name="auto_rotate_desc">When the device is rotated, recreate the stream to match the new orientation.</string>
-    <string name="auto_scale_remove_bars">Fill stream to remove black bars</string>
-    <string name="auto_scale_remove_bars_desc">Crop and scale the captured screen to fill the stream resolution, removing letterbox bars.</string>
+    <string name="rotate_with_content">Rotate with content</string>
+    <string name="rotate_with_content_desc">Rotate the image on the external display with content displayed.</string>
+    <string name="crop_black_borders">Fill video stream to remove black borders</string>
+    <string name="crop_black_borders_desc">Automatically zoom in to crop out black borders detected around any streamed image.</string>
     <string name="input_to_external_display">Send input to external display</string>
     <string name="input_to_external_display_desc">Route remote keyboard, mouse, touch, and controller input to the external display instead of the device screen.</string>
-    <string name="auto_match_aspect_ratio">Match display aspect ratio</string>
-    <string name="auto_match_aspect_ratio_desc">Adjust main screen aspect ratio to match the external display resolution.</string>
+    <string name="auto_match_aspect_ratio">Match external display aspect ratio</string>
+    <string name="auto_match_aspect_ratio_desc">Adjust built-in screen to match the external display aspect ratio in mirror mode.</string>
     <string name="prevent_auto_lock">Prevent auto-lock</string>
     <string name="prevent_auto_lock_desc">Modifies the system screen timeout setting.</string>
     <string name="no_audio_try_no_remote_submix">Disable REMOTE_SUBMIX</string>

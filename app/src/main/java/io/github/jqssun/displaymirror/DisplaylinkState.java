@@ -11,6 +11,8 @@ import android.os.HandlerThread;
 import com.displaylink.manager.NativeDriver;
 import com.displaylink.manager.NativeDriverListener;
 import com.displaylink.manager.display.MonitorInfo;
+import io.github.jqssun.displaymirror.job.CreateVirtualDisplay;
+import io.github.jqssun.displaymirror.job.StreamRenderer;
 import io.github.jqssun.displaymirror.job.VirtualDisplayArgs;
 
 public class DisplaylinkState {
@@ -25,6 +27,7 @@ public class DisplaylinkState {
   public ImageReader imageReader;
   public VirtualDisplayArgs virtualDisplayArgs = new VirtualDisplayArgs();
   public MediaProjection projection;
+  public StreamRenderer pipeline;
   private VirtualDisplay virtualDisplay;
   public HandlerThread handlerThread;
   public Handler handler;
@@ -84,8 +87,13 @@ public class DisplaylinkState {
       }
       projection = null;
     }
+    CreateVirtualDisplay.restoreAspectRatio();
     monitorInfo = null;
     encoderId = 0;
+    if (pipeline != null) {
+      pipeline.stop();
+      pipeline = null;
+    }
     stopHandlerThread();
     stopImageReader();
     if (nativeDriver != null) {

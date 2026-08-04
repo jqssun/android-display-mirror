@@ -31,7 +31,7 @@ import java.util.Set;
 
 public class SunshineMouse {
   private static String TAG = "SunshineMouse";
-  public static AutoRotateAndScaleForSunshine autoRotateAndScaleForSunshine;
+  public static StreamRenderer pipeline;
   private static IInputManager inputManager;
   private static float defaultDisplayWidth;
   private static float defaultDisplayHeight;
@@ -42,8 +42,8 @@ public class SunshineMouse {
   private static float portraitMirrorHeight;
   private static float landscapeMirrorWidth;
   private static float landscapeMirrorHeight;
-  private static boolean autoScale;
-  private static boolean autoRotate;
+  private static boolean cropBlackBorders;
+  private static boolean rotateWithContent;
   private static boolean showCursor;
 
   public static void setShowCursor(boolean show) {
@@ -62,9 +62,9 @@ public class SunshineMouse {
     }
     screenWidth = width;
     screenHeight = height;
-    autoRotate = Pref.getAutoRotate();
-    autoScale = Pref.getAutoScale();
-    showCursor = Pref.getShowSunshineCursor();
+    rotateWithContent = Pref.getRotateWithContent();
+    cropBlackBorders = Pref.getCropBlackBorders();
+    showCursor = Pref.getSunshineShowCursor();
     if (showCursor) {
       SunshineCursorOverlay.show();
     }
@@ -74,7 +74,8 @@ public class SunshineMouse {
     Display defaultDisplay = displayManager.getDisplay(Display.DEFAULT_DISPLAY);
     if (State.sunshineVirtualDisplay == null
         && Pref.getAutoMatchAspectRatio()
-        && ShizukuUtils.hasPermission()) {
+        && ShizukuUtils.hasPermission()
+        && CreateVirtualDisplay.streamMirrors()) {
       CreateVirtualDisplay.changeAspectRatio(width, height);
       IWindowManager windowManager = ServiceUtils.getWindowManager();
       android.graphics.Point baseSize = new android.graphics.Point();
@@ -174,7 +175,7 @@ public class SunshineMouse {
   }
 
   private static Point _translateRotation0Mirror(float xInScreen, float yInScreen) {
-    if (autoRotate) {
+    if (rotateWithContent) {
       Point point = new Point();
       float xBlackBar = (screenWidth - landscapeMirrorWidth) / 2;
       float yBlackBar = (screenHeight - landscapeMirrorHeight) / 2;
@@ -425,8 +426,8 @@ public class SunshineMouse {
   }
 
   private static void _injectEvent(String prefix, MotionEvent event) {
-    if (autoScale && autoRotateAndScaleForSunshine != null) {
-      autoRotateAndScaleForSunshine.exitScale();
+    if (cropBlackBorders && pipeline != null) {
+      pipeline.exitCrop();
     }
     if (inputManager != null) {
       MotionEventHidden motionEventHidden = Refine.unsafeCast(event);

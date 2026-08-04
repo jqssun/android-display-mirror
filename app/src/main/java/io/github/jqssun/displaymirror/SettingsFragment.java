@@ -38,8 +38,8 @@ public class SettingsFragment extends Fragment {
   private void _initSettings(View view) {
     MaterialSwitch trustedDisplayCheckbox = view.findViewById(R.id.trusted_display_checkbox);
     MaterialSwitch mirrorOnlyCheckbox = view.findViewById(R.id.mirror_only_checkbox);
-    MaterialSwitch autoRotateCheckbox = view.findViewById(R.id.auto_rotate_checkbox);
-    MaterialSwitch autoScaleCheckbox = view.findViewById(R.id.auto_scale_checkbox);
+    MaterialSwitch rotateWithContentCheckbox = view.findViewById(R.id.rotate_with_content_checkbox);
+    MaterialSwitch cropBlackBordersCheckbox = view.findViewById(R.id.crop_black_borders_checkbox);
     MaterialSwitch autoMatchCheckbox = view.findViewById(R.id.auto_match_aspect_ratio_checkbox);
     MaterialSwitch preventAutoLockCheckbox = view.findViewById(R.id.prevent_auto_lock_checkbox);
     MaterialButton manageSystemDisplaySettingsBtn =
@@ -51,17 +51,17 @@ public class SettingsFragment extends Fragment {
     trustedDisplayCheckbox.setOnCheckedChangeListener(
         (b, c) -> preferences.edit().putBoolean(Pref.KEY_TRUSTED_DISPLAY, c).apply());
 
-    mirrorOnlyCheckbox.setChecked(Pref.getProjectionBacked());
+    mirrorOnlyCheckbox.setChecked(Pref.getMirrorOnly());
     mirrorOnlyCheckbox.setOnCheckedChangeListener(
-        (b, c) -> preferences.edit().putBoolean(Pref.KEY_PROJECTION_BACKED, c).apply());
+        (b, c) -> preferences.edit().putBoolean(Pref.KEY_MIRROR_ONLY, c).apply());
 
-    autoRotateCheckbox.setChecked(Pref.getAutoRotate());
-    autoScaleCheckbox.setChecked(Pref.getAutoScale());
+    rotateWithContentCheckbox.setChecked(Pref.getRotateWithContent());
+    cropBlackBordersCheckbox.setChecked(Pref.getCropBlackBorders());
 
-    autoRotateCheckbox.setOnCheckedChangeListener(
-        (b, c) -> preferences.edit().putBoolean(Pref.KEY_AUTO_ROTATE, c).apply());
-    autoScaleCheckbox.setOnCheckedChangeListener(
-        (b, c) -> preferences.edit().putBoolean(Pref.KEY_AUTO_SCALE, c).apply());
+    rotateWithContentCheckbox.setOnCheckedChangeListener(
+        (b, c) -> preferences.edit().putBoolean(Pref.KEY_ROTATE_WITH_CONTENT, c).apply());
+    cropBlackBordersCheckbox.setOnCheckedChangeListener(
+        (b, c) -> preferences.edit().putBoolean(Pref.KEY_CROP_BLACK_BORDERS, c).apply());
 
     autoMatchCheckbox.setChecked(Pref.getAutoMatchAspectRatio());
     autoMatchCheckbox.setEnabled(hasShizuku);
@@ -106,9 +106,6 @@ public class SettingsFragment extends Fragment {
 
     view.findViewById(R.id.exit_btn)
         .setOnClickListener(
-            v -> {
-              io.github.jqssun.displaymirror.job.AutoRotateAndScaleForDisplaylink.instance = null;
-              io.github.jqssun.displaymirror.job.ExitAll.execute(requireActivity(), false);
-            });
+            v -> io.github.jqssun.displaymirror.job.ExitAll.execute(requireActivity(), false));
   }
 }

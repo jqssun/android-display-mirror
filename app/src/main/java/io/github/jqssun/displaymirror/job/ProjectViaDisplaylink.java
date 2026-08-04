@@ -3,14 +3,18 @@ package io.github.jqssun.displaymirror.job;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.hardware.display.DisplayManager;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
+import android.os.Handler;
+import android.os.HandlerThread;
 import com.displaylink.manager.NativeDriver;
 import com.displaylink.manager.NativeDriverListener;
 import com.displaylink.manager.display.DisplayMode;
 import io.github.jqssun.displaymirror.ApkImporter;
 import io.github.jqssun.displaymirror.DisplaylinkState;
 import io.github.jqssun.displaymirror.MainActivity;
+import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.State;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -73,8 +77,48 @@ public class ProjectViaDisplaylink implements Job {
               virtualDisplayArgs.width, virtualDisplayArgs.height, virtualDisplayArgs.refreshRate),
           virtualDisplayArgs.width * 4,
           1);
-      new AutoRotateAndScaleForDisplaylink(virtualDisplayArgs, context);
+      _startRenderer(displaylinkState);
     }
+  }
+
+  private void _startRenderer(DisplaylinkState displaylinkState) {
+    if (displaylinkState.pipeline != null) {
+      displaylinkState.pipeline.stop();
+      // let posted gl cleanup run before replacing the thread
+      displaylinkState.stopHandlerThread();
+    }
+    displaylinkState.handlerThread = new HandlerThread("ListenOpenglAndPostFrame");
+    displaylinkState.handlerThread.start();
+    displaylinkState.handler = new Handler(displaylinkState.handlerThread.getLooper());
+    boolean mirror = displaylinkState.getVirtualDisplay() == null;
+    displaylinkState.pipeline =
+        new StreamRenderer(
+            virtualDisplayArgs,
+            Pref.getRotateWithContent() && mirror,
+            Pref.getCropBlackBorders() && mirror,
+            new DisplaylinkSender(virtualDisplayArgs.width, virtualDisplayArgs.height),
+            displaylinkState.handler);
+    displaylinkState.pipeline.start(
+        (input, w, h) -> {
+          if (displaylinkState.getVirtualDisplay() == null && State.getMediaProjection() != null) {
+            displaylinkState.projection = State.getMediaProjection();
+            displaylinkState.createdVirtualDisplay(
+                displaylinkState.projection.createVirtualDisplay(
+                    "Displaylink Mirror",
+                    w,
+                    h,
+                    virtualDisplayArgs.dpi,
+                    DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC,
+                    input,
+                    null,
+                    displaylinkState.handler));
+            State.setMediaProjection(null);
+            CreateVirtualDisplay.changeAspectRatio(w, h);
+          } else if (displaylinkState.getVirtualDisplay() != null) {
+            displaylinkState.getVirtualDisplay().setSurface(input);
+          }
+          return displaylinkState.getVirtualDisplay();
+        });
   }
 
   private void _copyFirmwares(Context context) {

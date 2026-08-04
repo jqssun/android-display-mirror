@@ -26,6 +26,7 @@ import com.google.android.material.button.MaterialButton;
 import com.topjohnwu.superuser.Shell;
 import io.github.jqssun.displaymirror.job.AcquireShizuku;
 import io.github.jqssun.displaymirror.job.AirPlayService;
+import io.github.jqssun.displaymirror.job.CreateVirtualDisplay;
 import io.github.jqssun.displaymirror.job.MirrorDisplaylinkMonitor;
 import io.github.jqssun.displaymirror.job.SunshineHost;
 import org.lsposed.hiddenapibypass.HiddenApiBypass;
@@ -268,6 +269,10 @@ public class MainActivity extends AppCompatActivity {
   private final Shizuku.OnBinderReceivedListener _binderReceivedListener =
       () -> {
         State.log("Shizuku binder received");
+        // clear forced display size left over from a crashed session
+        if (State.mediaProjectionInUse == null) {
+          CreateVirtualDisplay.restoreAspectRatio();
+        }
       };
 
   private final Shizuku.OnBinderDeadListener _binderDeadListener =

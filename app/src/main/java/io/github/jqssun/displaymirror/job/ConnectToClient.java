@@ -16,7 +16,7 @@ import java.util.Enumeration;
 public class ConnectToClient {
   public static void connect(int pin) {
     SunshineServer.pinCandidate = String.valueOf(pin);
-    String clientIpAndPort = Pref.getSelectedClient();
+    String clientIpAndPort = Pref.getSunshineSelectedClient();
     String[] parts = clientIpAndPort.split(":");
     if (parts.length < 2) {
       State.log("invalid client address (missing port): " + clientIpAndPort);

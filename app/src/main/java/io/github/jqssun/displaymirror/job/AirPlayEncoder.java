@@ -16,7 +16,8 @@ import java.nio.ByteBuffer;
 public class AirPlayEncoder {
   private static final String TAG = "AirPlayEncoder";
   private MediaCodec codec;
-  private VirtualDisplay virtualDisplay;
+  private volatile VirtualDisplay virtualDisplay;
+  private StreamRenderer pipeline;
   private volatile boolean running;
   private Thread encodeThread;
   private byte[] codecConfig;
@@ -72,17 +73,43 @@ public class AirPlayEncoder {
       Surface inputSurface = codec.createInputSurface();
       codec.start();
 
-      virtualDisplay =
-          CreateVirtualDisplay.createForStream(
-              new VirtualDisplayArgs("AirPlay", screenWidth, screenHeight, fps, screenDpi, false),
-              inputSurface);
-      if (virtualDisplay == null) {
-        State.log("AirPlay: failed to create virtual display");
-        State.clearAirPlayTouchTarget();
-        running = false;
-        return;
+      boolean rotate = Pref.getRotateWithContent();
+      boolean crop = Pref.getCropBlackBorders();
+      if (CreateVirtualDisplay.streamMirrors() && (rotate || crop)) {
+        pipeline =
+            new StreamRenderer(
+                new VirtualDisplayArgs("AirPlay", screenWidth, screenHeight, fps, screenDpi, false),
+                rotate,
+                crop,
+                inputSurface);
+        pipeline.start(
+            (input, w, h) -> {
+              virtualDisplay =
+                  CreateVirtualDisplay.createForStream(
+                      new VirtualDisplayArgs("AirPlay", w, h, fps, screenDpi, false), input);
+              if (virtualDisplay == null) {
+                State.log("AirPlay: failed to create virtual display");
+                State.clearAirPlayTouchTarget();
+              } else {
+                State.setAirPlayTouchTarget(
+                    virtualDisplay.getDisplay().getDisplayId(), virtualDisplay.getSurface());
+              }
+              return virtualDisplay;
+            });
+      } else {
+        virtualDisplay =
+            CreateVirtualDisplay.createForStream(
+                new VirtualDisplayArgs(
+                    "AirPlay", screenWidth, screenHeight, fps, screenDpi, rotate),
+                inputSurface);
+        if (virtualDisplay == null) {
+          State.log("AirPlay: failed to create virtual display");
+          State.clearAirPlayTouchTarget();
+          running = false;
+          return;
+        }
+        State.setAirPlayTouchTarget(virtualDisplay.getDisplay().getDisplayId(), inputSurface);
       }
-      State.setAirPlayTouchTarget(virtualDisplay.getDisplay().getDisplayId(), inputSurface);
 
       encodeThread = new Thread(this::_encodeLoop, "AirPlayEncode");
       encodeThread.start();
@@ -105,6 +132,10 @@ public class AirPlayEncoder {
 
   public void stop() {
     running = false;
+    if (pipeline != null) {
+      pipeline.stop();
+      pipeline = null;
+    }
     if (virtualDisplay != null) {
       virtualDisplay.release();
       virtualDisplay = null;

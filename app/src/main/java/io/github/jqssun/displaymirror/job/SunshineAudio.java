@@ -102,7 +102,7 @@ public class SunshineAudio {
   }
 
   private static boolean _shouldUseShizukuAudio() {
-    if (Pref.getDisableRemoteSubmix()) {
+    if (Pref.getSunshineDisableRemoteSubmix()) {
       return false;
     }
     return State.userService != null

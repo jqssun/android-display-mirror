@@ -16,7 +16,6 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.materialswitch.MaterialSwitch;
 import io.github.jqssun.displaymirror.dialog.ManualClientInputDialog;
-import io.github.jqssun.displaymirror.job.AutoRotateAndScaleForDisplaylink;
 import io.github.jqssun.displaymirror.job.ConnectToClient;
 import io.github.jqssun.displaymirror.job.ExitAll;
 import io.github.jqssun.displaymirror.job.SunshineHost;
@@ -56,13 +55,7 @@ public class SunshineFragment extends Fragment {
     manageDisplayBtn = view.findViewById(R.id.manage_display_btn);
 
     startBtn.setOnClickListener(v -> ((MainActivity) requireActivity()).startSunshine());
-    stopBtn.setOnClickListener(
-        v -> {
-          if (AutoRotateAndScaleForDisplaylink.instance != null) {
-            AutoRotateAndScaleForDisplaylink.instance.release();
-          }
-          ExitAll.execute(requireActivity(), true);
-        });
+    stopBtn.setOnClickListener(v -> ExitAll.execute(requireActivity(), true));
     manageDisplayBtn.setOnClickListener(
         v ->
             ((MainActivity) requireActivity())
@@ -106,9 +99,10 @@ public class SunshineFragment extends Fragment {
 
     MaterialSwitch inputToExternalDisplayCheckbox =
         view.findViewById(R.id.input_to_external_display_checkbox);
-    inputToExternalDisplayCheckbox.setChecked(Pref.getInputToExternalDisplay());
+    inputToExternalDisplayCheckbox.setChecked(Pref.getSunshineInputToExternalDisplay());
     inputToExternalDisplayCheckbox.setOnCheckedChangeListener(
-        (b, c) -> preferences.edit().putBoolean(Pref.KEY_INPUT_TO_EXTERNAL_DISPLAY, c).apply());
+        (b, c) ->
+            preferences.edit().putBoolean(Pref.KEY_SUNSHINE_INPUT_TO_EXTERNAL_DISPLAY, c).apply());
 
     MaterialSwitch showCursorCheckbox = view.findViewById(R.id.show_sunshine_cursor_checkbox);
     MaterialSwitch autoConnectCheckbox = view.findViewById(R.id.auto_connect_client_checkbox);
@@ -118,19 +112,19 @@ public class SunshineFragment extends Fragment {
     MaterialSwitch disableRemoteSubmixCheckbox =
         view.findViewById(R.id.disable_remote_submix_checkbox);
 
-    showCursorCheckbox.setChecked(Pref.getShowSunshineCursor());
+    showCursorCheckbox.setChecked(Pref.getSunshineShowCursor());
     showCursorCheckbox.setOnCheckedChangeListener(
         (b, c) -> {
-          preferences.edit().putBoolean(Pref.KEY_SHOW_SUNSHINE_CURSOR, c).apply();
+          preferences.edit().putBoolean(Pref.KEY_SUNSHINE_SHOW_CURSOR, c).apply();
           SunshineMouse.setShowCursor(c);
         });
 
-    boolean autoConnect = Pref.getAutoConnectClient();
+    boolean autoConnect = Pref.getSunshineAutoConnectClient();
     autoConnectCheckbox.setChecked(autoConnect);
     clientConnectionContainer.setVisibility(autoConnect ? View.VISIBLE : View.GONE);
     autoConnectCheckbox.setOnCheckedChangeListener(
         (b, isChecked) -> {
-          preferences.edit().putBoolean(Pref.KEY_AUTO_CONNECT_CLIENT, isChecked).apply();
+          preferences.edit().putBoolean(Pref.KEY_SUNSHINE_AUTO_CONNECT_CLIENT, isChecked).apply();
           clientConnectionContainer.setVisibility(isChecked ? View.VISIBLE : View.GONE);
           if (isChecked) _loadClientList(clientSpinner);
         });
@@ -143,7 +137,10 @@ public class SunshineFragment extends Fragment {
             if (selectedClient.equals(getString(R.string.manual_input))) {
               ManualClientInputDialog.show(requireContext());
             } else {
-              preferences.edit().putString(Pref.KEY_SELECTED_CLIENT, selectedClient).apply();
+              preferences
+                  .edit()
+                  .putString(Pref.KEY_SUNSHINE_SELECTED_CLIENT, selectedClient)
+                  .apply();
               int pin = (int) (Math.random() * 9000) + 1000;
               SunshineServer.suppressPin = String.valueOf(pin);
               ConnectToClient.connect(pin);
@@ -151,9 +148,10 @@ public class SunshineFragment extends Fragment {
           }
         });
 
-    disableRemoteSubmixCheckbox.setChecked(Pref.getDisableRemoteSubmix());
+    disableRemoteSubmixCheckbox.setChecked(Pref.getSunshineDisableRemoteSubmix());
     disableRemoteSubmixCheckbox.setOnCheckedChangeListener(
-        (b, c) -> preferences.edit().putBoolean(Pref.KEY_DISABLE_REMOTE_SUBMIX, c).apply());
+        (b, c) ->
+            preferences.edit().putBoolean(Pref.KEY_SUNSHINE_DISABLE_REMOTE_SUBMIX, c).apply());
   }
 
   private void _updateUI(MirrorUiState state) {
@@ -198,7 +196,7 @@ public class SunshineFragment extends Fragment {
   }
 
   private void _loadClientList(Spinner spinner) {
-    String selectedClient = Pref.getSelectedClient();
+    String selectedClient = Pref.getSunshineSelectedClient();
     List<String> clients = new ArrayList<>();
     clients.add(getString(R.string.manual_input));
     if (!selectedClient.isEmpty()) clients.add(selectedClient);

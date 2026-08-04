@@ -52,7 +52,7 @@ public class CreateVirtualDisplay {
           "CreateVirtualDisplay",
           "created virtual display: " + virtualDisplay.getDisplay().getDisplayId());
       State.setMediaProjection(null);
-      if (!Pref.getProjectionBacked()) {
+      if (!Pref.getMirrorOnly()) {
         _showCastPlaceholder(virtualDisplay.getDisplay().getDisplayId());
       }
       return virtualDisplay;
@@ -66,10 +66,20 @@ public class CreateVirtualDisplay {
     }
   }
 
+  public static boolean streamMirrors() {
+    return Pref.getMirrorOnly() || !Pref.getTrustedDisplay() || !ShizukuUtils.hasPermission();
+  }
+
   public static VirtualDisplay createForStream(VirtualDisplayArgs args, Surface surface) {
     if (ShizukuUtils.hasPermission() && Pref.getTrustedDisplay()) {
+      // decide before createVirtualDisplay nulls State's projection slot
+      boolean mirror = streamMirrors() && State.getMediaProjection() != null;
       try {
-        return createVirtualDisplay(args, surface);
+        VirtualDisplay display = createVirtualDisplay(args, surface);
+        if (mirror) {
+          changeAspectRatio(args.width, args.height);
+        }
+        return display;
       } catch (Throwable e) {
         State.log("trusted display creation failed, falling back to untrusted: " + e.getMessage());
       }
@@ -89,6 +99,7 @@ public class CreateVirtualDisplay {
             null,
             null);
     State.setMediaProjection(null);
+    changeAspectRatio(args.width, args.height);
     return display;
   }
 
@@ -124,7 +135,7 @@ public class CreateVirtualDisplay {
     // mirroring, otherwise keep it null so shell owns a trusted own-content display
     IMediaProjection projection = null;
     MediaProjection mediaProjection = State.getMediaProjection();
-    if (Pref.getProjectionBacked() && mediaProjection != null) {
+    if (Pref.getMirrorOnly() && mediaProjection != null) {
       MediaProjectionHidden hidden = Refine.unsafeCast(mediaProjection);
       projection = hidden.getProjection();
     }
@@ -235,47 +246,26 @@ public class CreateVirtualDisplay {
     }
   }
 
-  private static boolean _shouldChangeAspectRatio() {
-    return ShizukuUtils.hasPermission() && Pref.getAutoMatchAspectRatio();
-  }
-
   public static void changeAspectRatio(int width, int height) {
-    if (!_shouldChangeAspectRatio()) {
+    if (!ShizukuUtils.hasPermission() || !Pref.getAutoMatchAspectRatio()) {
       return;
     }
+    float aspect = (float) Math.max(width, height) / Math.min(width, height);
     IWindowManager wm = ServiceUtils.getWindowManager();
     Point baseSize = new Point();
     wm.getInitialDisplaySize(Display.DEFAULT_DISPLAY, baseSize);
     int internalWidth = Math.min(baseSize.x, baseSize.y);
-    int internalHeight = Math.max(baseSize.x, baseSize.y);
-    float externalWidth = Math.min(width, height);
-    float externalHeight = Math.max(width, height);
-    internalHeight = (int) (internalWidth * (externalHeight / externalWidth));
-    if (internalHeight < 1600) {
-      return;
-    }
-    ServiceUtils.getWindowManager()
-        .setForcedDisplaySize(Display.DEFAULT_DISPLAY, internalWidth, internalHeight);
+    wm.setForcedDisplaySize(Display.DEFAULT_DISPLAY, internalWidth, (int) (internalWidth * aspect));
+    Pref.setAspectForced(true);
   }
 
   public static void restoreAspectRatio() {
-    if (!ShizukuUtils.hasPermission()) {
-      return;
-    }
-    if (!_shouldChangeAspectRatio()) {
+    if (!Pref.getAspectForced() || !ShizukuUtils.hasPermission()) {
       return;
     }
     try {
-      IWindowManager wm = ServiceUtils.getWindowManager();
-      Point baseSize = new Point();
-      wm.getBaseDisplaySize(Display.DEFAULT_DISPLAY, baseSize);
-      Point initialSize = new Point();
-      wm.getInitialDisplaySize(Display.DEFAULT_DISPLAY, initialSize);
-      if (baseSize.y == initialSize.y) {
-        return;
-      }
-      wm.clearForcedDisplaySize(Display.DEFAULT_DISPLAY);
-      wm.setForcedDisplaySize(Display.DEFAULT_DISPLAY, initialSize.x, initialSize.y);
+      ServiceUtils.getWindowManager().clearForcedDisplaySize(Display.DEFAULT_DISPLAY);
+      Pref.setAspectForced(false);
     } catch (Exception ignored) {
     }
   }

@@ -322,7 +322,7 @@ public class State {
   }
 
   public static boolean inputToExternalDisplay() {
-    return sunshineVirtualDisplay != null && Pref.getInputToExternalDisplay();
+    return sunshineVirtualDisplay != null && Pref.getSunshineInputToExternalDisplay();
   }
 
   public static int getInputDisplayId() {

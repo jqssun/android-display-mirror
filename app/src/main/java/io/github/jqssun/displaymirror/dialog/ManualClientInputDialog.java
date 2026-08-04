@@ -33,7 +33,7 @@ public class ManualClientInputDialog {
                     context
                         .getSharedPreferences(Pref.PREF_NAME, Context.MODE_PRIVATE)
                         .edit()
-                        .putString(Pref.KEY_SELECTED_CLIENT, addr)
+                        .putString(Pref.KEY_SUNSHINE_SELECTED_CLIENT, addr)
                         .apply();
                     int pin = (int) (Math.random() * 9000) + 1000;
                     SunshineServer.suppressPin = String.valueOf(pin);

@@ -9,18 +9,21 @@ public class Pref {
 
   // display
   public static final String KEY_TRUSTED_DISPLAY = "trusted_display";
-  public static final String KEY_PROJECTION_BACKED = "projection_backed";
-  public static final String KEY_AUTO_ROTATE = "auto_rotate";
-  public static final String KEY_AUTO_SCALE = "auto_scale";
+  public static final String KEY_MIRROR_ONLY = "mirror_only";
+  public static final String KEY_ROTATE_WITH_CONTENT = "rotate_with_content";
+  public static final String KEY_CROP_BLACK_BORDERS = "crop_black_borders";
   public static final String KEY_AUTO_MATCH_ASPECT_RATIO = "auto_match_aspect_ratio";
   public static final String KEY_PREVENT_AUTO_LOCK = "prevent_auto_lock";
+  // runtime marker so leftover forced size gets cleared after crash
+  public static final String KEY_ASPECT_FORCED = "aspect_forced";
 
   // sunshine
-  public static final String KEY_INPUT_TO_EXTERNAL_DISPLAY = "input_to_external_display";
-  public static final String KEY_SHOW_SUNSHINE_CURSOR = "show_sunshine_cursor";
-  public static final String KEY_AUTO_CONNECT_CLIENT = "auto_connect_client";
-  public static final String KEY_SELECTED_CLIENT = "selected_client";
-  public static final String KEY_DISABLE_REMOTE_SUBMIX = "disable_remote_submix";
+  public static final String KEY_SUNSHINE_INPUT_TO_EXTERNAL_DISPLAY =
+      "sunshine_input_to_external_display";
+  public static final String KEY_SUNSHINE_SHOW_CURSOR = "sunshine_show_cursor";
+  public static final String KEY_SUNSHINE_AUTO_CONNECT_CLIENT = "sunshine_auto_connect_client";
+  public static final String KEY_SUNSHINE_SELECTED_CLIENT = "sunshine_selected_client";
+  public static final String KEY_SUNSHINE_DISABLE_REMOTE_SUBMIX = "sunshine_disable_remote_submix";
   public static final String KEY_SUNSHINE_DEVICE_NAME = "sunshine_device_name";
 
   // airplay
@@ -42,44 +45,55 @@ public class Pref {
   }
 
   // when on, bind a MediaProjection so the display mirrors the screen
-  public static boolean getProjectionBacked() {
-    return getBoolean(KEY_PROJECTION_BACKED, false);
+  public static boolean getMirrorOnly() {
+    return getBoolean(KEY_MIRROR_ONLY, false);
   }
 
-  public static boolean getAutoRotate() {
-    return getBoolean(KEY_AUTO_ROTATE, false);
+  public static boolean getRotateWithContent() {
+    return getBoolean(KEY_ROTATE_WITH_CONTENT, false);
   }
 
-  public static boolean getAutoScale() {
-    return getBoolean(KEY_AUTO_SCALE, true);
+  public static boolean getCropBlackBorders() {
+    return getBoolean(KEY_CROP_BLACK_BORDERS, false);
   }
 
-  public static boolean getInputToExternalDisplay() {
-    return getBoolean(KEY_INPUT_TO_EXTERNAL_DISPLAY, false);
+  public static boolean getSunshineInputToExternalDisplay() {
+    return getBoolean(KEY_SUNSHINE_INPUT_TO_EXTERNAL_DISPLAY, false);
   }
 
   public static boolean getAutoMatchAspectRatio() {
     return getBoolean(KEY_AUTO_MATCH_ASPECT_RATIO, false);
   }
 
+  public static boolean getAspectForced() {
+    return getBoolean(KEY_ASPECT_FORCED, false);
+  }
+
+  public static void setAspectForced(boolean forced) {
+    SharedPreferences preferences = getPreferences();
+    if (preferences != null) {
+      preferences.edit().putBoolean(KEY_ASPECT_FORCED, forced).apply();
+    }
+  }
+
   public static boolean getPreventAutoLock() {
     return getBoolean(KEY_PREVENT_AUTO_LOCK, false);
   }
 
-  public static boolean getShowSunshineCursor() {
-    return getBoolean(KEY_SHOW_SUNSHINE_CURSOR, false);
+  public static boolean getSunshineShowCursor() {
+    return getBoolean(KEY_SUNSHINE_SHOW_CURSOR, false);
   }
 
-  public static boolean getAutoConnectClient() {
-    return getBoolean(KEY_AUTO_CONNECT_CLIENT, false);
+  public static boolean getSunshineAutoConnectClient() {
+    return getBoolean(KEY_SUNSHINE_AUTO_CONNECT_CLIENT, false);
   }
 
-  public static String getSelectedClient() {
-    return getString(KEY_SELECTED_CLIENT, "");
+  public static String getSunshineSelectedClient() {
+    return getString(KEY_SUNSHINE_SELECTED_CLIENT, "");
   }
 
-  public static boolean getDisableRemoteSubmix() {
-    return getBoolean(KEY_DISABLE_REMOTE_SUBMIX, false);
+  public static boolean getSunshineDisableRemoteSubmix() {
+    return getBoolean(KEY_SUNSHINE_DISABLE_REMOTE_SUBMIX, false);
   }
 
   public static String getSunshineDeviceName() {

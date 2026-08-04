@@ -76,7 +76,7 @@ public class NativeDriverListener {
                           Pref.getDisplaylinkHeight(),
                           Pref.getDisplaylinkRefreshRate(),
                           160,
-                          Pref.getAutoRotate());
+                          Pref.getRotateWithContent());
                   State.startNewJob(
                       State.MODE_DISPLAYLINK,
                       new ProjectViaDisplaylink(
