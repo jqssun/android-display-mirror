@@ -6,8 +6,14 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import io.github.jqssun.displaymirror.BuildConfig;
 import io.github.jqssun.displaymirror.CastPlaceholderActivity;
-import io.github.jqssun.displaymirror.State;
 import io.github.jqssun.displaymirror.ProjectionService;
+import io.github.jqssun.displaymirror.State;
+import io.github.jqssun.displaymirror.airplay.AirPlayService;
+import io.github.jqssun.displaymirror.airplay.AirPlayState;
+import io.github.jqssun.displaymirror.displaylink.DisplaylinkState;
+import io.github.jqssun.displaymirror.sunshine.SunshineAudio;
+import io.github.jqssun.displaymirror.sunshine.SunshineServer;
+import io.github.jqssun.displaymirror.sunshine.SunshineState;
 
 public class ExitAll {
   public static void execute(Context context, boolean restart) {
@@ -36,9 +42,9 @@ public class ExitAll {
       context.startActivity(mainIntent);
     }
 
-    State.stopSunshineVirtualDisplay();
-    State.setAirPlayVirtualDisplayId(-1);
-    State.displaylinkState.destroy();
+    SunshineState.stopVirtualDisplay();
+    AirPlayState.setVirtualDisplayId(-1);
+    DisplaylinkState.instance.destroy();
 
     if (context != null) {
       context.stopService(new Intent(context, ProjectionService.class));

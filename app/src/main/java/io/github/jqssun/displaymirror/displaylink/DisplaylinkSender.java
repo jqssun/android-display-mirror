@@ -1,8 +1,7 @@
-package io.github.jqssun.displaymirror.job;
+package io.github.jqssun.displaymirror.displaylink;
 
 import android.opengl.GLES20;
-import io.github.jqssun.displaymirror.DisplaylinkState;
-import io.github.jqssun.displaymirror.State;
+import io.github.jqssun.displaymirror.job.StreamRenderer;
 import java.nio.ByteBuffer;
 
 // reads rendered frames from the bound framebuffer and posts them to the displaylink driver
@@ -22,7 +21,7 @@ public class DisplaylinkSender implements StreamRenderer.FrameSink {
           ByteBuffer.allocateDirect(width * height * 4),
           ByteBuffer.allocateDirect(width * height * 4),
         };
-    displaylinkState = State.displaylinkState;
+    displaylinkState = DisplaylinkState.instance;
   }
 
   @Override

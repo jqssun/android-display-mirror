@@ -5,10 +5,10 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import com.displaylink.manager.display.MonitorInfo;
-import io.github.jqssun.displaymirror.DisplaylinkState;
 import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.State;
-import io.github.jqssun.displaymirror.job.ProjectViaDisplaylink;
+import io.github.jqssun.displaymirror.displaylink.DisplaylinkState;
+import io.github.jqssun.displaymirror.displaylink.ProjectViaDisplaylink;
 import io.github.jqssun.displaymirror.job.VirtualDisplayArgs;
 
 public class NativeDriverListener {
@@ -28,14 +28,9 @@ public class NativeDriverListener {
     new Handler(Looper.getMainLooper())
         .post(
             () -> {
-              DisplaylinkState displaylinkState = State.displaylinkState;
-              if (displaylinkState == null) {
-                State.log("display disconnected, but USB device not found");
-              } else {
-                State.log("display disconnected, closing USB state");
-                displaylinkState.encoderId = 0;
-                displaylinkState.monitorInfo = null;
-              }
+              State.log("display disconnected, closing USB state");
+              DisplaylinkState.instance.encoderId = 0;
+              DisplaylinkState.instance.monitorInfo = null;
             });
   }
 
@@ -58,30 +53,24 @@ public class NativeDriverListener {
         .post(
             () -> {
               State.log("onUpdateMonitorInfo: " + monitorInfo.toString());
-              DisplaylinkState displaylinkState = State.displaylinkState;
-              if (displaylinkState == null) {
-                State.log("displaylinkState is null");
-              } else {
-                boolean wasNoMonitor = displaylinkState.monitorInfo == null;
-                displaylinkState.encoderId = encoderId;
-                displaylinkState.monitorInfo = monitorInfo;
-                Context context = State.getContext();
-                if (!State.isJobRunning(State.MODE_DISPLAYLINK)
-                    && wasNoMonitor
-                    && context != null) {
-                  State.displaylinkState.virtualDisplayArgs =
-                      new VirtualDisplayArgs(
-                          "DisplayLink",
-                          Pref.getDisplaylinkWidth(),
-                          Pref.getDisplaylinkHeight(),
-                          Pref.getDisplaylinkRefreshRate(),
-                          160,
-                          Pref.getRotateWithContent());
-                  State.startNewJob(
-                      State.MODE_DISPLAYLINK,
-                      new ProjectViaDisplaylink(
-                          displaylinkState.device, displaylinkState.virtualDisplayArgs));
-                }
+              DisplaylinkState displaylinkState = DisplaylinkState.instance;
+              boolean wasNoMonitor = displaylinkState.monitorInfo == null;
+              displaylinkState.encoderId = encoderId;
+              displaylinkState.monitorInfo = monitorInfo;
+              Context context = State.getContext();
+              if (!State.isJobRunning(DisplaylinkState.MODE) && wasNoMonitor && context != null) {
+                displaylinkState.virtualDisplayArgs =
+                    new VirtualDisplayArgs(
+                        "DisplayLink",
+                        Pref.getDisplaylinkWidth(),
+                        Pref.getDisplaylinkHeight(),
+                        Pref.getDisplaylinkRefreshRate(),
+                        160,
+                        Pref.getRotateWithContent());
+                State.startNewJob(
+                    DisplaylinkState.MODE,
+                    new ProjectViaDisplaylink(
+                        displaylinkState.device, displaylinkState.virtualDisplayArgs));
               }
             });
   }

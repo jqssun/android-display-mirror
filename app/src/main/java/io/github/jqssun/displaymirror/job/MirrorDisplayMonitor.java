@@ -9,6 +9,8 @@ import android.view.Display;
 import io.github.jqssun.displaymirror.MainActivity;
 import io.github.jqssun.displaymirror.ProjectionService;
 import io.github.jqssun.displaymirror.State;
+import io.github.jqssun.displaymirror.airplay.AirPlayState;
+import io.github.jqssun.displaymirror.displaylink.DisplaylinkState;
 
 public class MirrorDisplayMonitor {
   private static boolean registered = false;
@@ -65,10 +67,10 @@ public class MirrorDisplayMonitor {
         return currentScreen;
       }
     }
-    if (displayId == State.getDisplaylinkVirtualDisplayId()) {
+    if (displayId == DisplaylinkState.getVirtualDisplayId()) {
       return MainActivity.SCREEN_DISPLAYLINK;
     }
-    if (displayId == State.getAirPlayVirtualDisplayId()) {
+    if (displayId == AirPlayState.getVirtualDisplayId()) {
       return MainActivity.SCREEN_AIRPLAY;
     }
     return MainActivity.SCREEN_SUNSHINE;

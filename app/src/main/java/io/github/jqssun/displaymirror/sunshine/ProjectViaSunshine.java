@@ -1,10 +1,15 @@
-package io.github.jqssun.displaymirror.job;
+package io.github.jqssun.displaymirror.sunshine;
 
 import android.content.Context;
 import android.view.Surface;
 import io.github.jqssun.displaymirror.MainActivity;
 import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.State;
+import io.github.jqssun.displaymirror.job.CreateVirtualDisplay;
+import io.github.jqssun.displaymirror.job.Job;
+import io.github.jqssun.displaymirror.job.StreamRenderer;
+import io.github.jqssun.displaymirror.job.VirtualDisplayArgs;
+import io.github.jqssun.displaymirror.job.YieldException;
 
 public class ProjectViaSunshine implements Job {
   private final int width;
@@ -57,17 +62,17 @@ public class ProjectViaSunshine implements Job {
               surface);
       SunshineMouse.pipeline.start(
           (input, w, h) -> {
-            if (State.sunshineVirtualDisplay == null && State.getMediaProjection() != null) {
-              State.setSunshineVirtualDisplay(
+            if (SunshineState.virtualDisplay == null && State.getMediaProjection() != null) {
+              SunshineState.setVirtualDisplay(
                   CreateVirtualDisplay.createForStream(
                       new VirtualDisplayArgs("Sunshine", w, h, frameRate, 160, false), input));
-            } else if (State.sunshineVirtualDisplay != null) {
-              State.sunshineVirtualDisplay.setSurface(input);
+            } else if (SunshineState.virtualDisplay != null) {
+              SunshineState.virtualDisplay.setSurface(input);
             }
-            return State.sunshineVirtualDisplay;
+            return SunshineState.virtualDisplay;
           });
     } else {
-      State.setSunshineVirtualDisplay(
+      SunshineState.setVirtualDisplay(
           CreateVirtualDisplay.createForStream(
               new VirtualDisplayArgs(
                   "Sunshine", width, height, frameRate, 160, Pref.getRotateWithContent()),
@@ -76,7 +81,7 @@ public class ProjectViaSunshine implements Job {
   }
 
   private boolean _requestMediaProjectionPermission() throws YieldException {
-    if (State.sunshineVirtualDisplay != null) {
+    if (SunshineState.virtualDisplay != null) {
       return true;
     }
     if (State.getMediaProjection() != null) {

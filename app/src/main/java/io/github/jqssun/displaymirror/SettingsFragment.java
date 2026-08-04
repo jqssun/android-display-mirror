@@ -14,6 +14,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.materialswitch.MaterialSwitch;
+import io.github.jqssun.displaymirror.job.ExitAll;
 import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
 
 public class SettingsFragment extends Fragment {
@@ -106,6 +107,6 @@ public class SettingsFragment extends Fragment {
 
     view.findViewById(R.id.exit_btn)
         .setOnClickListener(
-            v -> io.github.jqssun.displaymirror.job.ExitAll.execute(requireActivity(), false));
+            v -> ExitAll.execute(requireActivity(), false));
   }
 }

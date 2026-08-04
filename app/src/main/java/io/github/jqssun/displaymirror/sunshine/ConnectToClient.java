@@ -1,4 +1,4 @@
-package io.github.jqssun.displaymirror.job;
+package io.github.jqssun.displaymirror.sunshine;
 
 import android.util.Log;
 import io.github.jqssun.displaymirror.Pref;
@@ -35,7 +35,7 @@ public class ConnectToClient {
       State.log("cannot find local IP on the same subnet as client");
       return;
     }
-    if (State.serverUuid == null) {
+    if (SunshineState.serverUuid == null) {
       State.log("ServerUuid is empty");
       return;
     }
@@ -45,7 +45,7 @@ public class ConnectToClient {
             + "\", \"pin\": \""
             + pin
             + "\", \"uuid\": \""
-            + State.serverUuid
+            + SunshineState.serverUuid
             + "\"}\n";
     State.log("sending auto-start request to: " + clientIp + ":" + clientPort);
 

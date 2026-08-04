@@ -5,6 +5,9 @@ import android.content.Intent;
 import android.database.MatrixCursor;
 import android.net.Uri;
 import android.view.Surface;
+import io.github.jqssun.displaymirror.airplay.AirPlayState;
+import io.github.jqssun.displaymirror.displaylink.DisplaylinkState;
+import io.github.jqssun.displaymirror.sunshine.SunshineState;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,18 +41,18 @@ public final class MirrorTouchscreenBridge {
     List<TargetInfo> targets = new ArrayList<>();
     _addTarget(
         targets,
-        State.getSunshineVirtualDisplayId(),
+        SunshineState.getVirtualDisplayId(),
         TYPE_SUNSHINE,
-        State.sunshineVirtualDisplay != null ? State.sunshineVirtualDisplay.getSurface() : null);
+        SunshineState.virtualDisplay != null ? SunshineState.virtualDisplay.getSurface() : null);
     _addTarget(
         targets,
-        State.getDisplaylinkVirtualDisplayId(),
+        DisplaylinkState.getVirtualDisplayId(),
         TYPE_DISPLAYLINK,
-        State.displaylinkState.getVirtualDisplay() != null
-            ? State.displaylinkState.getVirtualDisplay().getSurface()
+        DisplaylinkState.instance.getVirtualDisplay() != null
+            ? DisplaylinkState.instance.getVirtualDisplay().getSurface()
             : null);
     _addTarget(
-        targets, State.getAirPlayVirtualDisplayId(), TYPE_AIRPLAY, State.getAirPlaySurface());
+        targets, AirPlayState.getVirtualDisplayId(), TYPE_AIRPLAY, AirPlayState.getSurface());
     return targets;
   }
 

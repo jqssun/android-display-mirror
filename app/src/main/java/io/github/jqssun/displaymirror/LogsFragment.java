@@ -56,7 +56,7 @@ public class LogsFragment extends Fragment {
                         .show();
                     return true;
                   }
-                  State.startNewJob(new FetchLogAndShare(requireContext()));
+                  State.startNewJob(State.MODE_UTILITY, new FetchLogAndShare(requireContext()));
                   return true;
                 } else if (item.getItemId() == R.id.action_clear) {
                   State.logs.clear();

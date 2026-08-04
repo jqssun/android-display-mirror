@@ -1,4 +1,4 @@
-package io.github.jqssun.displaymirror;
+package io.github.jqssun.displaymirror.displaylink;
 
 import android.graphics.PixelFormat;
 import android.hardware.display.VirtualDisplay;
@@ -11,11 +11,25 @@ import android.os.HandlerThread;
 import com.displaylink.manager.NativeDriver;
 import com.displaylink.manager.NativeDriverListener;
 import com.displaylink.manager.display.MonitorInfo;
+import io.github.jqssun.displaymirror.State;
 import io.github.jqssun.displaymirror.job.CreateVirtualDisplay;
+import io.github.jqssun.displaymirror.job.ExitAll;
 import io.github.jqssun.displaymirror.job.StreamRenderer;
 import io.github.jqssun.displaymirror.job.VirtualDisplayArgs;
 
 public class DisplaylinkState {
+  // job slot key
+  public static final String MODE = "displaylink";
+
+  public static final DisplaylinkState instance = new DisplaylinkState();
+
+  public static int getVirtualDisplayId() {
+    if (instance.getVirtualDisplay() == null) {
+      return -1;
+    }
+    return instance.getVirtualDisplay().getDisplay().getDisplayId();
+  }
+
   public UsbDevice device;
   public UsbDeviceConnection usbConnection;
   public UsbDevice displaylinkDevice2;

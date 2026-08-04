@@ -1,4 +1,4 @@
-package io.github.jqssun.displaymirror;
+package io.github.jqssun.displaymirror.sunshine;
 
 import android.content.Context;
 import android.graphics.PixelFormat;
@@ -9,6 +9,8 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import io.github.jqssun.displaymirror.R;
+import io.github.jqssun.displaymirror.State;
 
 public class SunshineCursorOverlay {
   private static final String TAG = "SunshineCursorOverlay";

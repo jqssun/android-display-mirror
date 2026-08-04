@@ -1,4 +1,4 @@
-package io.github.jqssun.displaymirror.job;
+package io.github.jqssun.displaymirror.airplay;
 
 import android.content.Context;
 import android.hardware.display.VirtualDisplay;
@@ -11,6 +11,9 @@ import android.view.Surface;
 import android.view.WindowManager;
 import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.State;
+import io.github.jqssun.displaymirror.job.CreateVirtualDisplay;
+import io.github.jqssun.displaymirror.job.StreamRenderer;
+import io.github.jqssun.displaymirror.job.VirtualDisplayArgs;
 import java.nio.ByteBuffer;
 
 public class AirPlayEncoder {
@@ -89,9 +92,9 @@ public class AirPlayEncoder {
                       new VirtualDisplayArgs("AirPlay", w, h, fps, screenDpi, false), input);
               if (virtualDisplay == null) {
                 State.log("AirPlay: failed to create virtual display");
-                State.clearAirPlayTouchTarget();
+                AirPlayState.clearTouchTarget();
               } else {
-                State.setAirPlayTouchTarget(
+                AirPlayState.setTouchTarget(
                     virtualDisplay.getDisplay().getDisplayId(), virtualDisplay.getSurface());
               }
               return virtualDisplay;
@@ -104,11 +107,11 @@ public class AirPlayEncoder {
                 inputSurface);
         if (virtualDisplay == null) {
           State.log("AirPlay: failed to create virtual display");
-          State.clearAirPlayTouchTarget();
+          AirPlayState.clearTouchTarget();
           running = false;
           return;
         }
-        State.setAirPlayTouchTarget(virtualDisplay.getDisplay().getDisplayId(), inputSurface);
+        AirPlayState.setTouchTarget(virtualDisplay.getDisplay().getDisplayId(), inputSurface);
       }
 
       encodeThread = new Thread(this::_encodeLoop, "AirPlayEncode");
@@ -125,7 +128,7 @@ public class AirPlayEncoder {
     } catch (Exception e) {
       Log.e(TAG, "start failed", e);
       State.log("AirPlay encoder failed: " + e.getMessage());
-      State.clearAirPlayTouchTarget();
+      AirPlayState.clearTouchTarget();
       running = false;
     }
   }
@@ -140,7 +143,7 @@ public class AirPlayEncoder {
       virtualDisplay.release();
       virtualDisplay = null;
     }
-    State.clearAirPlayTouchTarget();
+    AirPlayState.clearTouchTarget();
     if (codec != null) {
       try {
         codec.stop();

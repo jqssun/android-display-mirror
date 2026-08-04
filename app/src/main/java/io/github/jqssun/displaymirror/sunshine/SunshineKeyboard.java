@@ -1,4 +1,4 @@
-package io.github.jqssun.displaymirror.job;
+package io.github.jqssun.displaymirror.sunshine;
 
 import android.content.Context;
 import android.hardware.input.IInputManager;
@@ -115,7 +115,7 @@ public class SunshineKeyboard {
             0,
             InputDevice.SOURCE_KEYBOARD);
     KeyEventHidden keyEventHidden = Refine.unsafeCast(keyEvent);
-    keyEventHidden.setDisplayId(State.getInputDisplayId());
+    keyEventHidden.setDisplayId(SunshineState.getInputDisplayId());
     Log.d(TAG, "handleKeyboardEvent: " + modcode + " translated to " + keyEvent);
     inputManager.injectInputEvent(keyEvent, 0);
   }

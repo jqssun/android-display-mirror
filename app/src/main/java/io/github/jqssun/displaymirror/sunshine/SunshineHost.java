@@ -1,4 +1,4 @@
-package io.github.jqssun.displaymirror.job;
+package io.github.jqssun.displaymirror.sunshine;
 
 import android.content.Context;
 import android.media.MediaCodecInfo;

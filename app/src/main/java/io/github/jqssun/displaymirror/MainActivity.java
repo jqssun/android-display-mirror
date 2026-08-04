@@ -24,11 +24,13 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
 import com.topjohnwu.superuser.Shell;
+import io.github.jqssun.displaymirror.airplay.AirPlayService;
+import io.github.jqssun.displaymirror.displaylink.ApkImporter;
+import io.github.jqssun.displaymirror.displaylink.MirrorDisplaylinkMonitor;
 import io.github.jqssun.displaymirror.job.AcquireShizuku;
-import io.github.jqssun.displaymirror.job.AirPlayService;
 import io.github.jqssun.displaymirror.job.CreateVirtualDisplay;
-import io.github.jqssun.displaymirror.job.MirrorDisplaylinkMonitor;
-import io.github.jqssun.displaymirror.job.SunshineHost;
+import io.github.jqssun.displaymirror.shizuku.ServiceUtils;
+import io.github.jqssun.displaymirror.sunshine.SunshineHost;
 import org.lsposed.hiddenapibypass.HiddenApiBypass;
 import rikka.shizuku.Shizuku;
 
@@ -278,7 +280,7 @@ public class MainActivity extends AppCompatActivity {
   private final Shizuku.OnBinderDeadListener _binderDeadListener =
       () -> {
         State.log("Shizuku binder DIED");
-        io.github.jqssun.displaymirror.shizuku.ServiceUtils.invalidate();
+        ServiceUtils.invalidate();
       };
 
   @Override

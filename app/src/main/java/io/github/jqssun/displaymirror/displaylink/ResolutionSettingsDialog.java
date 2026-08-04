@@ -1,4 +1,4 @@
-package io.github.jqssun.displaymirror.dialog;
+package io.github.jqssun.displaymirror.displaylink;
 
 import android.content.Context;
 import android.view.LayoutInflater;

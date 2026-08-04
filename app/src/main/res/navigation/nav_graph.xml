@@ -15,17 +15,17 @@
 
     <fragment
         android:id="@+id/sunshine_fragment"
-        android:name="io.github.jqssun.displaymirror.SunshineFragment"
+        android:name="io.github.jqssun.displaymirror.sunshine.SunshineFragment"
         android:label="@string/tab_sunshine" />
 
     <fragment
         android:id="@+id/displaylink_fragment"
-        android:name="io.github.jqssun.displaymirror.DisplayLinkFragment"
+        android:name="io.github.jqssun.displaymirror.displaylink.DisplaylinkFragment"
         android:label="@string/tab_displaylink" />
 
     <fragment
         android:id="@+id/airplay_fragment"
-        android:name="io.github.jqssun.displaymirror.AirPlayFragment"
+        android:name="io.github.jqssun.displaymirror.airplay.AirPlayFragment"
         android:label="@string/tab_airplay" />
 
     <fragment

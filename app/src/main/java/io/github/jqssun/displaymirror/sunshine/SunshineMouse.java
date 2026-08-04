@@ -1,4 +1,4 @@
-package io.github.jqssun.displaymirror.job;
+package io.github.jqssun.displaymirror.sunshine;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -17,10 +17,11 @@ import android.view.MotionEventHidden;
 import android.view.Surface;
 import androidx.annotation.NonNull;
 import dev.rikka.tools.refine.Refine;
-import io.github.jqssun.displaymirror.SunshineCursorOverlay;
 import io.github.jqssun.displaymirror.Pref;
-import io.github.jqssun.displaymirror.State;
 import io.github.jqssun.displaymirror.ProjectionService;
+import io.github.jqssun.displaymirror.State;
+import io.github.jqssun.displaymirror.job.CreateVirtualDisplay;
+import io.github.jqssun.displaymirror.job.StreamRenderer;
 import io.github.jqssun.displaymirror.shizuku.ServiceUtils;
 import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
 import java.util.ArrayList;
@@ -72,7 +73,7 @@ public class SunshineMouse {
     DisplayManager displayManager =
         (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
     Display defaultDisplay = displayManager.getDisplay(Display.DEFAULT_DISPLAY);
-    if (State.sunshineVirtualDisplay == null
+    if (SunshineState.virtualDisplay == null
         && Pref.getAutoMatchAspectRatio()
         && ShizukuUtils.hasPermission()
         && CreateVirtualDisplay.streamMirrors()) {
@@ -123,7 +124,7 @@ public class SunshineMouse {
             + " defaultDisplayHeight: "
             + defaultDisplayHeight);
     State.log("client screen size screenWidth: " + screenWidth + " screenHeight: " + screenHeight);
-    if (State.sunshineVirtualDisplay == null) {
+    if (SunshineState.virtualDisplay == null) {
       State.log(
           "mirror mode portraitMirrorWidth: "
               + portraitMirrorWidth
@@ -154,7 +155,7 @@ public class SunshineMouse {
   private static Map<Integer, Point> pointers = new HashMap<>();
 
   private static Point _translate(float x, float y) {
-    if (State.inputToExternalDisplay()) {
+    if (SunshineState.inputToExternalDisplay()) {
       return _translateVirtualDisplay(x, y);
     } else {
       return _translateMirrorMode(x, y);
@@ -238,7 +239,7 @@ public class SunshineMouse {
   }
 
   private static @NonNull Point _translateVirtualDisplay(float x, float y) {
-    int displayRotation = State.sunshineVirtualDisplay.getDisplay().getRotation();
+    int displayRotation = SunshineState.virtualDisplay.getDisplay().getRotation();
     Point point = new Point();
     switch (displayRotation) {
       case Surface.ROTATION_0:
@@ -431,7 +432,7 @@ public class SunshineMouse {
     }
     if (inputManager != null) {
       MotionEventHidden motionEventHidden = Refine.unsafeCast(event);
-      motionEventHidden.setDisplayId(State.getInputDisplayId());
+      motionEventHidden.setDisplayId(SunshineState.getInputDisplayId());
       try {
         inputManager.injectInputEvent(event, 0);
         Log.d(TAG, prefix + ": " + event);

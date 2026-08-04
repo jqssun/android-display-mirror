@@ -1,4 +1,4 @@
-package io.github.jqssun.displaymirror.job;
+package io.github.jqssun.displaymirror.airplay;
 
 import android.content.Context;
 import android.media.projection.MediaProjection;
@@ -9,6 +9,7 @@ import io.github.jqssun.displaymirror.CastPlaceholderActivity;
 import io.github.jqssun.displaymirror.MainActivity;
 import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.State;
+import io.github.jqssun.displaymirror.job.CreateVirtualDisplay;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.ArrayList;

@@ -46,11 +46,11 @@ static jmethodID handleGamepadStateMethod = nullptr;
 
 
 JNIEXPORT void JNICALL
-Java_io_github_jqssun_displaymirror_job_SunshineServer_start(JNIEnv *env, jclass clazz) {
+Java_io_github_jqssun_displaymirror_sunshine_SunshineServer_start(JNIEnv *env, jclass clazz) {
     env->GetJavaVM(&jvm);
 
 
-    jclass serverClass = env->FindClass("io/github/jqssun/displaymirror/job/SunshineServer");
+    jclass serverClass = env->FindClass("io/github/jqssun/displaymirror/sunshine/SunshineServer");
     if (serverClass != nullptr) {
         sunshineServerClass = (jclass)env->NewGlobalRef(serverClass);
         env->DeleteLocalRef(serverClass);
@@ -58,7 +58,7 @@ Java_io_github_jqssun_displaymirror_job_SunshineServer_start(JNIEnv *env, jclass
         BOOST_LOG(error) << "Failed to find SunshineServer class at startup"sv;
     }
     
-    jclass mouseClass = env->FindClass("io/github/jqssun/displaymirror/job/SunshineMouse");
+    jclass mouseClass = env->FindClass("io/github/jqssun/displaymirror/sunshine/SunshineMouse");
     if (mouseClass != nullptr) {
         sunshineMouseClass = (jclass)env->NewGlobalRef(mouseClass);
         env->DeleteLocalRef(mouseClass);
@@ -77,7 +77,7 @@ Java_io_github_jqssun_displaymirror_job_SunshineServer_start(JNIEnv *env, jclass
     }
     
     // Cache SunshineKeyboard class ref
-    jclass keyboardClass = env->FindClass("io/github/jqssun/displaymirror/job/SunshineKeyboard");
+    jclass keyboardClass = env->FindClass("io/github/jqssun/displaymirror/sunshine/SunshineKeyboard");
     if (keyboardClass != nullptr) {
         sunshineKeyboardClass = (jclass)env->NewGlobalRef(keyboardClass);
         env->DeleteLocalRef(keyboardClass);
@@ -92,7 +92,7 @@ Java_io_github_jqssun_displaymirror_job_SunshineServer_start(JNIEnv *env, jclass
         BOOST_LOG(error) << "Failed to find SunshineKeyboard class at startup"sv;
     }
 
-    jclass gamepadClass = env->FindClass("io/github/jqssun/displaymirror/job/SunshineGamepad");
+    jclass gamepadClass = env->FindClass("io/github/jqssun/displaymirror/sunshine/SunshineGamepad");
     if (gamepadClass != nullptr) {
         sunshineGamepadClass = (jclass)env->NewGlobalRef(gamepadClass);
         env->DeleteLocalRef(gamepadClass);
@@ -120,42 +120,42 @@ Java_io_github_jqssun_displaymirror_job_SunshineServer_start(JNIEnv *env, jclass
 }
 
 JNIEXPORT void JNICALL
-Java_io_github_jqssun_displaymirror_job_SunshineServer_setSunshineName(JNIEnv *env, jclass clazz, jstring sunshine_name) {
+Java_io_github_jqssun_displaymirror_sunshine_SunshineServer_setSunshineName(JNIEnv *env, jclass clazz, jstring sunshine_name) {
     const char *str = env->GetStringUTFChars(sunshine_name, nullptr);
     config::nvhttp.sunshine_name = str;
     env->ReleaseStringUTFChars(sunshine_name, str);
 }
 
 JNIEXPORT void JNICALL
-Java_io_github_jqssun_displaymirror_job_SunshineServer_setPkeyPath(JNIEnv *env, jclass clazz, jstring path) {
+Java_io_github_jqssun_displaymirror_sunshine_SunshineServer_setPkeyPath(JNIEnv *env, jclass clazz, jstring path) {
     const char *str = env->GetStringUTFChars(path, nullptr);
     config::nvhttp.pkey = str;
     env->ReleaseStringUTFChars(path, str);
 }
 
 JNIEXPORT void JNICALL
-Java_io_github_jqssun_displaymirror_job_SunshineServer_setCertPath(JNIEnv *env, jclass clazz, jstring path) {
+Java_io_github_jqssun_displaymirror_sunshine_SunshineServer_setCertPath(JNIEnv *env, jclass clazz, jstring path) {
     const char *str = env->GetStringUTFChars(path, nullptr);
     config::nvhttp.cert = str;
     env->ReleaseStringUTFChars(path, str);
 }
 
 JNIEXPORT void JNICALL
-Java_io_github_jqssun_displaymirror_job_SunshineServer_setFileStatePath(JNIEnv *env, jclass clazz, jstring path) {
+Java_io_github_jqssun_displaymirror_sunshine_SunshineServer_setFileStatePath(JNIEnv *env, jclass clazz, jstring path) {
     const char *str = env->GetStringUTFChars(path, nullptr);
     config::nvhttp.file_state = str;
     env->ReleaseStringUTFChars(path, str);
 }
 
 JNIEXPORT void JNICALL
-Java_io_github_jqssun_displaymirror_job_SunshineServer_submitPin(JNIEnv *env, jclass clazz, jstring pin) {
+Java_io_github_jqssun_displaymirror_sunshine_SunshineServer_submitPin(JNIEnv *env, jclass clazz, jstring pin) {
     const char *pinStr = env->GetStringUTFChars(pin, nullptr);
     nvhttp::pin(pinStr, "some-moonlight");
     env->ReleaseStringUTFChars(pin, pinStr);
 }
 
 JNIEXPORT void JNICALL
-Java_io_github_jqssun_displaymirror_job_SunshineServer_cleanup(JNIEnv *env, jclass clazz) {
+Java_io_github_jqssun_displaymirror_sunshine_SunshineServer_cleanup(JNIEnv *env, jclass clazz) {
     if (sunshineServerClass != nullptr) {
         env->DeleteGlobalRef(sunshineServerClass);
         sunshineServerClass = nullptr;
@@ -182,7 +182,7 @@ Java_io_github_jqssun_displaymirror_job_SunshineServer_cleanup(JNIEnv *env, jcla
 }
 
 JNIEXPORT void JNICALL
-Java_io_github_jqssun_displaymirror_job_SunshineServer_startAudioRecording(JNIEnv *env, jclass clazz, jobject audioRecord, jint framesPerPacket) {
+Java_io_github_jqssun_displaymirror_sunshine_SunshineServer_startAudioRecording(JNIEnv *env, jclass clazz, jobject audioRecord, jint framesPerPacket) {
     // Create global ref for AudioRecord
     jobject globalAudioRecord = env->NewGlobalRef(audioRecord);
     if (globalAudioRecord == nullptr) {
@@ -244,12 +244,12 @@ Java_io_github_jqssun_displaymirror_job_SunshineServer_startAudioRecording(JNIEn
 }
 
 JNIEXPORT void JNICALL
-Java_io_github_jqssun_displaymirror_job_SunshineServer_enableH265(JNIEnv *env, jclass clazz) {
+Java_io_github_jqssun_displaymirror_sunshine_SunshineServer_enableH265(JNIEnv *env, jclass clazz) {
     video::active_hevc_mode = 2;
 }
 
 JNIEXPORT jboolean JNICALL
-Java_io_github_jqssun_displaymirror_job_SunshineServer_exitServer(JNIEnv *env, jclass clazz) {
+Java_io_github_jqssun_displaymirror_sunshine_SunshineServer_exitServer(JNIEnv *env, jclass clazz) {
     auto broadcast_shutdown_event = mail::man->event<bool>(mail::broadcast_shutdown);
     broadcast_shutdown_event->raise(true);
     if (stream::session::getRunningSessions() == 0) {

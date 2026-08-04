@@ -1,4 +1,4 @@
-package io.github.jqssun.displaymirror.job;
+package io.github.jqssun.displaymirror.sunshine;
 
 import android.hardware.input.IInputManager;
 import android.os.SystemClock;
@@ -11,7 +11,6 @@ import android.view.KeyEventHidden;
 import android.view.MotionEvent;
 import android.view.MotionEventHidden;
 import dev.rikka.tools.refine.Refine;
-import io.github.jqssun.displaymirror.State;
 import io.github.jqssun.displaymirror.shizuku.ServiceUtils;
 import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
 
@@ -107,7 +106,7 @@ public class SunshineGamepad {
             0, // flags
             source);
     KeyEventHidden hidden = Refine.unsafeCast(event);
-    hidden.setDisplayId(State.getInputDisplayId());
+    hidden.setDisplayId(SunshineState.getInputDisplayId());
     _inject(event);
   }
 
@@ -161,7 +160,7 @@ public class SunshineGamepad {
             0 // flags
             );
     MotionEventHidden hidden = Refine.unsafeCast(event);
-    hidden.setDisplayId(State.getInputDisplayId());
+    hidden.setDisplayId(SunshineState.getInputDisplayId());
     _inject(event);
   }
 

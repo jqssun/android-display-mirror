@@ -1,4 +1,4 @@
-package io.github.jqssun.displaymirror;
+package io.github.jqssun.displaymirror.displaylink;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -13,9 +13,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import com.google.android.material.button.MaterialButton;
-import io.github.jqssun.displaymirror.dialog.ResolutionSettingsDialog;
+import io.github.jqssun.displaymirror.MainActivity;
+import io.github.jqssun.displaymirror.Pref;
+import io.github.jqssun.displaymirror.R;
+import io.github.jqssun.displaymirror.State;
 
-public class DisplayLinkFragment extends Fragment {
+public class DisplaylinkFragment extends Fragment {
   private SharedPreferences preferences;
   private MaterialButton manageDisplayBtn;
 
@@ -66,7 +69,7 @@ public class DisplayLinkFragment extends Fragment {
         v ->
             ((MainActivity) requireActivity())
                 .manageDisplayInExtend(
-                    State.getDisplaylinkVirtualDisplayId(), MainActivity.SCREEN_DISPLAYLINK));
+                    DisplaylinkState.getVirtualDisplayId(), MainActivity.SCREEN_DISPLAYLINK));
 
     downloadApkBtn.setOnClickListener(
         v -> ((MainActivity) requireActivity()).downloadDisplayLink(downloadApkBtn));
@@ -131,6 +134,6 @@ public class DisplayLinkFragment extends Fragment {
       return;
     }
     manageDisplayBtn.setVisibility(
-        State.getDisplaylinkVirtualDisplayId() > 0 ? View.VISIBLE : View.GONE);
+        DisplaylinkState.getVirtualDisplayId() > 0 ? View.VISIBLE : View.GONE);
   }
 }

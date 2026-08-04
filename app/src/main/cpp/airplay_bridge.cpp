@@ -10,7 +10,7 @@ static jmethodID airPlaySendFrameMethod = nullptr;
 namespace airplay_bridge {
 
 void init(JNIEnv *env) {
-    jclass apClass = env->FindClass("io/github/jqssun/displaymirror/job/AirPlayService");
+    jclass apClass = env->FindClass("io/github/jqssun/displaymirror/airplay/AirPlayService");
     if (apClass != nullptr) {
         airPlayServiceClass = (jclass)env->NewGlobalRef(apClass);
         env->DeleteLocalRef(apClass);

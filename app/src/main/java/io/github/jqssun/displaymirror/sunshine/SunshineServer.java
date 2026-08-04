@@ -1,15 +1,16 @@
-package io.github.jqssun.displaymirror.job;
+package io.github.jqssun.displaymirror.sunshine;
 
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.Surface;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import io.github.jqssun.displaymirror.dialog.PinDialog;
-import io.github.jqssun.displaymirror.SunshineCursorOverlay;
 import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.R;
 import io.github.jqssun.displaymirror.State;
+import io.github.jqssun.displaymirror.dialog.PinDialog;
+import io.github.jqssun.displaymirror.job.CreateVirtualDisplay;
+import io.github.jqssun.displaymirror.job.ExitAll;
 
 // from Sunshine v2025.122.141614
 public class SunshineServer {
@@ -71,7 +72,7 @@ public class SunshineServer {
         .post(
             () -> {
               State.startNewJob(
-                  State.MODE_SUNSHINE,
+                  SunshineState.MODE,
                   new ProjectViaSunshine(
                       width, height, frameRate, packetDuration, surface, shouldMute));
             });
@@ -89,7 +90,7 @@ public class SunshineServer {
                 SunshineMouse.pipeline.stop();
                 SunshineMouse.pipeline = null;
               }
-              State.stopSunshineVirtualDisplay();
+              SunshineState.stopVirtualDisplay();
               Context context = State.getContext();
               ExitAll.execute(context, true);
             });
@@ -122,14 +123,14 @@ public class SunshineServer {
   }
 
   public static void onMirrorClientDiscovered(String mirrorClient) {
-    if (State.discoveredMirrorClients.contains(mirrorClient)) {
+    if (SunshineState.discoveredClients.contains(mirrorClient)) {
       return;
     }
-    State.discoveredMirrorClients.add(mirrorClient);
+    SunshineState.discoveredClients.add(mirrorClient);
   }
 
   public static void setMirrorServerUuid(String uuid) {
-    State.serverUuid = uuid;
+    SunshineState.serverUuid = uuid;
     if (!Pref.doNotAutoStartSunshine) {
       new Handler(Looper.getMainLooper())
           .postDelayed(

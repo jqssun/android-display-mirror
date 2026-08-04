@@ -1,4 +1,4 @@
-package io.github.jqssun.displaymirror;
+package io.github.jqssun.displaymirror.sunshine;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -15,12 +15,12 @@ import android.widget.TextView;
 import androidx.fragment.app.Fragment;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.materialswitch.MaterialSwitch;
-import io.github.jqssun.displaymirror.dialog.ManualClientInputDialog;
-import io.github.jqssun.displaymirror.job.ConnectToClient;
+import io.github.jqssun.displaymirror.MainActivity;
+import io.github.jqssun.displaymirror.MirrorUiState;
+import io.github.jqssun.displaymirror.Pref;
+import io.github.jqssun.displaymirror.R;
+import io.github.jqssun.displaymirror.State;
 import io.github.jqssun.displaymirror.job.ExitAll;
-import io.github.jqssun.displaymirror.job.SunshineHost;
-import io.github.jqssun.displaymirror.job.SunshineMouse;
-import io.github.jqssun.displaymirror.job.SunshineServer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,7 +60,7 @@ public class SunshineFragment extends Fragment {
         v ->
             ((MainActivity) requireActivity())
                 .manageDisplayInExtend(
-                    State.getSunshineVirtualDisplayId(), MainActivity.SCREEN_SUNSHINE));
+                    SunshineState.getVirtualDisplayId(), MainActivity.SCREEN_SUNSHINE));
 
     // sunshine settings
     _initSunshineSettings(view);
@@ -169,7 +169,7 @@ public class SunshineFragment extends Fragment {
       statusTitle.setText(R.string.sunshine_status_idle);
       statusDetail.setText(R.string.sunshine_status_idle_detail);
     } else {
-      boolean isProjecting = State.sunshineVirtualDisplay != null;
+      boolean isProjecting = SunshineState.virtualDisplay != null;
       if (isProjecting) {
         statusIcon.setImageResource(R.drawable.ic_check_circle);
         statusTitle.setText(R.string.sunshine_status_casting);
@@ -192,7 +192,7 @@ public class SunshineFragment extends Fragment {
 
     startBtn.setVisibility(state.startBtnVisibility ? View.VISIBLE : View.GONE);
     stopBtn.setVisibility(state.stopBtnVisibility ? View.VISIBLE : View.GONE);
-    manageDisplayBtn.setVisibility(State.getSunshineVirtualDisplayId() > 0 ? View.VISIBLE : View.GONE);
+    manageDisplayBtn.setVisibility(SunshineState.getVirtualDisplayId() > 0 ? View.VISIBLE : View.GONE);
   }
 
   private void _loadClientList(Spinner spinner) {
@@ -200,7 +200,7 @@ public class SunshineFragment extends Fragment {
     List<String> clients = new ArrayList<>();
     clients.add(getString(R.string.manual_input));
     if (!selectedClient.isEmpty()) clients.add(selectedClient);
-    clients.addAll(State.discoveredMirrorClients);
+    clients.addAll(SunshineState.discoveredClients);
 
     ArrayAdapter<String> adapter =
         new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, clients);

@@ -1,4 +1,4 @@
-package io.github.jqssun.displaymirror.dialog;
+package io.github.jqssun.displaymirror.sunshine;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -8,8 +8,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.R;
 import io.github.jqssun.displaymirror.TvFocus;
-import io.github.jqssun.displaymirror.job.ConnectToClient;
-import io.github.jqssun.displaymirror.job.SunshineServer;
 
 public class ManualClientInputDialog {
   public static void show(Context context) {

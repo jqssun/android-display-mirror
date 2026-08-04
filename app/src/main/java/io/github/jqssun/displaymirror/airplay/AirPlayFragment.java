@@ -1,4 +1,4 @@
-package io.github.jqssun.displaymirror;
+package io.github.jqssun.displaymirror.airplay;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -14,8 +14,11 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.android.material.textfield.TextInputEditText;
+import io.github.jqssun.displaymirror.MainActivity;
+import io.github.jqssun.displaymirror.Pref;
+import io.github.jqssun.displaymirror.R;
+import io.github.jqssun.displaymirror.State;
 import io.github.jqssun.displaymirror.dialog.PinDialog;
-import io.github.jqssun.displaymirror.job.AirPlayService;
 import java.util.List;
 
 public class AirPlayFragment extends Fragment {
@@ -78,7 +81,7 @@ public class AirPlayFragment extends Fragment {
         v ->
             ((MainActivity) requireActivity())
                 .manageDisplayInExtend(
-                    State.getAirPlayVirtualDisplayId(), MainActivity.SCREEN_AIRPLAY));
+                    AirPlayState.getVirtualDisplayId(), MainActivity.SCREEN_AIRPLAY));
 
     manualBtn.setOnClickListener(
         v -> {
@@ -247,6 +250,6 @@ public class AirPlayFragment extends Fragment {
       return;
     }
     manageDisplayBtn.setVisibility(
-        State.getAirPlayVirtualDisplayId() > 0 ? View.VISIBLE : View.GONE);
+        AirPlayState.getVirtualDisplayId() > 0 ? View.VISIBLE : View.GONE);
   }
 }

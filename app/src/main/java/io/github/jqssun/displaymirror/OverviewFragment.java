@@ -17,10 +17,13 @@ import androidx.navigation.Navigation;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.color.MaterialColors;
 import com.google.android.material.transition.MaterialSharedAxis;
+import io.github.jqssun.displaymirror.airplay.AirPlayService;
+import io.github.jqssun.displaymirror.displaylink.ApkImporter;
+import io.github.jqssun.displaymirror.displaylink.DisplaylinkState;
 import io.github.jqssun.displaymirror.job.AcquireShizuku;
-import io.github.jqssun.displaymirror.job.AirPlayService;
-import io.github.jqssun.displaymirror.job.SunshineHost;
 import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
+import io.github.jqssun.displaymirror.sunshine.SunshineHost;
+import io.github.jqssun.displaymirror.sunshine.SunshineState;
 
 public class OverviewFragment extends Fragment {
 
@@ -78,7 +81,7 @@ public class OverviewFragment extends Fragment {
 
   private void _initShizuku(View view) {
     MaterialButton btn = view.findViewById(R.id.shizuku_permission_btn);
-    btn.setOnClickListener(v -> State.startNewJob(new AcquireShizuku()));
+    btn.setOnClickListener(v -> State.startNewJob(State.MODE_UTILITY, new AcquireShizuku()));
     _updateShizuku(view);
   }
 
@@ -146,7 +149,7 @@ public class OverviewFragment extends Fragment {
     boolean sunshineActive = SunshineHost.isRunning();
     boolean sunshineProjecting =
         sunshineActive
-            && State.sunshineVirtualDisplay != null;
+            && SunshineState.virtualDisplay != null;
     if (sunshineProjecting) {
       sunshineStatus.setText(R.string.sunshine_status_casting);
     } else if (sunshineActive) {
@@ -174,7 +177,7 @@ public class OverviewFragment extends Fragment {
     TextView displaylinkStatus = view.findViewById(R.id.displaylink_status);
     ImageView displaylinkIcon = view.findViewById(R.id.displaylink_icon);
     boolean displaylinkImported = ApkImporter.areLibsImported(requireContext());
-    boolean displaylinkActive = State.displaylinkState.getVirtualDisplay() != null;
+    boolean displaylinkActive = DisplaylinkState.instance.getVirtualDisplay() != null;
     if (displaylinkActive) {
       displaylinkStatus.setText(R.string.displaylink_libs_status_active);
     } else if (displaylinkImported) {

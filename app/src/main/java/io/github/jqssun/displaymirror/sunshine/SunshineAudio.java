@@ -1,4 +1,4 @@
-package io.github.jqssun.displaymirror.job;
+package io.github.jqssun.displaymirror.sunshine;
 
 import static io.github.jqssun.displaymirror.MainActivity.REQUEST_RECORD_AUDIO_PERMISSION;
 
@@ -17,6 +17,7 @@ import androidx.core.app.ActivityCompat;
 import io.github.jqssun.displaymirror.MainActivity;
 import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.State;
+import io.github.jqssun.displaymirror.job.YieldException;
 
 public class SunshineAudio {
   private static boolean audioPermissionRequested;
@@ -61,7 +62,7 @@ public class SunshineAudio {
     volumeChangeListener =
         focusChange -> {
           // if still projecting and should stay muted, check and re-mute
-          if (State.sunshineVirtualDisplay != null && isMuted) {
+          if (SunshineState.virtualDisplay != null && isMuted) {
             _checkAndRestoreMute();
           }
         };
@@ -81,7 +82,7 @@ public class SunshineAudio {
               public void onChange(boolean selfChange) {
                 super.onChange(selfChange);
                 // if still projecting and should stay muted, check and re-mute
-                if (State.sunshineVirtualDisplay != null && isMuted) {
+                if (SunshineState.virtualDisplay != null && isMuted) {
                   _checkAndRestoreMute();
                 }
               }

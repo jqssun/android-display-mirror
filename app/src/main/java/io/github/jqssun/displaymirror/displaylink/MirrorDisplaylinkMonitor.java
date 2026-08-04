@@ -1,4 +1,4 @@
-package io.github.jqssun.displaymirror.job;
+package io.github.jqssun.displaymirror.displaylink;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -6,8 +6,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
+import io.github.jqssun.displaymirror.MainActivity;
 import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.State;
+import io.github.jqssun.displaymirror.job.CreateVirtualDisplay;
+import io.github.jqssun.displaymirror.job.VirtualDisplayArgs;
 
 public class MirrorDisplaylinkMonitor {
 
@@ -15,13 +18,15 @@ public class MirrorDisplaylinkMonitor {
       "io.github.jqssun.displaymirror.USB_PERMISSION";
 
   private static boolean registered = false;
+  // tracked DisplayLink usb device, null while none attached
+  private static String deviceName;
 
   private static final BroadcastReceiver usbPermissionReceiver =
       new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
           if (ACTION_USB_PERMISSION.equals(intent.getAction())) {
-            State.resumeJob(State.MODE_DISPLAYLINK);
+            State.resumeJob(DisplaylinkState.MODE);
           }
         }
       };
@@ -76,23 +81,23 @@ public class MirrorDisplaylinkMonitor {
     if (device == null) {
       return;
     }
-    if (State.displaylinkDeviceName != null) {
+    if (deviceName != null) {
       if (context != null) {
         UsbManager usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
-        if (usbManager.getDeviceList().get(State.displaylinkDeviceName) == null) {
-          State.displaylinkState.destroy();
-          State.displaylinkDeviceName = null;
-          State.displaylinkState.device = null;
+        if (usbManager.getDeviceList().get(deviceName) == null) {
+          DisplaylinkState.instance.destroy();
+          deviceName = null;
+          DisplaylinkState.instance.device = null;
         }
       }
     }
-    if (device.getVendorId() == 6121 && State.displaylinkDeviceName == null) {
-      State.displaylinkDeviceName = device.getDeviceName();
-      State.displaylinkState.device = device;
+    if (device.getVendorId() == 6121 && deviceName == null) {
+      deviceName = device.getDeviceName();
+      DisplaylinkState.instance.device = device;
       State.log("found DisplayLink device: " + device.getProductName());
     }
-    if (device.getDeviceName().equals(State.displaylinkDeviceName)) {
-      State.displaylinkState.virtualDisplayArgs =
+    if (device.getDeviceName().equals(deviceName)) {
+      DisplaylinkState.instance.virtualDisplayArgs =
           new VirtualDisplayArgs(
               "DisplayLink",
               Pref.getDisplaylinkWidth(),
@@ -101,8 +106,8 @@ public class MirrorDisplaylinkMonitor {
               160,
               Pref.getRotateWithContent());
       State.startNewJob(
-          State.MODE_DISPLAYLINK,
-          new ProjectViaDisplaylink(device, State.displaylinkState.virtualDisplayArgs));
+          DisplaylinkState.MODE,
+          new ProjectViaDisplaylink(device, DisplaylinkState.instance.virtualDisplayArgs));
     }
   }
 
@@ -114,11 +119,11 @@ public class MirrorDisplaylinkMonitor {
   }
 
   public static void onUsbDeviceDetached(UsbDevice device) {
-    if (device != null && device.getDeviceName().equals(State.displaylinkDeviceName)) {
+    if (device != null && device.getDeviceName().equals(deviceName)) {
       State.log("DisplayLink device disconnected: " + device.getProductName());
-      State.displaylinkState.destroy();
-      State.displaylinkDeviceName = null;
-      State.displaylinkState.device = null;
+      DisplaylinkState.instance.destroy();
+      deviceName = null;
+      DisplaylinkState.instance.device = null;
       CreateVirtualDisplay.powerOnScreen();
     }
   }

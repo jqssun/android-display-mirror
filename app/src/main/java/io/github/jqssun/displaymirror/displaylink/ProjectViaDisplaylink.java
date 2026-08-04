@@ -1,4 +1,4 @@
-package io.github.jqssun.displaymirror.job;
+package io.github.jqssun.displaymirror.displaylink;
 
 import android.app.PendingIntent;
 import android.content.Context;
@@ -11,11 +11,14 @@ import android.os.HandlerThread;
 import com.displaylink.manager.NativeDriver;
 import com.displaylink.manager.NativeDriverListener;
 import com.displaylink.manager.display.DisplayMode;
-import io.github.jqssun.displaymirror.ApkImporter;
-import io.github.jqssun.displaymirror.DisplaylinkState;
 import io.github.jqssun.displaymirror.MainActivity;
 import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.State;
+import io.github.jqssun.displaymirror.job.CreateVirtualDisplay;
+import io.github.jqssun.displaymirror.job.Job;
+import io.github.jqssun.displaymirror.job.StreamRenderer;
+import io.github.jqssun.displaymirror.job.VirtualDisplayArgs;
+import io.github.jqssun.displaymirror.job.YieldException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -40,12 +43,7 @@ public class ProjectViaDisplaylink implements Job {
       return;
     }
     UsbManager usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
-    DisplaylinkState displaylinkState = State.displaylinkState;
-
-    if (displaylinkState == null) {
-      State.log("USB device " + deviceName + " state not found, skipping task");
-      return;
-    }
+    DisplaylinkState displaylinkState = DisplaylinkState.instance;
 
     if (displaylinkState.displaylinkDevice2 != null
         && displaylinkState.getVirtualDisplay() != null) {
@@ -314,7 +312,7 @@ public class ProjectViaDisplaylink implements Job {
 
   private boolean _requestMediaProjectionPermission(
       Context context, DisplaylinkState displaylinkState) throws YieldException {
-    if (State.displaylinkState.getVirtualDisplay() != null) {
+    if (DisplaylinkState.instance.getVirtualDisplay() != null) {
       State.log("virtual display already exists, skipping projection permission request");
       return true;
     }

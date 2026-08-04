@@ -4,12 +4,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.hardware.display.VirtualDisplay;
 import android.media.projection.MediaProjection;
 import android.os.IBinder;
 import android.util.Log;
-import android.view.Display;
-import android.view.Surface;
 import androidx.lifecycle.MutableLiveData;
 import io.github.jqssun.displaymirror.job.Job;
 import io.github.jqssun.displaymirror.job.YieldException;
@@ -18,36 +15,23 @@ import io.github.jqssun.displaymirror.shizuku.UserService;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import rikka.shizuku.Shizuku;
 
 public class State {
-  // job modes: each mode gets its own independent job slot
-  public static final String MODE_SUNSHINE = "sunshine";
-  public static final String MODE_DISPLAYLINK = "displaylink";
-  public static final String MODE_UTILITY = "utility"; // for non-mode jobs like FetchLogAndShare
+  // job slot for non-path jobs like FetchLogAndShare; paths declare their own slot keys
+  public static final String MODE_UTILITY = "utility";
 
   // weak reference to avoid leaking the activity
   private static WeakReference<MainActivity> currentActivity = new WeakReference<>(null);
   public static final MutableLiveData<MirrorUiState> uiState =
       new MutableLiveData<>(new MirrorUiState());
-  public static String serverUuid;
   private static final Map<String, Job> jobs = new HashMap<>();
-  // legacy single-job alias: used by code that doesn't specify a mode
-  private static Job currentJob;
   public static List<String> logs = java.util.Collections.synchronizedList(new ArrayList<>());
-  public static DisplaylinkState displaylinkState = new DisplaylinkState();
   private static MediaProjection mediaProjection;
   public static MediaProjection mediaProjectionInUse;
-  private static int airPlayVirtualDisplayId = -1;
-  private static Surface airPlaySurface;
-  public static String displaylinkDeviceName;
-  public static VirtualDisplay sunshineVirtualDisplay;
   public static volatile IUserService userService;
-  public static Set<String> discoveredMirrorClients = new HashSet<>();
 
   public static MainActivity getCurrentActivity() {
     if (currentActivity == null) {
@@ -114,10 +98,6 @@ public class State {
   private static final android.os.Handler mainHandler =
       new android.os.Handler(android.os.Looper.getMainLooper());
 
-  public static boolean isJobRunning() {
-    return currentJob != null;
-  }
-
   public static boolean isJobRunning(String mode) {
     return jobs.containsKey(mode);
   }
@@ -130,94 +110,43 @@ public class State {
       return;
     }
     jobs.put(mode, job);
-    // keep legacy alias pointing at most recent job for backward compat
-    currentJob = job;
-    try {
-      State.log("starting task " + job.getClass().getSimpleName() + " [" + mode + "]");
-      job.start();
-      State.log("task " + job.getClass().getSimpleName() + " completed [" + mode + "]");
-      jobs.remove(mode);
-      if (currentJob == job) currentJob = null;
-    } catch (YieldException e) {
-      State.log(
-          "task " + job.getClass().getSimpleName() + " yielded [" + mode + "], " + e.getMessage());
-    } catch (RuntimeException e) {
-      State.log("task " + job.getClass().getSimpleName() + " failed [" + mode + "]");
-      String stackTrace = android.util.Log.getStackTraceString(e);
-      State.log("stacktrace: " + stackTrace);
-      jobs.remove(mode);
-      if (currentJob == job) currentJob = null;
-    }
-  }
-
-  /** legacy: start a job in the utility slot (blocks only other utility jobs). */
-  public static void startNewJob(Job job) {
-    startNewJob(MODE_UTILITY, job);
+    _run(mode, job, "starting");
   }
 
   /** resume all yielded jobs (e.g. after permission grant). */
   public static void resumeJob() {
-    // resume legacy job
-    if (currentJob == null) return;
-    Job job = currentJob;
-    try {
-      State.log("resuming task " + job.getClass().getSimpleName());
-      job.start();
-      State.log("task " + job.getClass().getSimpleName() + " completed");
-      // remove from mode map
-      jobs.values().remove(job);
-      if (currentJob == job) currentJob = null;
-    } catch (YieldException e) {
-      State.log("task " + job.getClass().getSimpleName() + " yielded, " + e.getMessage());
-    } catch (RuntimeException e) {
-      State.log("task " + job.getClass().getSimpleName() + " failed to resume");
-      String stackTrace = android.util.Log.getStackTraceString(e);
-      State.log("stacktrace: " + stackTrace);
-      jobs.values().remove(job);
-      if (currentJob == job) currentJob = null;
+    for (Map.Entry<String, Job> entry : new HashMap<>(jobs).entrySet()) {
+      _run(entry.getKey(), entry.getValue(), "resuming");
     }
   }
 
-  /** resume a job in a specific mode slot. */
+  /** resume the job in a specific mode slot. */
   public static void resumeJob(String mode) {
     Job job = jobs.get(mode);
-    if (job == null) {
-      resumeJob();
-      return;
-    }
-    currentJob = job; // update legacy alias
-    try {
-      State.log("resuming task " + job.getClass().getSimpleName() + " [" + mode + "]");
-      job.start();
-      State.log("task " + job.getClass().getSimpleName() + " completed [" + mode + "]");
-      jobs.remove(mode);
-      if (currentJob == job) currentJob = null;
-    } catch (YieldException e) {
-      State.log(
-          "task " + job.getClass().getSimpleName() + " yielded [" + mode + "], " + e.getMessage());
-    } catch (RuntimeException e) {
-      State.log("task " + job.getClass().getSimpleName() + " failed to resume [" + mode + "]");
-      String stackTrace = android.util.Log.getStackTraceString(e);
-      State.log("stacktrace: " + stackTrace);
-      jobs.remove(mode);
-      if (currentJob == job) currentJob = null;
-    }
-  }
-
-  public static void clearJob(String mode) {
-    Job job = jobs.remove(mode);
-    if (job != null && currentJob == job) currentJob = null;
-  }
-
-  public static void resumeJobLater(long delayMillis) {
-    if (currentActivity.get() != null) {
-      mainHandler.postDelayed(State::resumeJob, delayMillis);
+    if (job != null) {
+      _run(mode, job, "resuming");
     }
   }
 
   public static void resumeJobLater(String mode, long delayMillis) {
     if (currentActivity.get() != null) {
       mainHandler.postDelayed(() -> resumeJob(mode), delayMillis);
+    }
+  }
+
+  private static void _run(String mode, Job job, String verb) {
+    String name = job.getClass().getSimpleName();
+    try {
+      State.log(verb + " task " + name + " [" + mode + "]");
+      job.start();
+      State.log("task " + name + " completed [" + mode + "]");
+      jobs.remove(mode);
+    } catch (YieldException e) {
+      State.log("task " + name + " yielded [" + mode + "], " + e.getMessage());
+    } catch (RuntimeException e) {
+      State.log("task " + name + " failed [" + mode + "]");
+      State.log("stacktrace: " + Log.getStackTraceString(e));
+      jobs.remove(mode);
     }
   }
 
@@ -259,76 +188,6 @@ public class State {
       mediaProjection = newMediaProjection;
       mediaProjectionInUse = newMediaProjection;
     }
-  }
-
-  public static int getDisplaylinkVirtualDisplayId() {
-    if (displaylinkState.getVirtualDisplay() == null) {
-      return -1;
-    }
-    return displaylinkState.getVirtualDisplay().getDisplay().getDisplayId();
-  }
-
-  public static int getAirPlayVirtualDisplayId() {
-    return airPlayVirtualDisplayId;
-  }
-
-  public static Surface getAirPlaySurface() {
-    return airPlaySurface;
-  }
-
-  public static void setAirPlayTouchTarget(int displayId, Surface surface) {
-    boolean changed = airPlayVirtualDisplayId != displayId || airPlaySurface != surface;
-    airPlayVirtualDisplayId = displayId;
-    airPlaySurface = surface;
-    if (changed) {
-      refreshMainActivity();
-    }
-  }
-
-  public static void clearAirPlayTouchTarget() {
-    setAirPlayTouchTarget(-1, null);
-  }
-
-  public static void setAirPlayVirtualDisplayId(int displayId) {
-    if (airPlayVirtualDisplayId == displayId) {
-      return;
-    }
-    airPlayVirtualDisplayId = displayId;
-    refreshMainActivity();
-  }
-
-
-  public static void setSunshineVirtualDisplay(VirtualDisplay virtualDisplay) {
-    if (sunshineVirtualDisplay == virtualDisplay) {
-      return;
-    }
-    sunshineVirtualDisplay = virtualDisplay;
-    refreshMainActivity();
-  }
-
-  public static void stopSunshineVirtualDisplay() {
-    if (sunshineVirtualDisplay != null) {
-      sunshineVirtualDisplay.release();
-      sunshineVirtualDisplay = null;
-      refreshMainActivity();
-    }
-  }
-
-  public static int getSunshineVirtualDisplayId() {
-    if (sunshineVirtualDisplay == null) {
-      return -1;
-    }
-    return sunshineVirtualDisplay.getDisplay().getDisplayId();
-  }
-
-  public static boolean inputToExternalDisplay() {
-    return sunshineVirtualDisplay != null && Pref.getSunshineInputToExternalDisplay();
-  }
-
-  public static int getInputDisplayId() {
-    return inputToExternalDisplay()
-        ? sunshineVirtualDisplay.getDisplay().getDisplayId()
-        : Display.DEFAULT_DISPLAY;
   }
 
   public static void unbindUserService() {
