@@ -46,7 +46,7 @@ public final class CaptureAudio {
   }
 
   public static boolean useRemoteSubmix() {
-    return !Pref.getDisableRemoteSubmix()
+    return Pref.getUseGlobalAudioCapture()
         && State.userService != null
         && Build.VERSION.SDK_INT >= AndroidVersions.API_31_ANDROID_12;
   }
@@ -76,7 +76,7 @@ public final class CaptureAudio {
   not used by Moonlight, its native side reads float off the recorder object
   */
   public static PcmStream openPcm16(MediaProjection projection, int sampleRate) {
-    if (!Pref.getDisableRemoteSubmix()) {
+    if (Pref.getUseGlobalAudioCapture()) {
       // projection service kicks the bind async, so first capture races it
       if (ShizukuUtils.hasPermission()) {
         State.awaitUserService(SUBMIX_BIND_TIMEOUT_MS);

@@ -43,8 +43,8 @@ public class SettingsFragment extends Fragment {
     MaterialSwitch cropBlackBordersCheckbox = view.findViewById(R.id.crop_black_borders_checkbox);
     MaterialSwitch autoMatchCheckbox = view.findViewById(R.id.auto_match_aspect_ratio_checkbox);
     MaterialSwitch preventAutoLockCheckbox = view.findViewById(R.id.prevent_auto_lock_checkbox);
-    MaterialSwitch disableRemoteSubmixCheckbox =
-        view.findViewById(R.id.disable_remote_submix_checkbox);
+    MaterialSwitch useGlobalAudioCaptureCheckbox =
+        view.findViewById(R.id.use_global_audio_capture_checkbox);
     MaterialButton manageSystemDisplaySettingsBtn =
         view.findViewById(R.id.manage_system_display_settings_btn);
 
@@ -76,9 +76,9 @@ public class SettingsFragment extends Fragment {
     preventAutoLockCheckbox.setOnCheckedChangeListener(
         (b, c) -> preferences.edit().putBoolean(Pref.KEY_PREVENT_AUTO_LOCK, c).apply());
 
-    disableRemoteSubmixCheckbox.setChecked(Pref.getDisableRemoteSubmix());
-    disableRemoteSubmixCheckbox.setOnCheckedChangeListener(
-        (b, c) -> preferences.edit().putBoolean(Pref.KEY_DISABLE_REMOTE_SUBMIX, c).apply());
+    useGlobalAudioCaptureCheckbox.setChecked(Pref.getUseGlobalAudioCapture());
+    useGlobalAudioCaptureCheckbox.setOnCheckedChangeListener(
+        (b, c) -> preferences.edit().putBoolean(Pref.KEY_USE_GLOBAL_AUDIO_CAPTURE, c).apply());
 
     manageSystemDisplaySettingsBtn.setOnClickListener(
         v -> ((MainActivity) requireActivity()).openExtendSettings());

@@ -18,7 +18,7 @@ public class Pref {
   public static final String KEY_ASPECT_FORCED = "aspect_forced";
 
   // audio
-  public static final String KEY_DISABLE_REMOTE_SUBMIX = "disable_remote_submix";
+  public static final String KEY_USE_GLOBAL_AUDIO_CAPTURE = "use_global_audio_capture";
 
   // sunshine
   public static final String KEY_SUNSHINE_INPUT_TO_EXTERNAL_DISPLAY =
@@ -82,8 +82,8 @@ public class Pref {
     return getBoolean(KEY_PREVENT_AUTO_LOCK, false);
   }
 
-  public static boolean getDisableRemoteSubmix() {
-    return getBoolean(KEY_DISABLE_REMOTE_SUBMIX, false);
+  public static boolean getUseGlobalAudioCapture() {
+    return getBoolean(KEY_USE_GLOBAL_AUDIO_CAPTURE, false);
   }
 
   public static boolean getSunshineShowCursor() {

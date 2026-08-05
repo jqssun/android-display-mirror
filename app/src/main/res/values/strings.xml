@@ -101,8 +101,8 @@
     <string name="auto_match_aspect_ratio_desc">Adjust built-in screen to match the external display aspect ratio in mirror mode.</string>
     <string name="prevent_auto_lock">Prevent auto-lock</string>
     <string name="prevent_auto_lock_desc">Modifies the system screen timeout setting.</string>
-    <string name="disable_remote_submix">Disable global audio capture</string>
-    <string name="disable_remote_submix_desc">Capture only what apps allow to be recorded, instead of the whole audio output.</string>
+    <string name="use_global_audio_capture">Use global audio capture</string>
+    <string name="use_global_audio_capture_desc">Capture all audio output via REMOTE_SUBMIX, including unsupported content.</string>
     <string name="auto_connect_sunshine">Auto-connect Moonlight (Beta)</string>
     <string name="auto_connect_sunshine_desc">Proactively send a JSON connect request to the Moonlight client. Requires a fork with the autostart listener. Not compatible with standard Moonlight.</string>
     <string name="show_sunshine_cursor">Show cursor location</string>
