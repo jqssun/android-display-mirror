@@ -9,7 +9,8 @@ import (
 	"io"
 	"regexp"
 	"strconv"
-	"strings"
+
+	"howett.net/plist"
 )
 
 /*
@@ -30,15 +31,6 @@ func StopPipeAudioCapture(ac *AudioCapture, w *io.PipeWriter) {
 	ac.stopped = true
 	w.Close()
 	close(ac.waitCh)
-}
-
-/*
-UxPlay and HAP-paired receivers hash the pair-verify ECDH secret into the FairPlay stream key; Apple receivers use raw key over plaintext pair-verify
-*/
-var AppleReceiver bool
-
-func mixesStreamKey(encrypted bool) bool {
-	return encrypted || !AppleReceiver
 }
 
 /*
@@ -100,30 +92,6 @@ func (b *plistBool) UnmarshalPlist(unmarshal func(interface{}) error) error {
 }
 
 /*
-airPlayDescription_isAppleReceiver, airPlayDescription_isThirdPartyDevice
-*/
-const (
-	featureMaskThirdParty = uint64(1)<<26 | uint64(1)<<51
-	uxplayPI              = "2e388006-13ba-4041-9a67-25dd4a43d536"
-)
-
-func IsAppleReceiver(info *ReceiverInfo) bool {
-	if info == nil || info.PI == "" || info.PI == uxplayPI {
-		return false
-	}
-	if info.Features&featureMaskThirdParty != 0 {
-		return false
-	}
-	return strings.HasPrefix(info.Model, "AppleTV") ||
-		strings.HasPrefix(info.Model, "AudioAccessory")
-}
-
-func DetectAppleReceiver(info *ReceiverInfo) bool {
-	AppleReceiver = IsAppleReceiver(info)
-	return AppleReceiver
-}
-
-/*
 airPlayDescription_supportsCUPairingAndEncryption, apsession_requiresHKPairVerify: only the numbers are asserted
 */
 const (
@@ -140,6 +108,42 @@ func UseHomeKitPairing(info *ReceiverInfo) bool {
 		return false // password path wins over features
 	}
 	return info.Features&featureMaskHomeKitPairing != 0
+}
+
+/*
+establish session with a SETUP that carries no streams, then add each stream in its own SETUP
+*/
+func (c *AirPlayClient) SetupSession(uri, deviceID, sessionUUID string, timingPort int) (int, error) {
+	session := map[string]interface{}{
+		"deviceID":                 deviceID,
+		"macAddress":               deviceID,
+		"sessionUUID":              sessionUUID,
+		"isScreenMirroringSession": true,
+		"model":                    "Linux",
+		"name":                     "Linux",
+		"timingProtocol":           "NTP",
+		"timingPort":               int64(timingPort),
+	}
+	if c.FpEkey != nil && c.fpIV != nil {
+		session["et"] = int64(32)
+		session["ekey"] = c.FpEkey
+		session["eiv"] = c.fpIV
+	}
+	body, err := plist.Marshal(session, plist.BinaryFormat)
+	if err != nil {
+		return 0, fmt.Errorf("marshal session setup: %w", err)
+	}
+	dbg("[SETUP] phase 0 (session only): timingPort=%d", timingPort)
+	respBody, _, err := c.rtspRequest("SETUP", uri, "application/x-apple-binary-plist", body, nil)
+	if err != nil {
+		return 0, err
+	}
+	var resp map[string]interface{}
+	if _, err := plist.Unmarshal(respBody, &resp); err != nil {
+		return 0, fmt.Errorf("unmarshal session setup response: %w", err)
+	}
+	dbg("[SETUP] phase 0 response: %+v", resp)
+	return plistInt(resp["eventPort"]), nil
 }
 
 /*

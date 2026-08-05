@@ -56,8 +56,11 @@ public final class CaptureAudio {
         == PackageManager.PERMISSION_GRANTED;
   }
 
-  // true when a prompt was dispatched, false if already asked or no activity up
   public static boolean requestPermission() {
+    Context context = State.getContext();
+    if (context != null && hasPermission(context)) {
+      return false;
+    }
     if (permissionRequested) {
       return false;
     }
@@ -95,7 +98,6 @@ public final class CaptureAudio {
       return null;
     }
     if (!hasPermission(context)) {
-      requestPermission();
       State.log("audio capture: recording permission not granted");
       return null;
     }

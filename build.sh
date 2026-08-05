@@ -29,9 +29,13 @@ ln -sf ../../../airplay1.go internal/airplay/airplay1.go
 # airplay1 digest auth reads WWW-Authenticate off the 401 which rtspRequest otherwise drops
 sed -Ezi 's|if err != nil \{[[:space:]]+return nil, nil, err|if err != nil {\n\t\treturn nil, respHeaders, err|' internal/airplay/client.go
 
-# 3rd party receivers hash the ECDH secret into the stream key, Apple uses it raw
-sed -i 's|deriveStreamMasterKey(c.fpAesKey, sharedSecret(c.PairKeys), c.encrypted)|deriveStreamMasterKey(c.fpAesKey, sharedSecret(c.PairKeys), mixesStreamKey(c.encrypted))|' internal/airplay/fairplay.go
-sed -i 's|if c.encrypted \&\& len(sharedSecret(c.PairKeys)) > 0 {|if mixesStreamKey(c.encrypted) \&\& len(sharedSecret(c.PairKeys)) > 0 {|' internal/airplay/fairplay.go
+# receiver hashes the ECDH secret into the stream key when pairing produced one
+
+sed -i 's|deriveStreamMasterKey(c.fpAesKey, sharedSecret(c.PairKeys), c.encrypted)|deriveStreamMasterKey(c.fpAesKey, sharedSecret(c.PairKeys), true)|' internal/airplay/fairplay.go
+sed -i 's|if c.encrypted \&\& len(sharedSecret(c.PairKeys)) > 0 {|if len(sharedSecret(c.PairKeys)) > 0 {|' internal/airplay/fairplay.go
+
+# session gets its own SETUP before any stream is added
+sed -i 's|audioSetupBody, err2 := plist.Marshal(audioSetupPlist, plist.BinaryFormat)|if ep, err0 := c.SetupSession(audioURI, clientDeviceID, sessionUUID, timingPort); err0 != nil {audioCtrlConn.Close(); audioDataConn.Close(); return nil, fmt.Errorf("SETUP phase 0 (session): %w", err0)} else if ep > 0 {receiverEventPort = ep}\naudioSetupBody, err2 := plist.Marshal(audioSetupPlist, plist.BinaryFormat)|' internal/airplay/mirror.go
 
 # type
 sed -i 's|\[\]byte        `plist|pkBytes       `plist|' internal/airplay/client.go

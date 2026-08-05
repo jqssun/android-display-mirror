@@ -28,6 +28,7 @@ import io.github.jqssun.displaymirror.airplay.AirPlayService;
 import io.github.jqssun.displaymirror.displaylink.ApkImporter;
 import io.github.jqssun.displaymirror.displaylink.MirrorDisplaylinkMonitor;
 import io.github.jqssun.displaymirror.job.AcquireShizuku;
+import io.github.jqssun.displaymirror.job.CaptureAudio;
 import io.github.jqssun.displaymirror.job.CreateVirtualDisplay;
 import io.github.jqssun.displaymirror.shizuku.ServiceUtils;
 import io.github.jqssun.displaymirror.sunshine.SunshineHost;
@@ -233,6 +234,7 @@ public class MainActivity extends AppCompatActivity {
     _handleLaunchIntent(getIntent());
 
     MirrorDisplaylinkMonitor.init(this);
+    CaptureAudio.requestPermission();
 
     State.uiState.observe(this, state -> {});
   }

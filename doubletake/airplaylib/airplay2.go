@@ -28,8 +28,7 @@ func (s *Session) setupAirPlay2(ctx context.Context, client *airplay.AirPlayClie
 		return nil, s._setupFailed(client, "getinfo: ", err)
 	}
 	s.logf("[AIRPLAY2] connected to: %s (model: %s)", info.Name, info.Model)
-	s.logf("[AIRPLAY2] apple receiver: %v (features %#016x, statusFlags %#x)",
-		airplay.DetectAppleReceiver(info), info.Features, info.StatusFlags)
+	s.logf("[AIRPLAY2] features %#016x, statusFlags %#x", info.Features, info.StatusFlags)
 
 	var saved *airplay.SavedCredentials
 	if pin == "" && credStore != nil {

@@ -8,6 +8,7 @@ import android.hardware.display.IDisplayManager;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
@@ -293,6 +294,7 @@ public class UserService extends IUserService.Stub {
 
   @Override
   public boolean startRecordingAudio(int sampleRate, int encoding) throws RemoteException {
+    long identity = Binder.clearCallingIdentity();
     try {
       if (audioRecord != null
           && (audioRecord.getSampleRate() != sampleRate
@@ -310,6 +312,8 @@ public class UserService extends IUserService.Stub {
     } catch (Throwable e) {
       Ln.e("failed to start recording audio", e);
       return false;
+    } finally {
+      Binder.restoreCallingIdentity(identity);
     }
   }
 
