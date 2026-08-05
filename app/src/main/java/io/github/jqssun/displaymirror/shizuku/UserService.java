@@ -1,6 +1,7 @@
 package io.github.jqssun.displaymirror.shizuku;
 
 import android.annotation.SuppressLint;
+import android.app.ActivityThread;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.display.IDisplayManager;
@@ -264,7 +265,7 @@ public class UserService extends IUserService.Stub {
   }
 
   @Override
-  public int readAudio(float[] result) throws RemoteException {
+  public int readAudioFloat(float[] result) throws RemoteException {
     try {
       if (audioRecord == null) {
         return 0;
@@ -277,17 +278,28 @@ public class UserService extends IUserService.Stub {
   }
 
   @Override
-  public boolean startRecordingAudio() throws RemoteException {
+  public int readAudioPcm16(byte[] result) throws RemoteException {
+    try {
+      if (audioRecord == null) {
+        return 0;
+      }
+      return audioRecord.read(result, 0, result.length, AudioRecord.READ_BLOCKING);
+    } catch (Throwable e) {
+      Ln.e("failed to read audio", e);
+      return 0;
+    }
+  }
+
+  @Override
+  public boolean startRecordingAudio(int sampleRate, int encoding) throws RemoteException {
     try {
       if (audioRecord == null) {
         Ln.d("before start recording");
-        audioRecord = createAudioRecord();
+        audioRecord = createAudioRecord(sampleRate, encoding);
         audioRecord.startRecording();
         Ln.d("started recording");
-        return true;
-      } else {
-        return true;
       }
+      return true;
     } catch (Throwable e) {
       Ln.e("failed to start recording audio", e);
       return false;
@@ -310,25 +322,28 @@ public class UserService extends IUserService.Stub {
     }
   }
 
+  // Shizuku can start us without context
+  private Context _baseContext() {
+    return context != null ? context : ActivityThread.systemMain().getSystemContext();
+  }
+
   @SuppressLint({"WrongConstant", "MissingPermission"})
-  private AudioRecord createAudioRecord() {
+  private AudioRecord createAudioRecord(int sampleRate, int encoding) {
     AudioRecord.Builder builder = new AudioRecord.Builder();
     if (Build.VERSION.SDK_INT >= AndroidVersions.API_31_ANDROID_12) {
-      // on older APIs, Workarounds.fillAppInfo() must be called beforehand
-      builder.setContext(context);
+      // see FakeContext
+      builder.setContext(new FakeContext(_baseContext()));
     }
     builder.setAudioSource(MediaRecorder.AudioSource.REMOTE_SUBMIX);
-    int sampleRate = 48000; // match Opus configuration
     int channelConfig = AudioFormat.CHANNEL_IN_STEREO;
-    int audioEncoding = AudioFormat.ENCODING_PCM_FLOAT;
     AudioFormat audioFormat =
         new AudioFormat.Builder()
-            .setEncoding(audioEncoding)
+            .setEncoding(encoding)
             .setSampleRate(sampleRate)
             .setChannelMask(channelConfig)
             .build();
     builder.setAudioFormat(audioFormat);
-    int minBufferSize = AudioRecord.getMinBufferSize(sampleRate, channelConfig, audioEncoding);
+    int minBufferSize = AudioRecord.getMinBufferSize(sampleRate, channelConfig, encoding);
     if (minBufferSize > 0) {
       // this buffer size does not impact latency
       builder.setBufferSizeInBytes(2 * minBufferSize);

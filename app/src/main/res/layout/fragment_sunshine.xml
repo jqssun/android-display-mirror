@@ -183,14 +183,5 @@
                 android:text="@string/connect" />
         </LinearLayout>
 
-        <!-- Disable REMOTE_SUBMIX -->
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingHorizontal="16dp" android:paddingVertical="12dp">
-            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="16dp" android:orientation="vertical">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/no_audio_try_no_remote_submix" android:textAppearance="?attr/textAppearanceBodyLarge" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/no_audio_try_no_remote_submix_desc" android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="?colorOnSurfaceVariant" />
-            </LinearLayout>
-            <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/disable_remote_submix_checkbox" android:layout_width="wrap_content" android:layout_height="wrap_content" />
-        </LinearLayout>
-
     </LinearLayout>
 </ScrollView>

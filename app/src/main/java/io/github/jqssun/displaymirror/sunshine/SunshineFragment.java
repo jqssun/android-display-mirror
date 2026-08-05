@@ -109,8 +109,6 @@ public class SunshineFragment extends Fragment {
     LinearLayout clientConnectionContainer = view.findViewById(R.id.client_connection_container);
     Spinner clientSpinner = view.findViewById(R.id.client_spinner);
     MaterialButton connectClientButton = view.findViewById(R.id.connect_client_button);
-    MaterialSwitch disableRemoteSubmixCheckbox =
-        view.findViewById(R.id.disable_remote_submix_checkbox);
 
     showCursorCheckbox.setChecked(Pref.getSunshineShowCursor());
     showCursorCheckbox.setOnCheckedChangeListener(
@@ -147,11 +145,6 @@ public class SunshineFragment extends Fragment {
             }
           }
         });
-
-    disableRemoteSubmixCheckbox.setChecked(Pref.getSunshineDisableRemoteSubmix());
-    disableRemoteSubmixCheckbox.setOnCheckedChangeListener(
-        (b, c) ->
-            preferences.edit().putBoolean(Pref.KEY_SUNSHINE_DISABLE_REMOTE_SUBMIX, c).apply());
   }
 
   private void _updateUI(MirrorUiState state) {

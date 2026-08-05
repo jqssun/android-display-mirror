@@ -101,8 +101,8 @@
     <string name="auto_match_aspect_ratio_desc">Adjust built-in screen to match the external display aspect ratio in mirror mode.</string>
     <string name="prevent_auto_lock">Prevent auto-lock</string>
     <string name="prevent_auto_lock_desc">Modifies the system screen timeout setting.</string>
-    <string name="no_audio_try_no_remote_submix">Disable REMOTE_SUBMIX</string>
-    <string name="no_audio_try_no_remote_submix_desc">Fix audio issues in Moonlight.</string>
+    <string name="disable_remote_submix">Disable global audio capture</string>
+    <string name="disable_remote_submix_desc">Capture only what apps allow to be recorded, instead of the whole audio output.</string>
     <string name="auto_connect_sunshine">Auto-connect Moonlight (Beta)</string>
     <string name="auto_connect_sunshine_desc">Proactively send a JSON connect request to the Moonlight client. Requires a fork with the autostart listener. Not compatible with standard Moonlight.</string>
     <string name="show_sunshine_cursor">Show cursor location</string>
@@ -111,10 +111,10 @@
     <string name="section_airplay_controls">Controls</string>
     <string name="section_airplay">AirPlay Settings</string>
     <string name="airplay_apple_receiver">Support for 1st party receivers (Beta)</string>
-    <string name="airplay_apple_receiver_desc">Enable only when used with Apple devices. This allows real FairPlay SAP when audio is disabled. Approval is required on macOS at initial pairing.</string>
+    <string name="airplay_apple_receiver_desc">Enable only when used with Apple devices.</string>
     <string name="airplay1_mode">Support for legacy 3rd party receivers</string>
     <string name="airplay1_mode_desc">Enable only when used with legacy AirPlay 1 receivers that do not have AirPlay 2 support.</string>
-    <string name="about_airplay_notice">1st party receivers: Apple tvOS and macOS.\n\n3rd party receivers (AirPlay 2): AirPlay Receiver for Android (UxPlay).\n\n3rd party receivers (AirPlay 1): Anker Nebula Cast (AirPin).\n\nThis app is not affiliated with Apple.</string>
+    <string name="about_airplay_notice">1st party receivers: Apple tvOS and macOS.\n\n3rd party receivers (AirPlay 2): AirPlay Receiver &amp; Server (UxPlay).\n\n3rd party receivers (AirPlay 1): Anker Nebula Cast (AirPin).\n\nThis app is not affiliated with Apple.</string>
     <string name="airplay_discover">Scan for AirPlay receivers</string>
     <string name="airplay_no_devices">AirPlay receiver not connected</string>
     <string name="airplay_no_devices_detail">Search for receivers on your network</string>

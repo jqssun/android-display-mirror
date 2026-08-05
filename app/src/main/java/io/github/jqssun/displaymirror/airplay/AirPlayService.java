@@ -41,6 +41,7 @@ public class AirPlayService {
   private final List<AirPlayDevice> devices = new ArrayList<>();
   private boolean connected;
   private AirPlayEncoder encoder;
+  private AirPlayAudio audio;
   private MediaProjection projection;
   // pending connect params, used after projection is granted
   private String pendingHost;
@@ -86,6 +87,16 @@ public class AirPlayService {
 
   private void _ensureSession() {
     if (session != null) return;
+    // pair-verify on later connects instead of re-pairing, which re-prompts for a PIN
+    Context ctx = State.getContext();
+    if (ctx != null) {
+      try {
+        airplaylib.Airplaylib.setCredentialsPath(
+            new java.io.File(ctx.getFilesDir(), "airplay-credentials.json").getAbsolutePath());
+      } catch (Exception e) {
+        State.log("AirPlay: credential store unavailable: " + e.getMessage());
+      }
+    }
     airplaylib.Session s =
         airplaylib.Airplaylib.newSession(
             new airplaylib.EventHandler() {
@@ -267,11 +278,10 @@ public class AirPlayService {
     if (session != null && encoder.screenWidth > 0 && encoder.screenHeight > 0) {
       session.setAirPlay1FrameSize(encoder.screenWidth, encoder.screenHeight);
     }
-  }
-
-  public void sendFrame(byte[] annexBData, boolean isKeyframe) {
-    if (session == null || !connected) return;
-    session.sendFrame(annexBData, isKeyframe);
+    if (session != null && session.hasAudio()) {
+      audio = new AirPlayAudio();
+      audio.start(projection);
+    }
   }
 
   public void disconnect() {
@@ -285,6 +295,10 @@ public class AirPlayService {
 
   private void _stopEncoder() {
     CastPlaceholderActivity.dismiss();
+    if (audio != null) {
+      audio.stop();
+      audio = null;
+    }
     if (encoder != null) {
       encoder.stop();
       encoder = null;
@@ -302,9 +316,16 @@ public class AirPlayService {
 
   // called from native C++ via JNI for each Sunshine-encoded video frame
   // this is the piggyback path when Sunshine is also connected
+  // name bound by JNI in airplay_bridge.cpp
   public static void onNativeVideoFrame(byte[] annexBData, boolean isKeyframe) {
     if (instance != null && instance.connected && instance.session != null) {
       instance.session.sendFrame(annexBData, isKeyframe);
+    }
+  }
+
+  public static void onAudioFrame(byte[] pcm) {
+    if (instance != null && instance.connected && instance.session != null) {
+      instance.session.sendAudio(pcm);
     }
   }
 

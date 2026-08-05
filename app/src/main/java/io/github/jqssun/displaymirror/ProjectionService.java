@@ -54,6 +54,10 @@ public class ProjectionService extends Service {
 
   @Override
   public int onStartCommand(Intent intent, int flags, int startId) {
+    // audio capture picks its source when projection fires
+    if (ShizukuUtils.hasPermission() && State.userService == null) {
+      State.bindUserService();
+    }
     if (intent != null && intent.hasExtra("data")) {
       MediaProjectionManager mpm =
           (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);

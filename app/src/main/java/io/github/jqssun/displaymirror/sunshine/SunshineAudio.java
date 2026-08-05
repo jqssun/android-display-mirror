@@ -1,39 +1,32 @@
 package io.github.jqssun.displaymirror.sunshine;
 
-import static io.github.jqssun.displaymirror.MainActivity.REQUEST_RECORD_AUDIO_PERMISSION;
-
-import android.Manifest;
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioManager;
-import android.media.AudioPlaybackCaptureConfiguration;
 import android.media.AudioRecord;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.RemoteException;
-import androidx.core.app.ActivityCompat;
-import io.github.jqssun.displaymirror.MainActivity;
-import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.State;
+import io.github.jqssun.displaymirror.job.CaptureAudio;
 import io.github.jqssun.displaymirror.job.YieldException;
 
 public class SunshineAudio {
-  private static boolean audioPermissionRequested;
+  // Opus config, shared by both capture sources
+  private static final int SAMPLE_RATE = 48000;
+  private static final int ENCODING = AudioFormat.ENCODING_PCM_FLOAT;
+
   private static boolean isMuted = false;
   private static AudioManager.OnAudioFocusChangeListener volumeChangeListener;
 
   public static boolean sendAudio(Context context, int packetDuration) throws YieldException {
-    if (_shouldUseShizukuAudio()) {
-      int framesPerPacket = (int) (48000 * packetDuration / 1000.0f);
-      AudioRecordProxy audioRecordProxy = new AudioRecordProxy();
-      if (!_startRecording()) {
-        State.log("failed to start audio recording via Shizuku, falling back to normal audio");
-      } else {
-        SunshineServer.startAudioRecording(audioRecordProxy, framesPerPacket);
+    if (CaptureAudio.useRemoteSubmix()) {
+      if (CaptureAudio.startRemoteSubmix(SAMPLE_RATE, ENCODING)) {
+        // native reads float off the proxy
+        SunshineServer.startAudioRecording(
+            new AudioRecordProxy(), _framesPerPacket(packetDuration));
         return false;
       }
+      State.log("failed to start audio recording via Shizuku, falling back to normal audio");
     }
     if (_sendAudioUseNormalPermission(context, packetDuration)) {
       return true;
@@ -102,87 +95,30 @@ public class SunshineAudio {
     }
   }
 
-  private static boolean _shouldUseShizukuAudio() {
-    if (Pref.getSunshineDisableRemoteSubmix()) {
-      return false;
-    }
-    return State.userService != null
-        && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S;
-  }
-
-  private static boolean _startRecording() {
-    try {
-      return State.userService.startRecordingAudio();
-    } catch (RemoteException e) {
-      return false;
-    }
-  }
-
   private static boolean _sendAudioUseNormalPermission(Context context, int packetDuration)
       throws YieldException {
-    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.Q) {
-      State.log("Android version too low for audio recording");
-      return false;
+    if (!CaptureAudio.hasPermission(context)) {
+      if (CaptureAudio.requestPermission()) {
+        throw new YieldException("waiting for audio recording permission");
+      }
+      State.log("skipping task, audio recording permission not granted");
+      return true;
     }
-    if (ActivityCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO)
-        == PackageManager.PERMISSION_GRANTED) {
-      // configure audio capture parameters
-      int sampleRate = 48000; // match Opus configuration
-      int channelConfig = AudioFormat.CHANNEL_IN_STEREO;
-      int audioEncoding = AudioFormat.ENCODING_PCM_FLOAT;
-      int bufferSize = AudioRecord.getMinBufferSize(sampleRate, channelConfig, audioEncoding) * 2;
-
-      // calculate number of frames per packet (number of samples per channel)
-      // packetDuration is in ms
-      int framesPerPacket = (int) (sampleRate * packetDuration / 1000.0f);
-      AudioFormat audioFormat =
-          new AudioFormat.Builder()
-              .setEncoding(audioEncoding)
-              .setSampleRate(sampleRate)
-              .setChannelMask(channelConfig)
-              .build();
-      AudioPlaybackCaptureConfiguration config =
-          new AudioPlaybackCaptureConfiguration.Builder(State.getMediaProjection())
-              .excludeUsage(AudioAttributes.USAGE_ALARM)
-              .build();
-      AudioRecord audioRecord =
-          new AudioRecord.Builder()
-              .setAudioPlaybackCaptureConfig(config)
-              .setAudioFormat(audioFormat)
-              .setBufferSizeInBytes(bufferSize)
-              .build();
-      audioRecord.startRecording();
-
-      // pass AudioRecord to SunshineServer for processing
-      SunshineServer.startAudioRecording(audioRecord, framesPerPacket);
-
-    } else {
-      if (audioPermissionRequested) {
-        State.log("skipping task, audio recording permission not granted");
-        return true;
-      }
-      audioPermissionRequested = true;
-      MainActivity activity = State.getCurrentActivity();
-      if (activity == null) {
-        return true;
-      }
-      ActivityCompat.requestPermissions(
-          activity,
-          new String[] {Manifest.permission.RECORD_AUDIO},
-          REQUEST_RECORD_AUDIO_PERMISSION);
-      throw new YieldException("waiting for audio recording permission");
+    AudioRecord audioRecord =
+        CaptureAudio.startPlaybackCapture(State.getMediaProjection(), SAMPLE_RATE, ENCODING);
+    if (audioRecord != null) {
+      SunshineServer.startAudioRecording(audioRecord, _framesPerPacket(packetDuration));
     }
     return false;
   }
 
+  // samples per channel in packetDuration ms
+  private static int _framesPerPacket(int packetDuration) {
+    return (int) (SAMPLE_RATE * packetDuration / 1000.0f);
+  }
+
   public static void restoreVolume(Context context) {
-    if (State.userService != null) {
-      try {
-        State.userService.stopRecordingAudio();
-      } catch (RemoteException e) {
-        // ignore
-      }
-    }
+    CaptureAudio.stopRemoteSubmix();
     if (isMuted && context != null) {
       State.log("restoring volume");
       isMuted = false;

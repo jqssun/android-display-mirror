@@ -7,7 +7,7 @@ public class AudioRecordProxy {
   public int read(float[] audioData, int offsetInFloats, int sizeInFloats, int readMode) {
     try {
       if (State.userService != null) {
-        return State.userService.readAudio(audioData);
+        return State.userService.readAudioFloat(audioData);
       } else {
         return 0;
       }

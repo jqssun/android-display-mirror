@@ -57,6 +57,15 @@
             <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/prevent_auto_lock_checkbox" android:layout_width="wrap_content" android:layout_height="wrap_content" />
         </LinearLayout>
 
+        <!-- Capture audio per app -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingHorizontal="16dp" android:paddingVertical="12dp">
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="16dp" android:orientation="vertical">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/disable_remote_submix" android:textAppearance="?attr/textAppearanceBodyLarge" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/disable_remote_submix_desc" android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="?colorOnSurfaceVariant" />
+            </LinearLayout>
+            <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/disable_remote_submix_checkbox" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+        </LinearLayout>
+
         <!-- Mirror -->
         <TextView
             android:layout_width="wrap_content"

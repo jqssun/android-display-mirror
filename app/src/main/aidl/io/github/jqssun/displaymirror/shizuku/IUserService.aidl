@@ -20,9 +20,11 @@ interface IUserService {
 
     boolean isRooted() = 8;
 
-    int readAudio(out float[] buffer) = 9;
+    int readAudioFloat(out float[] buffer) = 9;
 
-    boolean startRecordingAudio() = 10;
+    boolean startRecordingAudio(int sampleRate, int encoding) = 10;
 
     boolean stopRecordingAudio() = 11;
+
+    int readAudioPcm16(out byte[] buffer) = 12;
 }

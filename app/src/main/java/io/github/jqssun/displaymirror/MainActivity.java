@@ -66,8 +66,6 @@ public class MainActivity extends AppCompatActivity {
         Shell.Builder.create().setFlags(Shell.FLAG_MOUNT_MASTER).setTimeout(10));
   }
 
-  public static final int REQUEST_RECORD_AUDIO_PERMISSION = 1002;
-
   private NavController navController;
   private BottomNavigationView bottomNav;
   private OnBackPressedCallback crossAppBackCallback;
@@ -123,6 +121,14 @@ public class MainActivity extends AppCompatActivity {
             }
           });
 
+  private final ActivityResultLauncher<String> recordAudioLauncher =
+      registerForActivityResult(
+          new ActivityResultContracts.RequestPermission(),
+          granted -> {
+            State.log("audio recording permission " + (granted ? "granted" : "denied"));
+            State.resumeJob();
+          });
+
   private final ActivityResultLauncher<Intent> importApkLauncher =
       registerForActivityResult(
           new ActivityResultContracts.StartActivityForResult(),
@@ -152,17 +158,6 @@ public class MainActivity extends AppCompatActivity {
               }
             }
           });
-
-  @Override
-  public void onRequestPermissionsResult(
-      int requestCode, String[] permissions, int[] grantResults) {
-    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    if (requestCode == REQUEST_RECORD_AUDIO_PERMISSION) {
-      State.resumeJob();
-    } else {
-      State.log("unknown permission request code: " + requestCode);
-    }
-  }
 
   private void _onRequestShizukuPermissionsResult(int requestCode, int grantResult) {
     if (requestCode == AcquireShizuku.SHIZUKU_PERMISSION_REQUEST_CODE) {
@@ -289,7 +284,10 @@ public class MainActivity extends AppCompatActivity {
     Shizuku.removeRequestPermissionResultListener(requestPermissionResultListener);
     Shizuku.removeBinderReceivedListener(_binderReceivedListener);
     Shizuku.removeBinderDeadListener(_binderDeadListener);
-    State.setCurrentActivity(null);
+    // a relaunch already registered the new instance, don't wipe it
+    if (State.getCurrentActivity() == this) {
+      State.setCurrentActivity(null);
+    }
   }
 
   public void startSunshine() {
@@ -305,6 +303,10 @@ public class MainActivity extends AppCompatActivity {
       SunshineHost.start(this);
       refresh();
     }
+  }
+
+  public void requestRecordAudioPermission() {
+    runOnUiThread(() -> recordAudioLauncher.launch(android.Manifest.permission.RECORD_AUDIO));
   }
 
   public void startAirPlayProjection() {

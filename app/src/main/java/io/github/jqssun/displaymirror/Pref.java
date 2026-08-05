@@ -17,13 +17,15 @@ public class Pref {
   // runtime marker so leftover forced size gets cleared after crash
   public static final String KEY_ASPECT_FORCED = "aspect_forced";
 
+  // audio
+  public static final String KEY_DISABLE_REMOTE_SUBMIX = "disable_remote_submix";
+
   // sunshine
   public static final String KEY_SUNSHINE_INPUT_TO_EXTERNAL_DISPLAY =
       "sunshine_input_to_external_display";
   public static final String KEY_SUNSHINE_SHOW_CURSOR = "sunshine_show_cursor";
   public static final String KEY_SUNSHINE_AUTO_CONNECT_CLIENT = "sunshine_auto_connect_client";
   public static final String KEY_SUNSHINE_SELECTED_CLIENT = "sunshine_selected_client";
-  public static final String KEY_SUNSHINE_DISABLE_REMOTE_SUBMIX = "sunshine_disable_remote_submix";
   public static final String KEY_SUNSHINE_DEVICE_NAME = "sunshine_device_name";
 
   // airplay
@@ -80,6 +82,10 @@ public class Pref {
     return getBoolean(KEY_PREVENT_AUTO_LOCK, false);
   }
 
+  public static boolean getDisableRemoteSubmix() {
+    return getBoolean(KEY_DISABLE_REMOTE_SUBMIX, false);
+  }
+
   public static boolean getSunshineShowCursor() {
     return getBoolean(KEY_SUNSHINE_SHOW_CURSOR, false);
   }
@@ -90,10 +96,6 @@ public class Pref {
 
   public static String getSunshineSelectedClient() {
     return getString(KEY_SUNSHINE_SELECTED_CLIENT, "");
-  }
-
-  public static boolean getSunshineDisableRemoteSubmix() {
-    return getBoolean(KEY_SUNSHINE_DISABLE_REMOTE_SUBMIX, false);
   }
 
   public static String getSunshineDeviceName() {

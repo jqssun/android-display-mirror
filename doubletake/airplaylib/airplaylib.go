@@ -40,6 +40,9 @@ type Session struct {
 	firstSendLog bool
 	sessionStart time.Time
 
+	audioW       *io.PipeWriter
+	audioCapture *airplay.AudioCapture
+
 	airplay1Stored bool
 	airplay1Width  int
 	airplay1Height int
@@ -115,6 +118,8 @@ func (s *Session) Connect(host string, port int, pin string, width int, height i
 		s.mu.Unlock()
 
 		airplay.DebugMode = true
+		// cmd/doubletake default; 1ms library default gives Apple no jitter budget
+		airplay.SetTargetLatency(100 * time.Millisecond)
 		client := airplay.NewAirPlayClient(host, port)
 		if err := client.Connect(ctx); err != nil {
 			s.handler.OnError("connect: " + err.Error())
@@ -126,40 +131,31 @@ func (s *Session) Connect(host string, port int, pin string, width int, height i
 		s.mu.Unlock()
 
 		// match the receiver's display; airplay1 keeps caller dims + clamp
-		if !airplay.AirPlay1Mode {
-			if rw, rh := client.ReceiverDisplaySize(); rw > 0 && rh > 0 {
+		if airplay.AirPlay1Mode {
+			airplay.AirPlay1Password = pin
+			width, height = clampAirPlay1(width, height)
+		} else {
+			info, err := s.setupAirPlay2(ctx, client, pin)
+			if err != nil {
+				return
+			}
+			if rw, rh := info.DisplaySize(); rw > 0 && rh > 0 {
 				s.logf("[AIRPLAY] using receiver display %dx%d (caller requested %dx%d)", rw, rh, width, height)
 				width, height = rw, rh
 			}
-		} else {
-			width, height = clampAirPlay1(width, height)
 		}
 		s.mu.Lock()
 		s.streamWidth = width
 		s.streamHeight = height
 		s.mu.Unlock()
 
-		if airplay.AirPlay1Mode {
-			airplay.AirPlay1Password = pin
-		} else {
-			if err := s.setupAirPlay2(ctx, client, pin); err != nil {
-				return
-			}
-		}
-
-		cfg := airplay.StreamConfig{
-			Width:   width,
-			Height:  height,
-			FPS:     fps,
-			NoAudio: true,
-		}
 		s.logf("[AIRPLAY] setting up mirror session %dx%d@%d (airplay1=%v)", width, height, fps, airplay.AirPlay1Mode)
 		var mirror *airplay.MirrorSession
 		var setupErr error
 		if airplay.AirPlay1Mode {
-			mirror, setupErr = client.SetupMirrorAirPlay1(ctx, cfg)
+			mirror, setupErr = client.SetupMirrorAirPlay1(ctx)
 		} else {
-			mirror, setupErr = client.SetupMirror(ctx, cfg)
+			mirror, setupErr = client.SetupMirror(ctx, airplay.StreamConfig{FPS: fps})
 		}
 		if setupErr != nil {
 			if errors.Is(setupErr, airplay.ErrAirPlay1PasswordRequired) {
@@ -196,6 +192,23 @@ func (s *Session) Connect(host string, port int, pin string, width int, height i
 			}
 			s.handler.OnDisconnected(fmt.Sprintf("%v", streamErr))
 		}()
+
+		// StreamAudio reads only after first video frame, so this pipe backpressures until then
+		if mirror.HasAudio() {
+			capture, audioW := airplay.NewPipeAudioCapture()
+			s.mu.Lock()
+			s.audioCapture = capture
+			s.audioW = audioW
+			s.mu.Unlock()
+			go func() {
+				if err := mirror.StreamAudio(ctx, capture, mirror.AudioStream()); err != nil && ctx.Err() == nil {
+					s.logf("[AIRPLAY] audio forwarder ended: %v", err)
+				}
+			}()
+			s.logf("[AIRPLAY] audio stream negotiated")
+		} else {
+			s.logf("[AIRPLAY] receiver negotiated no audio stream")
+		}
 
 		s.handler.OnConnected()
 	}()
@@ -236,6 +249,26 @@ func (s *Session) SendFrame(annexBData []byte, isKeyframe bool) {
 	}
 }
 
+// airplay1 never negotiates one
+func (s *Session) HasAudio() bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.audioW != nil
+}
+
+// interleaved S16LE 44.1kHz stereo PCM
+func (s *Session) SendAudio(pcm []byte) {
+	s.mu.Lock()
+	w := s.audioW
+	s.mu.Unlock()
+	if w == nil {
+		return
+	}
+	if _, err := w.Write(pcm); err != nil {
+		s.logf("[AIRPLAY] audio pipe write error: %v", err)
+	}
+}
+
 func (s *Session) Disconnect() {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -243,6 +276,11 @@ func (s *Session) Disconnect() {
 	if s.pipeW != nil {
 		s.pipeW.Close()
 		s.pipeW = nil
+	}
+	if s.audioW != nil {
+		airplay.StopPipeAudioCapture(s.audioCapture, s.audioW)
+		s.audioW = nil
+		s.audioCapture = nil
 	}
 	if s.cancel != nil {
 		s.cancel()

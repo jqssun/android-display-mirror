@@ -6,6 +6,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.media.projection.MediaProjection;
 import android.os.IBinder;
+import android.os.SystemClock;
 import android.util.Log;
 import androidx.lifecycle.MutableLiveData;
 import io.github.jqssun.displaymirror.job.Job;
@@ -44,12 +45,37 @@ public class State {
     currentActivity = new WeakReference<>(activity);
   }
 
+  private static final Object userServiceLock = new Object();
+
+  // blocks for in-flight bind, null on timeout
+  public static IUserService awaitUserService(long timeoutMs) {
+    synchronized (userServiceLock) {
+      long deadline = SystemClock.uptimeMillis() + timeoutMs;
+      while (userService == null) {
+        long remaining = deadline - SystemClock.uptimeMillis();
+        if (remaining <= 0) {
+          return null;
+        }
+        try {
+          userServiceLock.wait(remaining);
+        } catch (InterruptedException e) {
+          Thread.currentThread().interrupt();
+          return null;
+        }
+      }
+      return userService;
+    }
+  }
+
   public static final ServiceConnection userServiceConnection =
       new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder binder) {
           State.log("user service connected");
-          State.userService = IUserService.Stub.asInterface(binder);
+          synchronized (userServiceLock) {
+            State.userService = IUserService.Stub.asInterface(binder);
+            userServiceLock.notifyAll();
+          }
           if (State.currentActivity != null && State.currentActivity.get() != null) {
             MainActivity context = State.currentActivity.get();
             context.runOnUiThread(

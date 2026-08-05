@@ -1,22 +1,38 @@
 package airplay
 
 import (
+	"io"
 	"regexp"
 	"strconv"
-
-	"howett.net/plist"
 )
 
 /*
-This sets the video key SHA-512 derivation to 16 zero bytes as its session key input instead of the encKey derived from FairPlay. This is needed to support Apple receivers where real FairPlay SAP is used, so we intentionally keep this value bzero'd in the setup phase in order to skip FairPlay in no audio mode.
+backs AudioCapture with pipe instead of gst subprocess; android feeds S16LE 44.1kHz stereo PCM from MediaProjection and ReadFrame does the ALAC framing
+*/
+func NewPipeAudioCapture() (*AudioCapture, *io.PipeWriter) {
+	r, w := io.Pipe()
+	return &AudioCapture{pcmPipe: r, waitCh: make(chan struct{})}, w
+}
+
+/*
+AudioCapture.Stop waits on waitCh which only gst closes, so it deadlocks here
+*/
+func StopPipeAudioCapture(ac *AudioCapture, w *io.PipeWriter) {
+	if ac == nil || ac.stopped {
+		return
+	}
+	ac.stopped = true
+	w.Close()
+	close(ac.waitCh)
+}
+
+/*
+3rd party receivers (UxPlay) and HAP-paired receivers hash the pair-verify ECDH secret into the FairPlay stream key; whereas Apple receivers decrypt with the raw key over a plaintext pair-verify
 */
 var AppleReceiver bool
 
-func patchAppleReceiverKey(k []byte) []byte {
-	if AppleReceiver {
-		return make([]byte, 16)
-	}
-	return k
+func mixesStreamKey(encrypted bool) bool {
+	return encrypted || !AppleReceiver
 }
 
 /*
@@ -31,35 +47,4 @@ func parseTransportServerPort(transport string) int {
 		return port
 	}
 	return 0
-}
-
-/*
-receiver display resolution from GET /info; (0,0) if not advertised
-*/
-type receiverDisplay struct {
-	Width        int `plist:"width"`
-	Height       int `plist:"height"`
-	WidthPixels  int `plist:"widthPixels"`
-	HeightPixels int `plist:"heightPixels"`
-}
-
-func (c *AirPlayClient) ReceiverDisplaySize() (int, int) {
-	resp, err := c.httpRequest("GET", "/info", "application/x-apple-binary-plist", nil)
-	if err != nil {
-		return 0, 0
-	}
-	var info struct {
-		Displays []receiverDisplay `plist:"displays"`
-	}
-	if _, err := plist.Unmarshal(resp, &info); err != nil {
-		return 0, 0
-	}
-	if len(info.Displays) == 0 {
-		return 0, 0
-	}
-	d := info.Displays[0]
-	if d.WidthPixels > 0 && d.HeightPixels > 0 {
-		return d.WidthPixels, d.HeightPixels
-	}
-	return d.Width, d.Height
 }

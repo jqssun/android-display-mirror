@@ -22,7 +22,7 @@ var (
 
 var ErrAirPlay1PasswordRequired = fmt.Errorf("airplay1 receiver requires password")
 
-func (c *AirPlayClient) SetupMirrorAirPlay1(ctx context.Context, cfg StreamConfig) (*MirrorSession, error) {
+func (c *AirPlayClient) SetupMirrorAirPlay1(ctx context.Context) (*MirrorSession, error) {
 	videoURI := fmt.Sprintf("rtsp://%s:%d/video", c.host, c.port)
 	setupHeaders := map[string]string{
 		"Transport": "RTP/AVP/TCP;unicast;interleaved=0-1;mode=screen",
@@ -74,13 +74,11 @@ func (c *AirPlayClient) SetupMirrorAirPlay1(ctx context.Context, cfg StreamConfi
 	dbg("[AIRPLAY1] data connected: %s, /stream preamble sent (%d bytes)", dataAddr, len(preambleBody))
 
 	return &MirrorSession{
-		client:      c,
-		dataConn:    dataConn,
-		DataPort:    dataPort,
-		videoWidth:  cfg.Width,
-		videoHeight: cfg.Height,
-		sessionURI:  videoURI,
-		noAudio:     true,
+		client:     c,
+		dataConn:   dataConn,
+		DataPort:   dataPort,
+		sessionURI: videoURI,
+		noAudio:    true,
 	}, nil
 }
 
