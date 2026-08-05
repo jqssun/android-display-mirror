@@ -280,19 +280,26 @@ public class UserService extends IUserService.Stub {
   @Override
   public int readAudioPcm16(byte[] result) throws RemoteException {
     try {
+      // negative so callers can tell failure from silence
       if (audioRecord == null) {
-        return 0;
+        return AudioRecord.ERROR_INVALID_OPERATION;
       }
       return audioRecord.read(result, 0, result.length, AudioRecord.READ_BLOCKING);
     } catch (Throwable e) {
       Ln.e("failed to read audio", e);
-      return 0;
+      return AudioRecord.ERROR;
     }
   }
 
   @Override
   public boolean startRecordingAudio(int sampleRate, int encoding) throws RemoteException {
     try {
+      if (audioRecord != null
+          && (audioRecord.getSampleRate() != sampleRate
+              || audioRecord.getAudioFormat() != encoding)) {
+        Ln.d("recreating recorder for new format");
+        stopRecordingAudio();
+      }
       if (audioRecord == null) {
         Ln.d("before start recording");
         audioRecord = createAudioRecord(sampleRate, encoding);
@@ -313,6 +320,7 @@ public class UserService extends IUserService.Stub {
         return true;
       } else {
         audioRecord.stop();
+        audioRecord.release();
         audioRecord = null;
         return true;
       }

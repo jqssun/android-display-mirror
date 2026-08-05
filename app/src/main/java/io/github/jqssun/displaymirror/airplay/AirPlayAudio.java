@@ -78,7 +78,8 @@ public class AirPlayAudio {
         int n = s.read(buf);
         if (n > 0) {
           AirPlayService.onAudioFrame(n == buf.length ? buf : Arrays.copyOf(buf, n));
-        } else if (n < 0) {
+        } else {
+          // 0 means recorder stopped; < 0 means error
           if (running) State.log("AirPlay audio stopped: read failed (" + n + ")");
           return;
         }

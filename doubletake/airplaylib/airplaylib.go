@@ -204,6 +204,14 @@ func (s *Session) Connect(host string, port int, pin string, width int, height i
 				if err := mirror.StreamAudio(ctx, capture, mirror.AudioStream()); err != nil && ctx.Err() == nil {
 					s.logf("[AIRPLAY] audio forwarder ended: %v", err)
 				}
+				// forwarder no longer reads: close pipe or SendAudio blocks forever in unbuffered write
+				s.mu.Lock()
+				w, c := s.audioW, s.audioCapture
+				s.audioW, s.audioCapture = nil, nil
+				s.mu.Unlock()
+				if w != nil {
+					airplay.StopPipeAudioCapture(c, w)
+				}
 			}()
 			s.logf("[AIRPLAY] audio stream negotiated")
 		} else {

@@ -16,11 +16,14 @@ public class SunshineAudio {
   private static final int ENCODING = AudioFormat.ENCODING_PCM_FLOAT;
 
   private static boolean isMuted = false;
+  // submix is refcounted across paths, only release refs we took
+  private static boolean submixHeld;
   private static AudioManager.OnAudioFocusChangeListener volumeChangeListener;
 
   public static boolean sendAudio(Context context, int packetDuration) throws YieldException {
     if (CaptureAudio.useRemoteSubmix()) {
       if (CaptureAudio.startRemoteSubmix(SAMPLE_RATE, ENCODING)) {
+        submixHeld = true;
         // native reads float off the proxy
         SunshineServer.startAudioRecording(
             new AudioRecordProxy(), _framesPerPacket(packetDuration));
@@ -118,7 +121,10 @@ public class SunshineAudio {
   }
 
   public static void restoreVolume(Context context) {
-    CaptureAudio.stopRemoteSubmix();
+    if (submixHeld) {
+      submixHeld = false;
+      CaptureAudio.stopRemoteSubmix();
+    }
     if (isMuted && context != null) {
       State.log("restoring volume");
       isMuted = false;
