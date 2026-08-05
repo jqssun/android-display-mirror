@@ -33,6 +33,12 @@ sed -Ezi 's|if err != nil \{[[:space:]]+return nil, nil, err|if err != nil {\n\t
 sed -i 's|deriveStreamMasterKey(c.fpAesKey, sharedSecret(c.PairKeys), c.encrypted)|deriveStreamMasterKey(c.fpAesKey, sharedSecret(c.PairKeys), mixesStreamKey(c.encrypted))|' internal/airplay/fairplay.go
 sed -i 's|if c.encrypted \&\& len(sharedSecret(c.PairKeys)) > 0 {|if mixesStreamKey(c.encrypted) \&\& len(sharedSecret(c.PairKeys)) > 0 {|' internal/airplay/fairplay.go
 
+# type
+sed -i 's|\[\]byte        `plist|pkBytes       `plist|' internal/airplay/client.go
+sed -i 's|int `plist|plistNum `plist|' internal/airplay/client.go
+sed -i 's|bool          `plist|plistBool     `plist|' internal/airplay/client.go
+sed -i 's|return w, h|return int(w), int(h)|' internal/airplay/client.go
+
 # might rewrite entire thing
 go get golang.org/x/mobile/bind 2>/dev/null || true;
 gomobile bind -v -trimpath -ldflags="-buildid= -extldflags=-Wl,-z,max-page-size=16384" -target android -androidapi 26 -o $OUT_DIR/airplaylib.aar ./airplaylib/ # -overlay $(realpath ../overlay.json)

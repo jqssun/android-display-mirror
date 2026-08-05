@@ -60,15 +60,6 @@ public class AirPlayFragment extends Fragment {
     MaterialButton manualBtn = view.findViewById(R.id.airplay_manual_btn);
     MaterialButton manualConnectBtn = view.findViewById(R.id.airplay_manual_connect_btn);
 
-    MaterialSwitch appleReceiverSwitch = view.findViewById(R.id.airplay_apple_receiver_switch);
-    appleReceiverSwitch.setChecked(Pref.getAirPlayAppleReceiver());
-    airplaylib.Airplaylib.setAppleReceiver(Pref.getAirPlayAppleReceiver());
-    appleReceiverSwitch.setOnCheckedChangeListener(
-        (b, c) -> {
-          Pref.getPreferences().edit().putBoolean(Pref.KEY_AIRPLAY_APPLE_RECEIVER, c).apply();
-          airplaylib.Airplaylib.setAppleReceiver(c);
-        });
-
     MaterialSwitch airplay1ModeSwitch = view.findViewById(R.id.airplay1_mode_switch);
     airplay1ModeSwitch.setChecked(Pref.getAirPlay1Mode());
     airplaylib.Airplaylib.setAirPlay1Mode(Pref.getAirPlay1Mode());

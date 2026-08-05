@@ -257,7 +257,6 @@ public class AirPlayService {
             + pendingHeight
             + ")");
 
-    airplaylib.Airplaylib.setAppleReceiver(Pref.getAirPlayAppleReceiver());
     _ensureSession();
     session.connect(host, port, pin, pendingWidth, pendingHeight, pendingFps);
   }

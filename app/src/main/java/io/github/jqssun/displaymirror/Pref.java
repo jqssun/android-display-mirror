@@ -29,7 +29,6 @@ public class Pref {
   public static final String KEY_SUNSHINE_DEVICE_NAME = "sunshine_device_name";
 
   // airplay
-  public static final String KEY_AIRPLAY_APPLE_RECEIVER = "airplay_apple_receiver";
   public static final String KEY_AIRPLAY1_MODE = "airplay1_mode";
 
   // displaylink
@@ -105,10 +104,6 @@ public class Pref {
 
   public static String getDefaultSunshineDeviceName() {
     return "Mirror-" + Build.MANUFACTURER + "-" + Build.MODEL;
-  }
-
-  public static boolean getAirPlayAppleReceiver() {
-    return getBoolean(KEY_AIRPLAY_APPLE_RECEIVER, true);
   }
 
   public static boolean getAirPlay1Mode() {

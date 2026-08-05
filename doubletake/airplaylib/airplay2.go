@@ -7,10 +7,6 @@ import (
 	"doubletake/internal/airplay"
 )
 
-func SetAppleReceiver(enabled bool) {
-	airplay.AppleReceiver = enabled
-}
-
 var credStore *airplay.CredentialStore
 
 // pairing credentials live in app-private storage
@@ -32,6 +28,8 @@ func (s *Session) setupAirPlay2(ctx context.Context, client *airplay.AirPlayClie
 		return nil, s._setupFailed(client, "getinfo: ", err)
 	}
 	s.logf("[AIRPLAY2] connected to: %s (model: %s)", info.Name, info.Model)
+	s.logf("[AIRPLAY2] apple receiver: %v (features %#016x, statusFlags %#x)",
+		airplay.DetectAppleReceiver(info), info.Features, info.StatusFlags)
 
 	var saved *airplay.SavedCredentials
 	if pin == "" && credStore != nil {
@@ -60,13 +58,13 @@ func (s *Session) setupAirPlay2(ctx context.Context, client *airplay.AirPlayClie
 			if _, err := client.GetInfo(); err != nil {
 				return nil, s._setupFailed(client, "getinfo after reconnect: ", err)
 			}
-			if err := client.Pair(ctx, ""); err != nil {
+			if err := client.PairTransientAuto(ctx); err != nil {
 				return nil, s._requestPIN(client, err)
 			}
 		}
 
 	default:
-		if err := client.Pair(ctx, ""); err != nil {
+		if err := client.PairTransientAuto(ctx); err != nil {
 			return nil, s._requestPIN(client, err)
 		}
 	}
