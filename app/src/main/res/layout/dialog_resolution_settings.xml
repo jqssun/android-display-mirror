@@ -7,9 +7,9 @@
     android:padding="16dp">
 
     <TextView
+        android:id="@+id/resolution_explanation_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/resolution_explanation"
         android:textAppearance="?attr/textAppearanceBodySmall"
         android:textColor="?colorOnSurfaceVariant"
         android:layout_marginBottom="16dp"/>

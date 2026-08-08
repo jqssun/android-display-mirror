@@ -223,7 +223,7 @@ public class AirPlayService {
   }
 
   // step 1: User hits connect → start AirPlay handshake (no projection yet)
-  public void connect(String host, int port, String pin, int width, int height, int fps) {
+  public void connect(String host, int port, String pin) {
     // tear down any previous session/attempt
     if (session != null) {
       session.disconnect();
@@ -234,18 +234,10 @@ public class AirPlayService {
     pendingHost = host;
     pendingPort = port;
     pendingPin = pin;
-    pendingFps = fps;
+    pendingWidth = Pref.getAirPlayWidth();
+    pendingHeight = Pref.getAirPlayHeight();
+    pendingFps = Pref.getAirPlayRefreshRate();
 
-    // get screen dimensions now (doesn't need projection)
-    Context ctx = State.getContext();
-    if (ctx != null) {
-      android.util.DisplayMetrics dm = new android.util.DisplayMetrics();
-      ((android.view.WindowManager) ctx.getSystemService(Context.WINDOW_SERVICE))
-          .getDefaultDisplay()
-          .getRealMetrics(dm);
-      pendingWidth = dm.widthPixels;
-      pendingHeight = dm.heightPixels;
-    }
     State.log(
         "AirPlay: connecting to "
             + host

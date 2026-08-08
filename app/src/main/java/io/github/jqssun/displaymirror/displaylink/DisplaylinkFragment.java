@@ -17,6 +17,7 @@ import io.github.jqssun.displaymirror.MainActivity;
 import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.R;
 import io.github.jqssun.displaymirror.State;
+import io.github.jqssun.displaymirror.dialog.ResolutionSettingsDialog;
 
 public class DisplaylinkFragment extends Fragment {
   private SharedPreferences preferences;
@@ -126,7 +127,21 @@ public class DisplaylinkFragment extends Fragment {
 
   private void _showResolutionDialog(TextView currentResolutionText) {
     ResolutionSettingsDialog.show(
-        requireContext(), () -> _updateResolutionText(currentResolutionText));
+        requireContext(),
+        R.string.displaylink_resolution_title,
+        R.string.resolution_explanation,
+        Pref.getDisplaylinkWidth(),
+        Pref.getDisplaylinkHeight(),
+        Pref.getDisplaylinkRefreshRate(),
+        (w, h, r) -> {
+          preferences
+              .edit()
+              .putInt(Pref.KEY_DISPLAYLINK_WIDTH, w)
+              .putInt(Pref.KEY_DISPLAYLINK_HEIGHT, h)
+              .putInt(Pref.KEY_DISPLAYLINK_REFRESH_RATE, r)
+              .apply();
+          _updateResolutionText(currentResolutionText);
+        });
   }
 
   private void _updateManageDisplayButton() {

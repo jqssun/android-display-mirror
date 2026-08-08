@@ -31,6 +31,9 @@ public class Pref {
 
   // airplay
   public static final String KEY_AIRPLAY1_MODE = "airplay1_mode";
+  public static final String KEY_AIRPLAY_WIDTH = "airplay_width";
+  public static final String KEY_AIRPLAY_HEIGHT = "airplay_height";
+  public static final String KEY_AIRPLAY_REFRESH_RATE = "airplay_refresh_rate";
 
   // displaylink
   public static final String KEY_DISPLAYLINK_WIDTH = "displaylink_width";
@@ -113,6 +116,18 @@ public class Pref {
 
   public static boolean getAirPlay1Mode() {
     return getBoolean(KEY_AIRPLAY1_MODE, false);
+  }
+
+  public static int getAirPlayWidth() {
+    return getInt(KEY_AIRPLAY_WIDTH, 1920);
+  }
+
+  public static int getAirPlayHeight() {
+    return getInt(KEY_AIRPLAY_HEIGHT, 1080);
+  }
+
+  public static int getAirPlayRefreshRate() {
+    return getInt(KEY_AIRPLAY_REFRESH_RATE, 30);
   }
 
   public static int getDisplaylinkWidth() {

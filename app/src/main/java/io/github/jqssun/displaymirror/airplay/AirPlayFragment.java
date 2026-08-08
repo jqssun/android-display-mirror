@@ -19,6 +19,7 @@ import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.R;
 import io.github.jqssun.displaymirror.State;
 import io.github.jqssun.displaymirror.dialog.PinDialog;
+import io.github.jqssun.displaymirror.dialog.ResolutionSettingsDialog;
 import java.util.List;
 
 public class AirPlayFragment extends Fragment {
@@ -74,6 +75,28 @@ public class AirPlayFragment extends Fragment {
                 .manageDisplayInExtend(
                     AirPlayState.getVirtualDisplayId(), MainActivity.SCREEN_AIRPLAY));
 
+    TextView resolutionText = view.findViewById(R.id.airplay_resolution_text);
+    _updateResolutionText(resolutionText);
+    view.findViewById(R.id.airplay_resolution_button)
+        .setOnClickListener(
+            v ->
+                ResolutionSettingsDialog.show(
+                    requireContext(),
+                    R.string.airplay_resolution_title,
+                    R.string.airplay_resolution_explanation,
+                    Pref.getAirPlayWidth(),
+                    Pref.getAirPlayHeight(),
+                    Pref.getAirPlayRefreshRate(),
+                    (w, h, r) -> {
+                      Pref.getPreferences()
+                          .edit()
+                          .putInt(Pref.KEY_AIRPLAY_WIDTH, w)
+                          .putInt(Pref.KEY_AIRPLAY_HEIGHT, h)
+                          .putInt(Pref.KEY_AIRPLAY_REFRESH_RATE, r)
+                          .apply();
+                      _updateResolutionText(resolutionText);
+                    }));
+
     manualBtn.setOnClickListener(
         v -> {
           boolean show = manualLayout.getVisibility() != View.VISIBLE;
@@ -95,8 +118,7 @@ public class AirPlayFragment extends Fragment {
           _pendingDevice = new AirPlayService.AirPlayDevice("Manual (" + ip + ")", ip, port);
           _updateStatus(
               R.drawable.ic_sync, R.string.airplay_connecting, R.string.airplay_connecting_detail);
-          AirPlayService.getInstance()
-              .connect(_pendingDevice.ip, _pendingDevice.port, "", 0, 0, 30);
+          AirPlayService.getInstance().connect(_pendingDevice.ip, _pendingDevice.port, "");
         });
 
     airplay.setListener(
@@ -176,7 +198,7 @@ public class AirPlayFragment extends Fragment {
           _pendingDevice = dev;
           _updateStatus(
               R.drawable.ic_sync, R.string.airplay_connecting, R.string.airplay_connecting_detail);
-          airplay.connect(dev.ip, dev.port, "", 0, 0, 30);
+          airplay.connect(dev.ip, dev.port, "");
         });
 
     // restore state if devices already discovered
@@ -218,8 +240,17 @@ public class AirPlayFragment extends Fragment {
           _pendingDevice = dev;
           _updateStatus(
               R.drawable.ic_sync, R.string.airplay_connecting, R.string.airplay_connecting_detail);
-          AirPlayService.getInstance().connect(dev.ip, dev.port, pin, 0, 0, 30);
+          AirPlayService.getInstance().connect(dev.ip, dev.port, pin);
         });
+  }
+
+  private void _updateResolutionText(TextView textView) {
+    textView.setText(
+        getString(
+            R.string.airplay_output_format,
+            Pref.getAirPlayWidth(),
+            Pref.getAirPlayHeight(),
+            Pref.getAirPlayRefreshRate()));
   }
 
   private void _updateStatus(int iconRes, int titleRes, int detailRes) {

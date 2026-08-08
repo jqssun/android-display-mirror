@@ -77,8 +77,10 @@
     <string name="shizuku_permission_status">Shizuku</string>
 
     <!-- dialog_resolution_settings -->
-    <string name="resolution_explanation">This only controls the output resolution of the DisplayLink chip in the adapter. For USB-C DisplayPort connections, the resolution is determined by Android automatically. For Sunshine/Moonlight, resolution and bitrate can be changed on client side.</string>
+    <string name="resolution_explanation">This only controls the output resolution of the DisplayLink chip in the adapter. For USB-C DisplayPort connections, the resolution is determined by Android automatically.</string>
     <string name="preset_resolution">Preset</string>
+    <string name="preset_portrait">Portrait</string>
+    <string name="preset_landscape">Landscape</string>
 
     <!-- dialog_manual_client_input -->
     <string name="ip_address">IP address</string>
@@ -90,7 +92,7 @@
     <string name="trusted_display_desc">Create the virtual display as a trusted display. This enables other apps to set keyboard policy and other features. Requires Shizuku.</string>
     <string name="mirror_only">Mirror only</string>
     <string name="mirror_only_desc">Always mirror the built-in screen to the external display using MediaProjection. Launching apps onto the display will not be possible.</string>
-    <string name="cast_placeholder_message">Please select an application to cast via "Manage This Display"</string>
+    <string name="cast_placeholder_message">Please select an application to cast via \"Manage This Display\" or use \"Mirror only\" mode.</string>
     <string name="rotate_with_content">Rotate with content</string>
     <string name="rotate_with_content_desc">Rotate the image on the external display with content displayed.</string>
     <string name="crop_black_borders">Fill video stream to remove black borders</string>
@@ -130,7 +132,11 @@
     <string name="airplay_manual_port_hint">Port (default 7000)</string>
     <string name="change_displaylink_output_settings">Change DisplayLink Output Settings</string>
     <string name="displaylink_resolution_title">DisplayLink Output Settings</string>
-    <string name="displaylink_output_format">Current output: %1$dx%2$d@%3$dHz</string>
+    <string name="displaylink_output_format">Current DisplayLink Output: %1$dx%2$d@%3$dHz</string>
+    <string name="change_airplay_output_settings">Change AirPlay Output Settings</string>
+    <string name="airplay_resolution_title">AirPlay Output Settings</string>
+    <string name="airplay_output_format">Current AirPlay Output: %1$dx%2$d@%3$dHz</string>
+    <string name="airplay_resolution_explanation">This controls the default output format advertised to the AirPlay receiver when connecting. The receiver may negotiate a different stream resolution.</string>
     <string name="quick_presets">Custom</string>
     <string name="manual_input">Manual input</string>
     <string name="manual_input_client_title">Manual input client</string>

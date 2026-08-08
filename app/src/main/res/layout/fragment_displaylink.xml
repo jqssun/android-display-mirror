@@ -145,15 +145,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingHorizontal="16dp"
-            android:paddingTop="12dp"
-            android:text="@string/resolution_explanation"
-            android:textAppearance="?attr/textAppearanceBodySmall"
-            android:textColor="?colorOnSurfaceVariant" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingHorizontal="16dp"
             android:paddingTop="16dp"
             android:paddingBottom="16dp"
             android:text="@string/about_displaylink_legal_notice"
