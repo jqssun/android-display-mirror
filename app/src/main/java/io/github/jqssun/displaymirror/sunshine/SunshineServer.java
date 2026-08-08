@@ -98,7 +98,7 @@ public class SunshineServer {
 
   public static native void startAudioRecording(Object audioRecord, int framesPerPacket);
 
-  public static native void enableH265();
+  public static native void setHevcSupported(boolean supported);
 
   public static void showEncoderError(String errorMessage) {
     new Handler(Looper.getMainLooper())

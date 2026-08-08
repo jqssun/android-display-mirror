@@ -24,6 +24,7 @@ public class Pref {
   public static final String KEY_SUNSHINE_INPUT_TO_EXTERNAL_DISPLAY =
       "sunshine_input_to_external_display";
   public static final String KEY_SUNSHINE_SHOW_CURSOR = "sunshine_show_cursor";
+  public static final String KEY_SUNSHINE_H265 = "sunshine_h265";
   public static final String KEY_SUNSHINE_AUTO_CONNECT_CLIENT = "sunshine_auto_connect_client";
   public static final String KEY_SUNSHINE_SELECTED_CLIENT = "sunshine_selected_client";
   public static final String KEY_SUNSHINE_DEVICE_NAME = "sunshine_device_name";
@@ -87,6 +88,10 @@ public class Pref {
 
   public static boolean getSunshineShowCursor() {
     return getBoolean(KEY_SUNSHINE_SHOW_CURSOR, false);
+  }
+
+  public static boolean getSunshineH265() {
+    return getBoolean(KEY_SUNSHINE_H265, true);
   }
 
   public static boolean getSunshineAutoConnectClient() {

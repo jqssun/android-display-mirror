@@ -39,7 +39,7 @@ public class SunshineHost {
     String name = Pref.getSunshineDeviceName();
     SunshineServer.setSunshineName(name);
     Set<String> ips = getWifiIpAddresses(context);
-    probeH265();
+    updateHevcMode();
 
     new Thread(
             () -> {
@@ -125,7 +125,17 @@ public class SunshineHost {
     return ips;
   }
 
-  private static void probeH265() {
+  // applies immediately, clients pick the codec on their next connection
+  public static void updateHevcMode() {
+    if (!Pref.getSunshineH265()) {
+      State.log("H.265 disabled in settings, clients will use H.264");
+      SunshineServer.setHevcSupported(false);
+      return;
+    }
+    SunshineServer.setHevcSupported(_hasH265Encoder());
+  }
+
+  private static boolean _hasH265Encoder() {
     try {
       MediaCodecList codecList = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
       for (MediaCodecInfo codecInfo : codecList.getCodecInfos()) {
@@ -135,8 +145,7 @@ public class SunshineHost {
         if (!codecInfo.isEncoder()) continue;
         for (String type : codecInfo.getSupportedTypes()) {
           if (type.equalsIgnoreCase("video/hevc")) {
-            SunshineServer.enableH265();
-            return;
+            return true;
           }
         }
       }
@@ -144,6 +153,7 @@ public class SunshineHost {
     } catch (Exception e) {
       State.log("error checking H.265 encoding support: " + e.getMessage());
     }
+    return false;
   }
 
   private static void writeCertAndKey(Context context) {

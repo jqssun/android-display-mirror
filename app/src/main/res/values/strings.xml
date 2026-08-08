@@ -107,6 +107,8 @@
     <string name="auto_connect_sunshine_desc">Proactively send a JSON connect request to the Moonlight client. Requires a fork with the autostart listener. Not compatible with standard Moonlight.</string>
     <string name="show_sunshine_cursor">Show cursor location</string>
     <string name="show_sunshine_cursor_desc">Show a cursor overlay on the device screen for Moonlight mouse input.</string>
+    <string name="sunshine_h265">Use H.265 (HEVC)</string>
+    <string name="sunshine_h265_desc">Stream in H.265 when this device supports it. Turn off to force H.264 instead.</string>
     <string name="sunshine_device_name">Device name</string>
     <string name="section_airplay_controls">Controls</string>
     <string name="section_airplay">AirPlay Settings</string>

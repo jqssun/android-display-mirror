@@ -244,8 +244,8 @@ Java_io_github_jqssun_displaymirror_sunshine_SunshineServer_startAudioRecording(
 }
 
 JNIEXPORT void JNICALL
-Java_io_github_jqssun_displaymirror_sunshine_SunshineServer_enableH265(JNIEnv *env, jclass clazz) {
-    video::active_hevc_mode = 2;
+Java_io_github_jqssun_displaymirror_sunshine_SunshineServer_setHevcSupported(JNIEnv *env, jclass clazz, jboolean supported) {
+    video::active_hevc_mode = supported ? 2 : 1;
 }
 
 JNIEXPORT jboolean JNICALL

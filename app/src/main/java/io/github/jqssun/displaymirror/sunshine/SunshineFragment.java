@@ -117,6 +117,14 @@ public class SunshineFragment extends Fragment {
           SunshineMouse.setShowCursor(c);
         });
 
+    MaterialSwitch h265Checkbox = view.findViewById(R.id.sunshine_h265_checkbox);
+    h265Checkbox.setChecked(Pref.getSunshineH265());
+    h265Checkbox.setOnCheckedChangeListener(
+        (b, c) -> {
+          preferences.edit().putBoolean(Pref.KEY_SUNSHINE_H265, c).apply();
+          SunshineHost.updateHevcMode();
+        });
+
     boolean autoConnect = Pref.getSunshineAutoConnectClient();
     autoConnectCheckbox.setChecked(autoConnect);
     clientConnectionContainer.setVisibility(autoConnect ? View.VISIBLE : View.GONE);
