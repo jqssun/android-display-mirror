@@ -14,6 +14,8 @@ public class Pref {
   public static final String KEY_CROP_BLACK_BORDERS = "crop_black_borders";
   public static final String KEY_AUTO_MATCH_ASPECT_RATIO = "auto_match_aspect_ratio";
   public static final String KEY_PREVENT_AUTO_LOCK = "prevent_auto_lock";
+  public static final String KEY_CUSTOM_DISPLAY_FLAGS_ENABLED = "custom_display_flags_enabled";
+  public static final String KEY_CUSTOM_DISPLAY_FLAGS = "custom_display_flags";
   // runtime marker so leftover forced size gets cleared after crash
   public static final String KEY_ASPECT_FORCED = "aspect_forced";
 
@@ -78,6 +80,28 @@ public class Pref {
     SharedPreferences preferences = getPreferences();
     if (preferences != null) {
       preferences.edit().putBoolean(KEY_ASPECT_FORCED, forced).apply();
+    }
+  }
+
+  public static boolean getCustomDisplayFlagsEnabled() {
+    return getBoolean(KEY_CUSTOM_DISPLAY_FLAGS_ENABLED, false);
+  }
+
+  public static void setCustomDisplayFlagsEnabled(boolean enabled) {
+    SharedPreferences preferences = getPreferences();
+    if (preferences != null) {
+      preferences.edit().putBoolean(KEY_CUSTOM_DISPLAY_FLAGS_ENABLED, enabled).apply();
+    }
+  }
+
+  public static int getCustomDisplayFlags(int defaultFlags) {
+    return getInt(KEY_CUSTOM_DISPLAY_FLAGS, defaultFlags);
+  }
+
+  public static void setCustomDisplayFlags(int flags) {
+    SharedPreferences preferences = getPreferences();
+    if (preferences != null) {
+      preferences.edit().putInt(KEY_CUSTOM_DISPLAY_FLAGS, flags).apply();
     }
   }
 

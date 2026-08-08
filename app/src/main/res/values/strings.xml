@@ -90,6 +90,38 @@
     <string name="overlay_status">Display over other apps</string>
     <string name="trusted_display">Create as trusted virtual display</string>
     <string name="trusted_display_desc">Create the virtual display as a trusted display. This enables other apps to set keyboard policy and other features. Requires Shizuku.</string>
+    <string name="display_flags">Virtual Display Flags</string>
+    <string name="change_display_flags">Change Virtual Display Flags</string>
+    <string name="display_flags_customize">Enable customization</string>
+    <string name="display_flags_explanation">Flags used to create the trusted virtual display. Picks the recommended set for this Android version by default. Changes apply the next time a display is created. Combinations rejected by the system fall back to automatic; see Logs for details.</string>
+    <string name="flag_public" translatable="false">PUBLIC</string>
+    <string name="flag_public_desc">Apps can open windows on the display and the system may mirror the contents of other displays onto it. Unset creates a private display.</string>
+    <string name="flag_presentation" translatable="false">PRESENTATION</string>
+    <string name="flag_presentation_desc">Register as a presentation display. Apps may automatically project their content to it for second-screen experiences.</string>
+    <string name="flag_secure" translatable="false">SECURE</string>
+    <string name="flag_secure_desc">Mark the display secure. Creation requires the CAPTURE_SECURE_VIDEO_OUTPUT permission, which is reserved for system components.</string>
+    <string name="flag_insecure_keyguard" translatable="false">CAN_SHOW_WITH_INSECURE_KEYGUARD</string>
+    <string name="flag_insecure_keyguard_desc">Allow content to be displayed while the keyguard is shown but insecure. Private displays only; mutually exclusive with PUBLIC.</string>
+    <string name="flag_supports_touch" translatable="false">SUPPORTS_TOUCH</string>
+    <string name="flag_supports_touch_desc">The display can be associated with a touchpad device that matches its unique ID.</string>
+    <string name="flag_destroy_content" translatable="false">DESTROY_CONTENT_ON_REMOVAL</string>
+    <string name="flag_destroy_content_desc">Destroy contents once the display is removed. Public displays without this flag move their content to the main display stack.</string>
+    <string name="flag_system_decorations" translatable="false">SHOULD_SHOW_SYSTEM_DECORATIONS</string>
+    <string name="flag_system_decorations_desc">Support and always show system decorations: home, navigation bar and wallpaper. Does not work without TRUSTED.</string>
+    <string name="flag_trusted" translatable="false">TRUSTED</string>
+    <string name="flag_trusted_desc">Trust the display to show system decorations and receive inputs without the user\'s touch.</string>
+    <string name="flag_own_display_group" translatable="false">OWN_DISPLAY_GROUP</string>
+    <string name="flag_own_display_group_desc">Place the display in a new display group instead of the default display group.</string>
+    <string name="flag_always_unlocked" translatable="false">ALWAYS_UNLOCKED</string>
+    <string name="flag_always_unlocked_desc">Keep the display unlocked with no keyguard on it. Only valid for displays that are not in the default display group.</string>
+    <string name="flag_touch_feedback_disabled" translatable="false">TOUCH_FEEDBACK_DISABLED</string>
+    <string name="flag_touch_feedback_disabled_desc">Do not play sound effects or perform haptic feedback when the user touches the screen.</string>
+    <string name="flag_own_focus" translatable="false">OWN_FOCUS</string>
+    <string name="flag_own_focus_desc">Maintain own focus and touch mode. The display must be trusted to have its own focus.</string>
+    <string name="flag_device_display_group" translatable="false">DEVICE_DISPLAY_GROUP</string>
+    <string name="flag_device_display_group_desc">Place the display in a display group associated with its virtual device instead of the default display group.</string>
+    <string name="flag_steal_top_focus_disabled" translatable="false">STEAL_TOP_FOCUS_DISABLED</string>
+    <string name="flag_steal_top_focus_disabled_desc">Do not become the top focused display by stealing top focus from another display. Ignored without OWN_FOCUS.</string>
     <string name="mirror_only">Mirror only</string>
     <string name="mirror_only_desc">Always mirror the built-in screen to the external display using MediaProjection. Launching apps onto the display will not be possible.</string>
     <string name="cast_placeholder_message">Please select an application to cast via \"Manage This Display\" or use \"Mirror only\" mode.</string>
@@ -115,8 +147,8 @@
     <string name="section_airplay_controls">Controls</string>
     <string name="section_airplay">AirPlay Settings</string>
     <string name="airplay1_mode">Support for legacy 3rd party receivers</string>
-    <string name="airplay1_mode_desc">Enable only when used with legacy AirPlay 1 receivers that do not have AirPlay 2 support.</string>
-    <string name="about_airplay_notice">AirPlay 2: macOS, tvOS, AirPlay Receiver &amp; Server (UxPlay).\n\nAirPlay 1: Anker Nebula Cast (AirPin).\n\nThis app is not affiliated with Apple.</string>
+    <string name="airplay1_mode_desc">Enable only when used with legacy receivers including Anker Nebula Cast (AirPin) which do not have modern AirPlay support.</string>
+    <string name="about_airplay_notice">This app is not affiliated with Apple.</string>
     <string name="airplay_discover">Scan for AirPlay receivers</string>
     <string name="airplay_no_devices">AirPlay receiver not connected</string>
     <string name="airplay_no_devices_detail">Search for receivers on your network</string>

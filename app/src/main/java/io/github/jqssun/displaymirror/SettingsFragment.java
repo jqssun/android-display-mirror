@@ -14,6 +14,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.materialswitch.MaterialSwitch;
+import io.github.jqssun.displaymirror.dialog.DisplayFlagsDialog;
 import io.github.jqssun.displaymirror.job.ExitAll;
 import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
 
@@ -82,6 +83,10 @@ public class SettingsFragment extends Fragment {
 
     manageSystemDisplaySettingsBtn.setOnClickListener(
         v -> ((MainActivity) requireActivity()).openExtendSettings());
+
+    MaterialButton displayFlagsBtn = view.findViewById(R.id.display_flags_btn);
+    displayFlagsBtn.setEnabled(hasShizuku);
+    displayFlagsBtn.setOnClickListener(v -> DisplayFlagsDialog.show(requireContext()));
 
     // about
     TextView versionText = view.findViewById(R.id.version_text);

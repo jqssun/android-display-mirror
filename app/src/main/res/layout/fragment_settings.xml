@@ -103,6 +103,15 @@
             android:layout_marginTop="8dp"
             android:text="@string/manage_system_display_settings" />
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/display_flags_btn"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/change_display_flags" />
+
         <!-- About -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/about_card"
