@@ -1,5 +1,8 @@
 #include <jni.h>
+#include <algorithm>
+#include <mutex>
 #include <string>
+#include <vector>
 #include "logging.h"
 #include "config.h"
 #include "nvhttp.h"
@@ -26,7 +29,11 @@ static std::unique_ptr<logging::deinit_t> deinit;
 static JavaVM* jvm = nullptr;
 static jclass sunshineServerClass = nullptr;
 static jclass sunshineMouseClass = nullptr;
-static audio::sample_queue_t samples = nullptr;
+
+// one pump feeds all session queues
+static std::mutex sampleQueuesLock;
+static std::vector<audio::sample_queue_t> sampleQueues;
+static bool audioPumpStarted = false;
 
 // Global variables for audio recording state
 static std::thread audioRecordingThread;
@@ -64,10 +71,10 @@ Java_io_github_jqssun_displaymirror_sunshine_SunshineServer_start(JNIEnv *env, j
         env->DeleteLocalRef(mouseClass);
         
         // Cache method IDs right after creating class refs
-        handleTouchPacketMethod = env->GetStaticMethodID(sunshineMouseClass, "handleTouchPacket", "(IIIFFFFF)V");
-        handleAbsMouseMoveMethod = env->GetStaticMethodID(sunshineMouseClass, "handleAbsMouseMovePacket", "(FFFF)V");
-        handleRelMouseMoveMethod = env->GetStaticMethodID(sunshineMouseClass, "handleRelMouseMovePacket", "(SS)V");
-        handleLeftMouseButtonMethod = env->GetStaticMethodID(sunshineMouseClass, "handleLeftMouseButton", "(Z)V");
+        handleTouchPacketMethod = env->GetStaticMethodID(sunshineMouseClass, "handleTouchPacket", "(JIIIFFFFF)V");
+        handleAbsMouseMoveMethod = env->GetStaticMethodID(sunshineMouseClass, "handleAbsMouseMovePacket", "(JFFFF)V");
+        handleRelMouseMoveMethod = env->GetStaticMethodID(sunshineMouseClass, "handleRelMouseMovePacket", "(JSS)V");
+        handleLeftMouseButtonMethod = env->GetStaticMethodID(sunshineMouseClass, "handleLeftMouseButton", "(JZ)V");
 
         if (!handleTouchPacketMethod || !handleAbsMouseMoveMethod || !handleRelMouseMoveMethod || !handleLeftMouseButtonMethod) {
             BOOST_LOG(warning) << "Failed to cache one or more input handler method IDs"sv;
@@ -183,6 +190,11 @@ Java_io_github_jqssun_displaymirror_sunshine_SunshineServer_cleanup(JNIEnv *env,
 
 JNIEXPORT void JNICALL
 Java_io_github_jqssun_displaymirror_sunshine_SunshineServer_startAudioRecording(JNIEnv *env, jclass clazz, jobject audioRecord, jint framesPerPacket) {
+    if (audioPumpStarted) {
+        BOOST_LOG(warning) << "Audio pump already running, ignoring duplicate start"sv;
+        return;
+    }
+    audioPumpStarted = true;
     // Create global ref for AudioRecord
     jobject globalAudioRecord = env->NewGlobalRef(audioRecord);
     if (globalAudioRecord == nullptr) {
@@ -226,8 +238,11 @@ Java_io_github_jqssun_displaymirror_sunshine_SunshineServer_startAudioRecording(
                     if (audioData) {
                         std::vector<float> audioSamples(audioData, audioData + samplesRead);
 
-                        if (samples) {
-                            samples->raise(std::move(audioSamples));
+                        {
+                            std::lock_guard lg {sampleQueuesLock};
+                            for (auto &queue : sampleQueues) {
+                                queue->raise(std::vector<float>(audioSamples));
+                            }
                         }
 
                         threadEnv->ReleaseFloatArrayElements(buffer, audioData, JNI_ABORT);
@@ -303,7 +318,7 @@ namespace sunshine_callbacks {
         jvm->DetachCurrentThread();
     }
 
-    void createVirtualDisplay(JNIEnv *env, jint width, jint height, jint frameRate, jint packetDuration, jobject surface, jboolean shouldMute) {
+    void createVirtualDisplay(JNIEnv *env, jlong session, jint width, jint height, jint frameRate, jint packetDuration, jobject surface, jboolean shouldMute) {
         if (jvm == nullptr) {
             BOOST_LOG(error) << "JVM pointer is null"sv;
             return;
@@ -314,14 +329,14 @@ namespace sunshine_callbacks {
             return;
         }
 
-        jmethodID createVirtualDisplayMethod = env->GetStaticMethodID(sunshineServerClass, "createVirtualDisplay", "(IIIILandroid/view/Surface;Z)V");
+        jmethodID createVirtualDisplayMethod = env->GetStaticMethodID(sunshineServerClass, "createVirtualDisplay", "(JIIIILandroid/view/Surface;Z)V");
         if (createVirtualDisplayMethod == nullptr) {
             BOOST_LOG(error) << "Cannot find createVirtualDisplay method"sv;
             jvm->DetachCurrentThread();
             return;
         }
 
-        env->CallStaticVoidMethod(sunshineServerClass, createVirtualDisplayMethod, width, height, frameRate, packetDuration, surface, shouldMute);
+        env->CallStaticVoidMethod(sunshineServerClass, createVirtualDisplayMethod, session, width, height, frameRate, packetDuration, surface, shouldMute);
 
         if (env->ExceptionCheck()) {
             env->ExceptionDescribe();
@@ -331,7 +346,7 @@ namespace sunshine_callbacks {
         jvm->DetachCurrentThread();
     }
 
-    void stopVirtualDisplay() {
+    void stopVirtualDisplay(jlong session) {
         JNIEnv *env;
         jint result = jvm->AttachCurrentThread(&env, nullptr);
         if (result != JNI_OK) {
@@ -348,14 +363,14 @@ namespace sunshine_callbacks {
             return;
         }
 
-        jmethodID stopVirtualDisplayMethod = env->GetStaticMethodID(sunshineServerClass, "stopVirtualDisplay", "()V");
+        jmethodID stopVirtualDisplayMethod = env->GetStaticMethodID(sunshineServerClass, "stopVirtualDisplay", "(J)V");
         if (stopVirtualDisplayMethod == nullptr) {
             BOOST_LOG(error) << "Cannot find stopVirtualDisplay method"sv;
             jvm->DetachCurrentThread();
             return;
         }
 
-        env->CallStaticVoidMethod(sunshineServerClass, stopVirtualDisplayMethod);
+        env->CallStaticVoidMethod(sunshineServerClass, stopVirtualDisplayMethod, session);
 
         if (env->ExceptionCheck()) {
             env->ExceptionDescribe();
@@ -398,6 +413,7 @@ namespace sunshine_callbacks {
     }
 
     void captureVideoLoop(void *channel_data, safe::mail_t mail, const video::config_t& config, const audio::config_t& audioConfig) {
+        auto sessionHandle = (jlong)(intptr_t) channel_data;
         JNIEnv *env;
         jint result = jvm->AttachCurrentThread(&env, nullptr);
         if (result != JNI_OK) {
@@ -556,12 +572,13 @@ namespace sunshine_callbacks {
         }
         
         // Call createVirtualDisplay, passing shouldMute
-        createVirtualDisplay(env, config.width, config.height, config.framerate, audioConfig.packetDuration, javaSurface, shouldMute);
-        
+        createVirtualDisplay(env, sessionHandle, config.width, config.height, config.framerate, audioConfig.packetDuration, javaSurface, shouldMute);
+
         // Start encoder
         status = AMediaCodec_start(codec);
         if (status != AMEDIA_OK) {
             BOOST_LOG(error) << "Failed to start encoder, error: "sv << status;
+            stopVirtualDisplay(sessionHandle);
             env->DeleteLocalRef(javaSurface);
             jvm->DetachCurrentThread();
             ANativeWindow_release(inputSurface);
@@ -673,7 +690,7 @@ namespace sunshine_callbacks {
             }
         }
 
-        stopVirtualDisplay();
+        stopVirtualDisplay(sessionHandle);
         // Stop encoder
         AMediaCodec_stop(codec);
         
@@ -687,20 +704,40 @@ namespace sunshine_callbacks {
     }
 
     void captureAudioLoop(void *channel_data, safe::mail_t mail, const audio::config_t& config) {
-        samples = std::make_shared<audio::sample_queue_t::element_type>(30);
-        encodeThread(samples, config, channel_data);
+        auto shutdown_event = mail->event<bool>(mail::shutdown);
+        // host audio plays on phone, skip capture feed
+        if (config.flags[audio::config_t::HOST_AUDIO]) {
+            shutdown_event->view();
+            return;
+        }
+        auto queue = std::make_shared<audio::sample_queue_t::element_type>(30);
+        {
+            std::lock_guard lg {sampleQueuesLock};
+            sampleQueues.push_back(queue);
+        }
+        // unblock encoder pop() on shutdown
+        std::thread stopper {[queue, shutdown_event]() {
+            shutdown_event->view();
+            queue->stop();
+        }};
+        encodeThread(queue, config, channel_data);
+        {
+            std::lock_guard lg {sampleQueuesLock};
+            sampleQueues.erase(std::remove(sampleQueues.begin(), sampleQueues.end(), queue), sampleQueues.end());
+        }
+        stopper.join();
     }
 
     float from_netfloat(netfloat f) {
         return boost::endian::endian_load<float, sizeof(float), boost::endian::order::little>(f);
     }
 
-    void callJavaOnTouch(SS_TOUCH_PACKET* touchPacket) {
+    void callJavaOnTouch(std::int64_t session, SS_TOUCH_PACKET* touchPacket) {
         if (jvm == nullptr) {
             BOOST_LOG(error) << "JVM pointer is null"sv;
             return;
         }
-        
+
         if (sunshineMouseClass == nullptr || handleTouchPacketMethod == nullptr) {
             BOOST_LOG(error) << "SunshineServer class ref or method ID is null"sv;
             return;
@@ -715,6 +752,7 @@ namespace sunshine_callbacks {
 
         // Use cached method ID
         env->CallStaticVoidMethod(sunshineMouseClass, handleTouchPacketMethod,
+                                 static_cast<jlong>(session),
                                  static_cast<int>(touchPacket->eventType),
                                  static_cast<int>(touchPacket->rotation),
                                  static_cast<int>(touchPacket->pointerId),
@@ -732,7 +770,7 @@ namespace sunshine_callbacks {
         jvm->DetachCurrentThread();
     }
 
-    void callJavaOnAbsMouseMove(NV_ABS_MOUSE_MOVE_PACKET* packet) {
+    void callJavaOnAbsMouseMove(std::int64_t session, NV_ABS_MOUSE_MOVE_PACKET* packet) {
         if (jvm == nullptr) {
             BOOST_LOG(error) << "JVM pointer is null"sv;
             return;
@@ -758,7 +796,7 @@ namespace sunshine_callbacks {
         
         BOOST_LOG(info) << "Calling Java mouse move handler: "sv << x << ","sv << y << " in "sv << width << "*"sv << height;
 
-        env->CallStaticVoidMethod(sunshineMouseClass, handleAbsMouseMoveMethod, x, y, width, height);
+        env->CallStaticVoidMethod(sunshineMouseClass, handleAbsMouseMoveMethod, static_cast<jlong>(session), x, y, width, height);
 
         if (env->ExceptionCheck()) {
             env->ExceptionDescribe();
@@ -768,7 +806,7 @@ namespace sunshine_callbacks {
         jvm->DetachCurrentThread();
     }
 
-    void callJavaOnRelMouseMove(NV_REL_MOUSE_MOVE_PACKET* packet) {
+    void callJavaOnRelMouseMove(std::int64_t session, NV_REL_MOUSE_MOVE_PACKET* packet) {
         if (jvm == nullptr || sunshineMouseClass == nullptr || handleRelMouseMoveMethod == nullptr) {
             return;
         }
@@ -780,7 +818,7 @@ namespace sunshine_callbacks {
 
         jshort dx = util::endian::big(packet->deltaX);
         jshort dy = util::endian::big(packet->deltaY);
-        env->CallStaticVoidMethod(sunshineMouseClass, handleRelMouseMoveMethod, dx, dy);
+        env->CallStaticVoidMethod(sunshineMouseClass, handleRelMouseMoveMethod, static_cast<jlong>(session), dx, dy);
 
         if (env->ExceptionCheck()) {
             env->ExceptionDescribe();
@@ -789,14 +827,14 @@ namespace sunshine_callbacks {
         jvm->DetachCurrentThread();
     }
 
-    void callJavaOnMouseButton(std::uint8_t button, bool release) {
+    void callJavaOnMouseButton(std::int64_t session, std::uint8_t button, bool release) {
         BOOST_LOG(info) << "on mouse button "sv << static_cast<int>(button) << " release "sv << release;
-        
+
         if (jvm == nullptr) {
             BOOST_LOG(error) << "JVM pointer is null"sv;
             return;
         }
-        
+
         if (sunshineMouseClass == nullptr) {
             BOOST_LOG(error) << "SunshineServer class ref is null"sv;
             return;
@@ -811,7 +849,7 @@ namespace sunshine_callbacks {
 
         // Call different Java methods based on button type
         if (button == BUTTON_LEFT && handleLeftMouseButtonMethod != nullptr) {
-            env->CallStaticVoidMethod(sunshineMouseClass, handleLeftMouseButtonMethod, release);
+            env->CallStaticVoidMethod(sunshineMouseClass, handleLeftMouseButtonMethod, static_cast<jlong>(session), release);
         } else {
             // More button types can be handled here
             BOOST_LOG(info) << "Unhandled mouse button type: "sv << static_cast<int>(button);

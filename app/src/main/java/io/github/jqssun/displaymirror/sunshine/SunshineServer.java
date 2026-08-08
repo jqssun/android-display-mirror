@@ -52,6 +52,7 @@ public class SunshineServer {
   // surface created by MediaCodec
   // width always > height, as it is a landscape mode
   public static void createVirtualDisplay(
+      long session,
       int width,
       int height,
       int frameRate,
@@ -64,7 +65,7 @@ public class SunshineServer {
       return;
     }
 
-    SunshineMouse.initialize(width, height);
+    SunshineMouse.initialize(session, width, height);
     SunshineKeyboard.initialize();
     SunshineGamepad.initialize();
 
@@ -72,28 +73,35 @@ public class SunshineServer {
         .post(
             () -> {
               State.startNewJob(
-                  SunshineState.MODE,
+                  SunshineState.MODE + ":" + session,
                   new ProjectViaSunshine(
-                      width, height, frameRate, packetDuration, surface, shouldMute));
+                      session, width, height, frameRate, packetDuration, surface, shouldMute));
             });
   }
 
-  public static void stopVirtualDisplay() {
+  public static void stopVirtualDisplay(long session) {
     new Handler(Looper.getMainLooper())
         .post(
             () -> {
-              State.log("stopping Sunshine projection");
-              SunshineCursorOverlay.hide();
-              CreateVirtualDisplay.powerOnScreen();
-              CreateVirtualDisplay.restoreAspectRatio();
-              if (SunshineMouse.pipeline != null) {
-                SunshineMouse.pipeline.stop();
-                SunshineMouse.pipeline = null;
+              State.cancelJob(SunshineState.MODE + ":" + session);
+              SunshineMouse.removeSession(session);
+              if (!SunshineState.releaseSession(session)) {
+                State.log("Sunshine session ended, others still streaming");
+                return;
               }
-              SunshineState.stopVirtualDisplay();
-              Context context = State.getContext();
-              ExitAll.execute(context, true);
+              _stopProjection();
             });
+  }
+
+  // full teardown after last session
+  private static void _stopProjection() {
+    State.log("stopping Sunshine projection");
+    SunshineCursorOverlay.hide();
+    CreateVirtualDisplay.powerOnScreen();
+    CreateVirtualDisplay.restoreAspectRatio();
+    SunshineState.stopVirtualDisplay();
+    Context context = State.getContext();
+    ExitAll.execute(context, true);
   }
 
   public static native void startAudioRecording(Object audioRecord, int framesPerPacket);
@@ -115,7 +123,7 @@ public class SunshineServer {
                   .setPositiveButton(
                       R.string.ok,
                       (dialog, which) -> {
-                        stopVirtualDisplay();
+                        _stopProjection();
                       })
                   .setCancelable(false)
                   .show();

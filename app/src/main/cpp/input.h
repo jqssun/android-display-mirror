@@ -5,6 +5,7 @@
 #pragma once
 
 // standard includes
+#include <cstdint>
 #include <functional>
 
 // local includes
@@ -22,7 +23,7 @@ namespace input {
 
   bool probe_gamepads();
 
-  std::shared_ptr<input_t> alloc(safe::mail_t mail);
+  std::shared_ptr<input_t> alloc(safe::mail_t mail, std::int64_t session_handle);
 
   struct touch_port_t: public platf::touch_port_t {
     int env_width, env_height;

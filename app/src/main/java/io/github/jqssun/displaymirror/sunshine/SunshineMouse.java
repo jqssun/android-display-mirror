@@ -21,28 +21,35 @@ import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.ProjectionService;
 import io.github.jqssun.displaymirror.State;
 import io.github.jqssun.displaymirror.job.CreateVirtualDisplay;
-import io.github.jqssun.displaymirror.job.StreamRenderer;
 import io.github.jqssun.displaymirror.shizuku.ServiceUtils;
 import io.github.jqssun.displaymirror.shizuku.ShizukuUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SunshineMouse {
   private static String TAG = "SunshineMouse";
-  public static StreamRenderer pipeline;
   private static IInputManager inputManager;
-  private static float defaultDisplayWidth;
-  private static float defaultDisplayHeight;
-  // screenWidth * screenHeight always in landscape mode
-  private static float screenWidth;
-  private static float screenHeight;
-  private static float portraitMirrorWidth;
-  private static float portraitMirrorHeight;
-  private static float landscapeMirrorWidth;
-  private static float landscapeMirrorHeight;
+
+  // per-client coordinate mapping
+  private static class Geometry {
+    float defaultDisplayWidth;
+    float defaultDisplayHeight;
+    // screenWidth * screenHeight always in landscape mode
+    float screenWidth;
+    float screenHeight;
+    float portraitMirrorWidth;
+    float portraitMirrorHeight;
+    float landscapeMirrorWidth;
+    float landscapeMirrorHeight;
+  }
+
+  private static final Map<Long, Geometry> geometries = new ConcurrentHashMap<>();
+
   private static boolean cropBlackBorders;
   private static boolean rotateWithContent;
   private static boolean showCursor;
@@ -53,7 +60,7 @@ public class SunshineMouse {
     else SunshineCursorOverlay.hide();
   }
 
-  public static void initialize(int width, int height) {
+  public static void initialize(long session, int width, int height) {
     Context context = State.getContext();
     if (context == null) {
       return;
@@ -61,8 +68,9 @@ public class SunshineMouse {
     if (ShizukuUtils.hasPermission()) {
       inputManager = ServiceUtils.getInputManager();
     }
-    screenWidth = width;
-    screenHeight = height;
+    Geometry g = new Geometry();
+    g.screenWidth = width;
+    g.screenHeight = height;
     rotateWithContent = Pref.getRotateWithContent();
     cropBlackBorders = Pref.getCropBlackBorders();
     showCursor = Pref.getSunshineShowCursor();
@@ -73,75 +81,94 @@ public class SunshineMouse {
     DisplayManager displayManager =
         (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
     Display defaultDisplay = displayManager.getDisplay(Display.DEFAULT_DISPLAY);
-    if (SunshineState.virtualDisplay == null
+    boolean firstClient = SunshineState.virtualDisplay == null && SunshineState.pipeline == null;
+    if (firstClient
         && Pref.getAutoMatchAspectRatio()
         && ShizukuUtils.hasPermission()
         && CreateVirtualDisplay.streamMirrors()) {
+      // first client wins forced aspect
       CreateVirtualDisplay.changeAspectRatio(width, height);
       IWindowManager windowManager = ServiceUtils.getWindowManager();
       android.graphics.Point baseSize = new android.graphics.Point();
       windowManager.getBaseDisplaySize(Display.DEFAULT_DISPLAY, baseSize);
-      defaultDisplayWidth = Math.max(baseSize.x, baseSize.y);
-      defaultDisplayHeight = Math.min(baseSize.x, baseSize.y);
-      float aspectRatio1 = defaultDisplayWidth / defaultDisplayHeight;
-      float aspectRatio2 = screenWidth / screenHeight;
+      g.defaultDisplayWidth = Math.max(baseSize.x, baseSize.y);
+      g.defaultDisplayHeight = Math.min(baseSize.x, baseSize.y);
+      float aspectRatio1 = g.defaultDisplayWidth / g.defaultDisplayHeight;
+      float aspectRatio2 = g.screenWidth / g.screenHeight;
       if (Math.abs(aspectRatio1 - aspectRatio2) > 0.01) {
         // change resolution to avoid stretching
-        defaultDisplayWidth = screenWidth;
+        g.defaultDisplayWidth = g.screenWidth;
         DisplayCutout cutout = null;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
           cutout = defaultDisplay.getCutout();
         }
         if (cutout != null) {
-          _applyCutoutWidth(cutout);
+          _applyCutoutWidth(g, cutout);
         }
       }
     } else {
       android.graphics.Point realSize = new android.graphics.Point();
       defaultDisplay.getRealSize(realSize);
-      defaultDisplayWidth = Math.max(realSize.x, realSize.y);
-      defaultDisplayHeight = Math.min(realSize.x, realSize.y);
+      g.defaultDisplayWidth = Math.max(realSize.x, realSize.y);
+      g.defaultDisplayHeight = Math.min(realSize.x, realSize.y);
     }
-    float aspectRatio = defaultDisplayWidth / defaultDisplayHeight;
+    float aspectRatio = g.defaultDisplayWidth / g.defaultDisplayHeight;
 
-    landscapeMirrorHeight = screenHeight;
-    landscapeMirrorWidth = landscapeMirrorHeight * aspectRatio;
-    if (landscapeMirrorWidth > screenWidth) {
-      landscapeMirrorWidth = screenWidth;
-      landscapeMirrorHeight = landscapeMirrorWidth / aspectRatio;
+    g.landscapeMirrorHeight = g.screenHeight;
+    g.landscapeMirrorWidth = g.landscapeMirrorHeight * aspectRatio;
+    if (g.landscapeMirrorWidth > g.screenWidth) {
+      g.landscapeMirrorWidth = g.screenWidth;
+      g.landscapeMirrorHeight = g.landscapeMirrorWidth / aspectRatio;
     }
 
-    portraitMirrorHeight = screenHeight;
-    portraitMirrorWidth = portraitMirrorHeight / aspectRatio;
-    if (portraitMirrorWidth > screenWidth) {
-      portraitMirrorWidth = screenWidth;
-      portraitMirrorHeight = portraitMirrorWidth * aspectRatio;
+    g.portraitMirrorHeight = g.screenHeight;
+    g.portraitMirrorWidth = g.portraitMirrorHeight / aspectRatio;
+    if (g.portraitMirrorWidth > g.screenWidth) {
+      g.portraitMirrorWidth = g.screenWidth;
+      g.portraitMirrorHeight = g.portraitMirrorWidth * aspectRatio;
     }
+
+    geometries.put(session, g);
 
     State.log(
         "primary display size defaultDisplayWidth: "
-            + defaultDisplayWidth
+            + g.defaultDisplayWidth
             + " defaultDisplayHeight: "
-            + defaultDisplayHeight);
-    State.log("client screen size screenWidth: " + screenWidth + " screenHeight: " + screenHeight);
-    if (SunshineState.virtualDisplay == null) {
+            + g.defaultDisplayHeight);
+    State.log(
+        "client screen size screenWidth: " + g.screenWidth + " screenHeight: " + g.screenHeight);
+    if (firstClient) {
       State.log(
           "mirror mode portraitMirrorWidth: "
-              + portraitMirrorWidth
+              + g.portraitMirrorWidth
               + " portraitMirrorHeight: "
-              + portraitMirrorHeight
+              + g.portraitMirrorHeight
               + " landscapeMirrorWidth: "
-              + landscapeMirrorWidth
+              + g.landscapeMirrorWidth
               + " landscapeMirrorHeight: "
-              + landscapeMirrorHeight);
+              + g.landscapeMirrorHeight);
     }
   }
 
+  public static void removeSession(long session) {
+    geometries.remove(session);
+  }
+
+  private static Geometry _geometry(long session) {
+    Geometry g = geometries.get(session);
+    if (g != null) {
+      return g;
+    }
+    // input can race session registration
+    Iterator<Geometry> it = geometries.values().iterator();
+    return it.hasNext() ? it.next() : null;
+  }
+
   @SuppressLint("NewApi")
-  private static void _applyCutoutWidth(DisplayCutout cutout) {
+  private static void _applyCutoutWidth(Geometry g, DisplayCutout cutout) {
     for (Rect rect : cutout.getBoundingRects()) {
       if (rect.top == 0) {
-        defaultDisplayWidth += rect.bottom * 2;
+        g.defaultDisplayWidth += rect.bottom * 2;
         break;
       }
     }
@@ -154,109 +181,109 @@ public class SunshineMouse {
 
   private static Map<Integer, Point> pointers = new HashMap<>();
 
-  private static Point _translate(float x, float y) {
+  private static Point _translate(Geometry g, float x, float y) {
     if (SunshineState.inputToExternalDisplay()) {
-      return _translateVirtualDisplay(x, y);
+      return _translateVirtualDisplay(g, x, y);
     } else {
-      return _translateMirrorMode(x, y);
+      return _translateMirrorMode(g, x, y);
     }
   }
 
-  private static Point _translateMirrorMode(float x, float y) {
+  private static Point _translateMirrorMode(Geometry g, float x, float y) {
     boolean isLandscape =
         ProjectionService.instance.getResources().getConfiguration().orientation
             == Configuration.ORIENTATION_LANDSCAPE;
-    float xInScreen = x * screenWidth;
-    float yInScreen = y * screenHeight;
+    float xInScreen = x * g.screenWidth;
+    float yInScreen = y * g.screenHeight;
     if (isLandscape) {
-      return _translateRotation90Mirror(xInScreen, yInScreen);
+      return _translateRotation90Mirror(g, xInScreen, yInScreen);
     } else {
-      return _translateRotation0Mirror(xInScreen, yInScreen);
+      return _translateRotation0Mirror(g, xInScreen, yInScreen);
     }
   }
 
-  private static Point _translateRotation0Mirror(float xInScreen, float yInScreen) {
+  private static Point _translateRotation0Mirror(Geometry g, float xInScreen, float yInScreen) {
     if (rotateWithContent) {
       Point point = new Point();
-      float xBlackBar = (screenWidth - landscapeMirrorWidth) / 2;
-      float yBlackBar = (screenHeight - landscapeMirrorHeight) / 2;
+      float xBlackBar = (g.screenWidth - g.landscapeMirrorWidth) / 2;
+      float yBlackBar = (g.screenHeight - g.landscapeMirrorHeight) / 2;
       float adjustedX = xInScreen - xBlackBar;
-      if (adjustedX > landscapeMirrorWidth) {
-        adjustedX = landscapeMirrorWidth;
+      if (adjustedX > g.landscapeMirrorWidth) {
+        adjustedX = g.landscapeMirrorWidth;
       } else if (adjustedX < 0) {
         adjustedX = 0;
       }
       float adjustedY = yInScreen - yBlackBar;
-      if (adjustedY > landscapeMirrorHeight) {
-        adjustedY = landscapeMirrorHeight;
+      if (adjustedY > g.landscapeMirrorHeight) {
+        adjustedY = g.landscapeMirrorHeight;
       } else if (adjustedY < 0) {
         adjustedY = 0;
       }
-      point.y = (adjustedX / landscapeMirrorWidth) * defaultDisplayWidth;
-      point.x = (1 - (adjustedY / landscapeMirrorHeight)) * defaultDisplayHeight;
+      point.y = (adjustedX / g.landscapeMirrorWidth) * g.defaultDisplayWidth;
+      point.x = (1 - (adjustedY / g.landscapeMirrorHeight)) * g.defaultDisplayHeight;
       return point;
     } else {
       Point point = new Point();
-      float xBlackBar = (screenWidth - portraitMirrorWidth) / 2;
-      float yBlackBar = (screenHeight - portraitMirrorHeight) / 2;
+      float xBlackBar = (g.screenWidth - g.portraitMirrorWidth) / 2;
+      float yBlackBar = (g.screenHeight - g.portraitMirrorHeight) / 2;
       float adjustedX = xInScreen - xBlackBar;
-      if (adjustedX > portraitMirrorWidth) {
-        adjustedX = portraitMirrorWidth;
+      if (adjustedX > g.portraitMirrorWidth) {
+        adjustedX = g.portraitMirrorWidth;
       } else if (adjustedX < 0) {
         adjustedX = 0;
       }
       float adjustedY = yInScreen - yBlackBar;
-      if (adjustedY > portraitMirrorHeight) {
-        adjustedY = portraitMirrorHeight;
+      if (adjustedY > g.portraitMirrorHeight) {
+        adjustedY = g.portraitMirrorHeight;
       } else if (adjustedY < 0) {
         adjustedY = 0;
       }
-      point.x = (adjustedX / portraitMirrorWidth) * defaultDisplayHeight;
-      point.y = (adjustedY / portraitMirrorHeight) * defaultDisplayWidth;
+      point.x = (adjustedX / g.portraitMirrorWidth) * g.defaultDisplayHeight;
+      point.y = (adjustedY / g.portraitMirrorHeight) * g.defaultDisplayWidth;
       return point;
     }
   }
 
-  private static Point _translateRotation90Mirror(float xInScreen, float yInScreen) {
+  private static Point _translateRotation90Mirror(Geometry g, float xInScreen, float yInScreen) {
     Point point = new Point();
-    float xBlackBar = (screenWidth - landscapeMirrorWidth) / 2;
-    float yBlackBar = (screenHeight - landscapeMirrorHeight) / 2;
+    float xBlackBar = (g.screenWidth - g.landscapeMirrorWidth) / 2;
+    float yBlackBar = (g.screenHeight - g.landscapeMirrorHeight) / 2;
     float adjustedX = xInScreen - xBlackBar;
-    if (adjustedX > landscapeMirrorWidth) {
-      adjustedX = landscapeMirrorWidth;
+    if (adjustedX > g.landscapeMirrorWidth) {
+      adjustedX = g.landscapeMirrorWidth;
     } else if (adjustedX < 0) {
       adjustedX = 0;
     }
     float adjustedY = yInScreen - yBlackBar;
-    if (adjustedY > landscapeMirrorHeight) {
-      adjustedY = landscapeMirrorHeight;
+    if (adjustedY > g.landscapeMirrorHeight) {
+      adjustedY = g.landscapeMirrorHeight;
     } else if (adjustedY < 0) {
       adjustedY = 0;
     }
-    point.x = (adjustedX / landscapeMirrorWidth) * defaultDisplayWidth;
-    point.y = (adjustedY / landscapeMirrorHeight) * defaultDisplayHeight;
+    point.x = (adjustedX / g.landscapeMirrorWidth) * g.defaultDisplayWidth;
+    point.y = (adjustedY / g.landscapeMirrorHeight) * g.defaultDisplayHeight;
     return point;
   }
 
-  private static @NonNull Point _translateVirtualDisplay(float x, float y) {
+  private static @NonNull Point _translateVirtualDisplay(Geometry g, float x, float y) {
     int displayRotation = SunshineState.virtualDisplay.getDisplay().getRotation();
     Point point = new Point();
     switch (displayRotation) {
       case Surface.ROTATION_0:
-        point.x = x * screenWidth;
-        point.y = y * screenHeight;
+        point.x = x * g.screenWidth;
+        point.y = y * g.screenHeight;
         break;
       case Surface.ROTATION_90:
-        point.x = y * screenHeight;
-        point.y = (1 - x) * screenWidth;
+        point.x = y * g.screenHeight;
+        point.y = (1 - x) * g.screenWidth;
         break;
       case Surface.ROTATION_180:
-        point.x = (1 - x) * screenWidth;
-        point.y = (1 - y) * screenHeight;
+        point.x = (1 - x) * g.screenWidth;
+        point.y = (1 - y) * g.screenHeight;
         break;
       case Surface.ROTATION_270:
-        point.x = (1 - y) * screenHeight;
-        point.y = x * screenWidth;
+        point.x = (1 - y) * g.screenHeight;
+        point.y = x * g.screenWidth;
         break;
     }
     return point;
@@ -266,13 +293,17 @@ public class SunshineMouse {
   // cursor position in normalized 0-1 coordinates for relative mouse
   private static Point cursorPos = null;
 
-  public static void handleAbsMouseMovePacket(float x, float y, float width, float height) {
+  public static void handleAbsMouseMovePacket(long session, float x, float y, float width, float height) {
+    Geometry g = _geometry(session);
+    if (g == null) {
+      return;
+    }
     x = x / width;
     y = y / height;
     if (cursorPos == null) cursorPos = new Point();
     cursorPos.x = x;
     cursorPos.y = y;
-    Point point = _translate(x, y);
+    Point point = _translate(g, x, y);
     if (singlePoint != null) {
       singlePoint = point;
       _handleTouchEventMove(0, singlePoint.x, singlePoint.y);
@@ -280,38 +311,43 @@ public class SunshineMouse {
       singlePoint = point;
     }
     if (showCursor) {
-      Point cursorPoint = _translateMirrorMode(x, y);
+      Point cursorPoint = _translateMirrorMode(g, x, y);
       SunshineCursorOverlay.update(cursorPoint.x, cursorPoint.y);
     }
   }
 
-  public static void handleRelMouseMovePacket(short deltaX, short deltaY) {
+  public static void handleRelMouseMovePacket(long session, short deltaX, short deltaY) {
+    Geometry g = _geometry(session);
+    if (g == null) {
+      return;
+    }
     if (cursorPos == null) {
       cursorPos = new Point();
       cursorPos.x = 0.5f;
       cursorPos.y = 0.5f;
     }
-    cursorPos.x += deltaX / screenWidth;
-    cursorPos.y += deltaY / screenHeight;
+    cursorPos.x += deltaX / g.screenWidth;
+    cursorPos.y += deltaY / g.screenHeight;
     cursorPos.x = Math.max(0, Math.min(cursorPos.x, 1));
     cursorPos.y = Math.max(0, Math.min(cursorPos.y, 1));
 
-    Point injPoint = _translate(cursorPos.x, cursorPos.y);
+    Point injPoint = _translate(g, cursorPos.x, cursorPos.y);
     if (singlePoint != null) {
       singlePoint = injPoint;
       _handleTouchEventMove(0, singlePoint.x, singlePoint.y);
     }
     if (showCursor) {
-      Point cursorScreenPoint = _translateMirrorMode(cursorPos.x, cursorPos.y);
+      Point cursorScreenPoint = _translateMirrorMode(g, cursorPos.x, cursorPos.y);
       SunshineCursorOverlay.update(cursorScreenPoint.x, cursorScreenPoint.y);
     }
   }
 
-  public static void handleLeftMouseButton(boolean release) {
-    if (cursorPos == null) {
+  public static void handleLeftMouseButton(long session, boolean release) {
+    Geometry g = _geometry(session);
+    if (g == null || cursorPos == null) {
       return;
     }
-    Point injPoint = _translate(cursorPos.x, cursorPos.y);
+    Point injPoint = _translate(g, cursorPos.x, cursorPos.y);
     if (release) {
       _handleTouchEventUp(0, injPoint.x, injPoint.y, false);
       singlePoint = null;
@@ -322,6 +358,7 @@ public class SunshineMouse {
   }
 
   public static void handleTouchPacket(
+      long session,
       int eventType,
       int rotation,
       int pointerId,
@@ -330,7 +367,11 @@ public class SunshineMouse {
       float pressureOrDistance,
       float contactAreaMajor,
       float contactAreaMinor) {
-    Point point = _translate(x, y);
+    Geometry g = _geometry(session);
+    if (g == null) {
+      return;
+    }
+    Point point = _translate(g, x, y);
     pointerId = pointerId % 10;
     switch (eventType) {
       case 0x01: // LI_TOUCH_EVENT_DOWN
@@ -427,8 +468,8 @@ public class SunshineMouse {
   }
 
   private static void _injectEvent(String prefix, MotionEvent event) {
-    if (cropBlackBorders && pipeline != null) {
-      pipeline.exitCrop();
+    if (cropBlackBorders && SunshineState.pipeline != null) {
+      SunshineState.pipeline.exitCrop();
     }
     if (inputManager != null) {
       MotionEventHidden motionEventHidden = Refine.unsafeCast(event);

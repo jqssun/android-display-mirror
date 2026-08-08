@@ -19,9 +19,12 @@ import android.util.Log;
 import android.view.Display;
 import android.view.Surface;
 import io.github.jqssun.displaymirror.State;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-// shared gl pipeline between a virtual display and a stream output
-// output is either an encoder surface or a frame sink reading the bound framebuffer
+// shared gl pipeline between a virtual display and one or more stream outputs
+// outputs are encoder surfaces, or a frame sink reading the bound
+// framebuffer
 public class StreamRenderer {
   private static final String TAG = "StreamRenderer";
 
@@ -35,11 +38,25 @@ public class StreamRenderer {
     void postFrame();
   }
 
+  private static class Output {
+    final Surface surface;
+    final int width;
+    final int height;
+    EGLSurface egl = EGL14.EGL_NO_SURFACE;
+
+    Output(Surface surface, int width, int height) {
+      this.surface = surface;
+      this.width = width;
+      this.height = height;
+    }
+  }
+
   private final VirtualDisplayArgs args;
   private final boolean rotate;
   private final boolean crop;
-  private final Surface output;
   private final FrameSink sink;
+  // render thread confined after start()
+  private final Map<Long, Output> outputs = new LinkedHashMap<>();
 
   private HandlerThread ownThread;
   private Handler handler;
@@ -50,7 +67,9 @@ public class StreamRenderer {
 
   private EGLDisplay eglDisplay = EGL14.EGL_NO_DISPLAY;
   private EGLContext eglContext = EGL14.EGL_NO_CONTEXT;
-  private EGLSurface eglSurface = EGL14.EGL_NO_SURFACE;
+  private EGLConfig eglConfig;
+  // pbuffer for setup and fbo work
+  private EGLSurface homeSurface = EGL14.EGL_NO_SURFACE;
   private final int[] fbo = new int[1];
   private final int[] fboTexture = new int[1];
 
@@ -63,12 +82,16 @@ public class StreamRenderer {
   private Surface currentSurface;
   private LandscapeAutoScaler scaler;
 
-  public StreamRenderer(VirtualDisplayArgs args, boolean rotate, boolean crop, Surface output) {
+  public StreamRenderer(VirtualDisplayArgs args, boolean rotate, boolean crop) {
     this.args = args;
     this.rotate = rotate;
     this.crop = crop;
-    this.output = output;
     this.sink = null;
+  }
+
+  public StreamRenderer(VirtualDisplayArgs args, boolean rotate, boolean crop, Surface output) {
+    this(args, rotate, crop);
+    addOutput(0, output, args.width, args.height);
   }
 
   public StreamRenderer(
@@ -76,7 +99,6 @@ public class StreamRenderer {
     this.args = args;
     this.rotate = rotate;
     this.crop = crop;
-    this.output = null;
     this.sink = sink;
     this.handler = handler;
   }
@@ -112,6 +134,49 @@ public class StreamRenderer {
       ownThread.quitSafely();
       ownThread = null;
     }
+  }
+
+  public void addOutput(long id, Surface surface, int width, int height) {
+    Output output = new Output(surface, width, height);
+    if (handler == null) {
+      outputs.put(id, output);
+      return;
+    }
+    handler.post(
+        () -> {
+          if (stopped) {
+            return;
+          }
+          Output old = outputs.put(id, output);
+          if (old != null) {
+            _destroyOutputSurface(old);
+          }
+          _createOutputSurface(output);
+          State.log(
+              args.virtualDisplayName
+                  + " output added: "
+                  + width
+                  + "x"
+                  + height
+                  + " ["
+                  + outputs.size()
+                  + " active]");
+        });
+  }
+
+  public void removeOutput(long id) {
+    if (handler == null) {
+      outputs.remove(id);
+      return;
+    }
+    handler.post(
+        () -> {
+          Output output = outputs.remove(id);
+          if (output != null) {
+            _destroyOutputSurface(output);
+            State.log(args.virtualDisplayName + " output removed [" + outputs.size() + " active]");
+          }
+        });
   }
 
   public void exitCrop() {
@@ -171,14 +236,13 @@ public class StreamRenderer {
     EGLConfig[] configs = new EGLConfig[1];
     int[] numConfigs = new int[1];
     EGL14.eglChooseConfig(eglDisplay, configAttribs, 0, configs, 0, 1, numConfigs, 0);
+    eglConfig = configs[0];
     int[] contextAttribs = {EGL14.EGL_CONTEXT_CLIENT_VERSION, 2, EGL14.EGL_NONE};
     eglContext =
-        EGL14.eglCreateContext(eglDisplay, configs[0], EGL14.EGL_NO_CONTEXT, contextAttribs, 0);
-    eglSurface =
-        output != null
-            ? EGL14.eglCreateWindowSurface(eglDisplay, configs[0], output, null, 0)
-            : EGL14.eglCreatePbufferSurface(eglDisplay, configs[0], new int[] {EGL14.EGL_NONE}, 0);
-    if (!EGL14.eglMakeCurrent(eglDisplay, eglSurface, eglSurface, eglContext)) {
+        EGL14.eglCreateContext(eglDisplay, eglConfig, EGL14.EGL_NO_CONTEXT, contextAttribs, 0);
+    homeSurface =
+        EGL14.eglCreatePbufferSurface(eglDisplay, eglConfig, new int[] {EGL14.EGL_NONE}, 0);
+    if (!EGL14.eglMakeCurrent(eglDisplay, homeSurface, homeSurface, eglContext)) {
       throw new RuntimeException("Failed to set EGL context as current");
     }
     GLES20.glViewport(0, 0, args.width, args.height);
@@ -187,6 +251,10 @@ public class StreamRenderer {
     _createFbo();
     if (sink != null) {
       GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, fbo[0]);
+    }
+
+    for (Output output : outputs.values()) {
+      _createOutputSurface(output);
     }
 
     int[] textures = new int[2];
@@ -227,6 +295,28 @@ public class StreamRenderer {
       return;
     }
     displayId = display.getDisplay().getDisplayId();
+  }
+
+  private void _createOutputSurface(Output output) {
+    output.egl =
+        EGL14.eglCreateWindowSurface(eglDisplay, eglConfig, output.surface, null, 0);
+  }
+
+  private void _destroyOutputSurface(Output output) {
+    if (output.egl != EGL14.EGL_NO_SURFACE) {
+      // never leave a destroyed surface current
+      EGL14.eglMakeCurrent(eglDisplay, homeSurface, homeSurface, eglContext);
+      EGL14.eglDestroySurface(eglDisplay, output.egl);
+      output.egl = EGL14.EGL_NO_SURFACE;
+    }
+  }
+
+  private void _applyOutputViewport(Output output) {
+    float scale =
+        Math.min(output.width / (float) args.width, output.height / (float) args.height);
+    int width = Math.round(args.width * scale);
+    int height = Math.round(args.height * scale);
+    GLES20.glViewport((output.width - width) / 2, (output.height - height) / 2, width, height);
   }
 
   private void _updateSurface() {
@@ -325,8 +415,15 @@ public class StreamRenderer {
     if (eglDisplay != EGL14.EGL_NO_DISPLAY) {
       EGL14.eglMakeCurrent(
           eglDisplay, EGL14.EGL_NO_SURFACE, EGL14.EGL_NO_SURFACE, EGL14.EGL_NO_CONTEXT);
-      if (eglSurface != EGL14.EGL_NO_SURFACE) {
-        EGL14.eglDestroySurface(eglDisplay, eglSurface);
+      for (Output output : outputs.values()) {
+        if (output.egl != EGL14.EGL_NO_SURFACE) {
+          EGL14.eglDestroySurface(eglDisplay, output.egl);
+          output.egl = EGL14.EGL_NO_SURFACE;
+        }
+      }
+      outputs.clear();
+      if (homeSurface != EGL14.EGL_NO_SURFACE) {
+        EGL14.eglDestroySurface(eglDisplay, homeSurface);
       }
       if (eglContext != EGL14.EGL_NO_CONTEXT) {
         EGL14.eglDestroyContext(eglDisplay, eglContext);
@@ -335,7 +432,7 @@ public class StreamRenderer {
     }
     eglDisplay = EGL14.EGL_NO_DISPLAY;
     eglContext = EGL14.EGL_NO_CONTEXT;
-    eglSurface = EGL14.EGL_NO_SURFACE;
+    homeSurface = EGL14.EGL_NO_SURFACE;
   }
 
   private class Renderer implements SurfaceTexture.OnFrameAvailableListener {
@@ -351,13 +448,26 @@ public class StreamRenderer {
     public void onFrameAvailable(SurfaceTexture surfaceTexture) {
       try {
         surfaceTexture.updateTexImage();
-        texRenderer.renderFrame(matrix != null ? matrix : scaler.landscapeMvpMatrix);
+        float[] mvpMatrix = matrix != null ? matrix : scaler.landscapeMvpMatrix;
         if (sink != null) {
+          texRenderer.renderFrame(mvpMatrix);
           sink.postFrame();
-        } else {
-          EGL14.eglSwapBuffers(eglDisplay, eglSurface);
+          return;
         }
-        if (matrix == null && crop) {
+        boolean rendered = false;
+        for (Output output : outputs.values()) {
+          if (output.egl == EGL14.EGL_NO_SURFACE) {
+            continue;
+          }
+          EGL14.eglMakeCurrent(eglDisplay, output.egl, output.egl, eglContext);
+          _applyOutputViewport(output);
+          texRenderer.renderFrame(mvpMatrix);
+          EGL14.eglSwapBuffers(eglDisplay, output.egl);
+          rendered = true;
+        }
+        if (matrix == null && crop && rendered) {
+          // bar detection needs stream-size viewport
+          GLES20.glViewport(0, 0, args.width, args.height);
           scaler.onFrame();
         }
       } catch (Exception e) {

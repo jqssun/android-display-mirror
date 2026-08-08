@@ -18,12 +18,18 @@ public class SunshineAudio {
   private static boolean isMuted = false;
   // submix is refcounted across paths, only release refs we took
   private static boolean submixHeld;
+  // one pump per run
+  private static boolean captureActive;
   private static AudioManager.OnAudioFocusChangeListener volumeChangeListener;
 
   public static boolean sendAudio(Context context, int packetDuration) throws YieldException {
+    if (captureActive) {
+      return false;
+    }
     if (CaptureAudio.useRemoteSubmix()) {
       if (CaptureAudio.startRemoteSubmix(SAMPLE_RATE, ENCODING)) {
         submixHeld = true;
+        captureActive = true;
         // native reads float off the proxy
         SunshineServer.startAudioRecording(
             new AudioRecordProxy(), _framesPerPacket(packetDuration));
@@ -110,6 +116,7 @@ public class SunshineAudio {
     AudioRecord audioRecord =
         CaptureAudio.startPlaybackCapture(State.getMediaProjection(), SAMPLE_RATE, ENCODING);
     if (audioRecord != null) {
+      captureActive = true;
       SunshineServer.startAudioRecording(audioRecord, _framesPerPacket(packetDuration));
     }
     return false;
@@ -121,6 +128,7 @@ public class SunshineAudio {
   }
 
   public static void restoreVolume(Context context) {
+    captureActive = false;
     if (submixHeld) {
       submixHeld = false;
       CaptureAudio.stopRemoteSubmix();

@@ -164,7 +164,8 @@ namespace input {
 
     input_t(
       safe::mail_raw_t::event_t<input::touch_port_t> touch_port_event,
-      platf::feedback_queue_t feedback_queue
+      platf::feedback_queue_t feedback_queue,
+      std::int64_t session_handle
     ):
         shortcutFlags {},
         gamepads(MAX_GAMEPADS),
@@ -174,11 +175,14 @@ namespace input {
         mouse_left_button_timeout {},
         touch_port {{0, 0, 0, 0}, 0, 0, 1.0f},
         accumulated_vscroll_delta {},
-        accumulated_hscroll_delta {} {
+        accumulated_hscroll_delta {},
+        session_handle {session_handle} {
     }
 
     // Keep track of alt+ctrl+shift key combo
     int shortcutFlags;
+
+    std::int64_t session_handle;
 
     std::vector<gamepad_t> gamepads;
     std::unique_ptr<platf::client_input_t> client_context;
@@ -449,7 +453,7 @@ namespace input {
     }
 
     input->mouse_left_button_timeout = DISABLE_LEFT_BUTTON_DELAY;
-    sunshine_callbacks::callJavaOnRelMouseMove(packet);
+    sunshine_callbacks::callJavaOnRelMouseMove(input->session_handle, packet);
   }
 
   /**
@@ -541,7 +545,7 @@ namespace input {
     auto width = (float) util::endian::big(packet->width);
     auto height = (float) util::endian::big(packet->height);
 
-    sunshine_callbacks::callJavaOnAbsMouseMove(packet);
+    sunshine_callbacks::callJavaOnAbsMouseMove(input->session_handle, packet);
 
 //    auto tpcoords = client_to_touchport(input, {x, y}, {width, height});
 //    if (!tpcoords) {
@@ -594,7 +598,7 @@ namespace input {
           // Already released left button
           return;
         }
-        sunshine_callbacks::callJavaOnMouseButton(BUTTON_LEFT, release);
+        sunshine_callbacks::callJavaOnMouseButton(input->session_handle, BUTTON_LEFT, release);
 //        platf::button_mouse(platf_input, BUTTON_LEFT, release);
 
         mouse_press[BUTTON_LEFT] = false;
@@ -609,8 +613,8 @@ namespace input {
       button == BUTTON_RIGHT && !release &&
       input->mouse_left_button_timeout > DISABLE_LEFT_BUTTON_DELAY
     ) {
-        sunshine_callbacks::callJavaOnMouseButton(BUTTON_RIGHT, false);
-        sunshine_callbacks::callJavaOnMouseButton(BUTTON_RIGHT, true);
+        sunshine_callbacks::callJavaOnMouseButton(input->session_handle, BUTTON_RIGHT, false);
+        sunshine_callbacks::callJavaOnMouseButton(input->session_handle, BUTTON_RIGHT, true);
 //      platf::button_mouse(platf_input, BUTTON_RIGHT, false);
 //      platf::button_mouse(platf_input, BUTTON_RIGHT, true);
 
@@ -619,7 +623,7 @@ namespace input {
       return;
     }
 
-      sunshine_callbacks::callJavaOnMouseButton(button, release);
+      sunshine_callbacks::callJavaOnMouseButton(input->session_handle, button, release);
 //    platf::button_mouse(platf_input, button, release);
   }
 
@@ -892,7 +896,7 @@ sunshine_callbacks::callJavaOnKeyboard(VKEY_MENU, true, flags);
       return;
     }
 
-      sunshine_callbacks::callJavaOnTouch(packet);
+      sunshine_callbacks::callJavaOnTouch(input->session_handle, packet);
 
 //    BOOST_LOG(debug) << "Processing touch event: type=" << (int)packet->eventType << ", pointerId=" << util::endian::little(packet->pointerId);
 //
@@ -1668,10 +1672,11 @@ sunshine_callbacks::callJavaOnKeyboard(VKEY_MENU, true, flags);
     return true;
   }
 
-  std::shared_ptr<input_t> alloc(safe::mail_t mail) {
+  std::shared_ptr<input_t> alloc(safe::mail_t mail, std::int64_t session_handle) {
     auto input = std::make_shared<input_t>(
       mail->event<input::touch_port_t>(mail::touch_port),
-      mail->queue<platf::gamepad_feedback_msg_t>(mail::gamepad_feedback)
+      mail->queue<platf::gamepad_feedback_msg_t>(mail::gamepad_feedback),
+      session_handle
     );
 
     // Workaround to ensure new frames will be captured when a client connects

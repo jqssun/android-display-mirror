@@ -511,7 +511,7 @@ namespace stream {
       }
 
       // Once the control stream connection is established, RTSP session state can be torn down
-//      rtsp_stream::launch_session_clear(session_p->launch_session_id);
+      rtsp_stream::launch_session_clear(session_p->launch_session_id);
 
       session_p->control.peer = peer;
 
@@ -1939,7 +1939,7 @@ namespace stream {
     }
 
     int start(session_t &session, const std::string &addr_string) {
-      session.input = input::alloc(session.mail);
+      session.input = input::alloc(session.mail, (std::int64_t)(intptr_t) &session);
 
       session.broadcast_ref = broadcast.ref();
       if (!session.broadcast_ref) {

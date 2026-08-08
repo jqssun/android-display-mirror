@@ -139,6 +139,10 @@ public class State {
     _run(mode, job, "starting");
   }
 
+  public static void cancelJob(String mode) {
+    jobs.remove(mode);
+  }
+
   /** resume all yielded jobs (e.g. after permission grant). */
   public static void resumeJob() {
     for (Map.Entry<String, Job> entry : new HashMap<>(jobs).entrySet()) {

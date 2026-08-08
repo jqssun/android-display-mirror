@@ -12,6 +12,7 @@ import io.github.jqssun.displaymirror.job.VirtualDisplayArgs;
 import io.github.jqssun.displaymirror.job.YieldException;
 
 public class ProjectViaSunshine implements Job {
+  private final long session;
   private final int width;
   private final int height;
   private final int frameRate;
@@ -21,12 +22,14 @@ public class ProjectViaSunshine implements Job {
   private boolean mediaProjectionRequested;
 
   public ProjectViaSunshine(
+      long session,
       int width,
       int height,
       int frameRate,
       int packetDuration,
       Surface surface,
       boolean shouldSendAudio) {
+    this.session = session;
     this.width = width;
     this.height = height;
     this.frameRate = frameRate;
@@ -37,30 +40,36 @@ public class ProjectViaSunshine implements Job {
 
   @Override
   public void start() throws YieldException {
-    if (!_requestMediaProjectionPermission()) {
-      return;
-    }
     Context context = State.getContext();
     if (context == null) {
       return;
     }
-    if (shouldSendAudio) {
-      if (SunshineAudio.sendAudio(context, packetDuration)) {
+    boolean mirrors = CreateVirtualDisplay.streamMirrors();
+    if (mirrors && SunshineState.pipeline != null) {
+      // later sessions join shared capture, no projection needed
+      if (_sendAudio(context)) {
         return;
       }
-    } else {
-      State.log("client requested no audio capture, using phone speaker instead");
+      SunshineState.addSession(session);
+      SunshineState.pipeline.addOutput(session, surface, width, height);
+      return;
     }
-    boolean rotateWithContent = Pref.getRotateWithContent();
-    boolean cropBlackBorders = Pref.getCropBlackBorders();
-    if (CreateVirtualDisplay.streamMirrors() && (rotateWithContent || cropBlackBorders)) {
-      SunshineMouse.pipeline =
+    if (!_requestMediaProjectionPermission()) {
+      return;
+    }
+    if (_sendAudio(context)) {
+      return;
+    }
+    if (mirrors) {
+      StreamRenderer pipeline =
           new StreamRenderer(
               new VirtualDisplayArgs("Sunshine", width, height, frameRate, 160, false),
-              rotateWithContent,
-              cropBlackBorders,
-              surface);
-      SunshineMouse.pipeline.start(
+              Pref.getRotateWithContent(),
+              Pref.getCropBlackBorders());
+      SunshineState.pipeline = pipeline;
+      SunshineState.addSession(session);
+      pipeline.addOutput(session, surface, width, height);
+      pipeline.start(
           (input, w, h) -> {
             if (SunshineState.virtualDisplay == null && State.getMediaProjection() != null) {
               SunshineState.setVirtualDisplay(
@@ -72,12 +81,22 @@ public class ProjectViaSunshine implements Job {
             return SunshineState.virtualDisplay;
           });
     } else {
-      SunshineState.setVirtualDisplay(
+      SunshineState.addSessionDisplay(
+          session,
           CreateVirtualDisplay.createForStream(
               new VirtualDisplayArgs(
                   "Sunshine", width, height, frameRate, 160, Pref.getRotateWithContent()),
               surface));
     }
+  }
+
+  // true when the job should abort
+  private boolean _sendAudio(Context context) throws YieldException {
+    if (!shouldSendAudio) {
+      State.log("client requested no audio capture, using phone speaker instead");
+      return false;
+    }
+    return SunshineAudio.sendAudio(context, packetDuration);
   }
 
   private boolean _requestMediaProjectionPermission() throws YieldException {
