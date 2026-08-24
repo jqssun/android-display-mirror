@@ -134,7 +134,6 @@ public class AirPlayService {
               @Override
               public void onPinRequired() {
                 State.log("AirPlay PIN required");
-                session = null;
                 mainHandler.post(
                     () -> {
                       if (listener != null) listener.onPinRequired();
@@ -251,6 +250,12 @@ public class AirPlayService {
 
     _ensureSession();
     session.connect(host, port, pin, pendingWidth, pendingHeight, pendingFps);
+  }
+
+  public void submitPin(String pin) {
+    if (session != null) {
+      session.submitPin(pin);
+    }
   }
 
   // step 2: projection ready

@@ -240,7 +240,7 @@ public class AirPlayFragment extends Fragment {
           _pendingDevice = dev;
           _updateStatus(
               R.drawable.ic_sync, R.string.airplay_connecting, R.string.airplay_connecting_detail);
-          AirPlayService.getInstance().connect(dev.ip, dev.port, pin);
+          AirPlayService.getInstance().submitPin(pin);
         });
   }
 

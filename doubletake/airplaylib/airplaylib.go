@@ -35,6 +35,7 @@ type Session struct {
 	mirror  *airplay.MirrorSession
 	handler EventHandler
 	cancel  context.CancelFunc
+	pinCh   chan string
 
 	pipeW        *io.PipeWriter
 	firstSendLog bool
@@ -115,12 +116,14 @@ func (s *Session) Connect(host string, port int, pin string, width int, height i
 		}
 		ctx, cancel := context.WithCancel(context.Background())
 		s.cancel = cancel
+		s.pinCh = make(chan string, 1)
 		s.mu.Unlock()
 
 		airplay.DebugMode = true
 		// cmd/doubletake default; 1ms library default gives Apple no jitter budget
 		airplay.SetTargetLatency(100 * time.Millisecond)
 		client := airplay.NewAirPlayClient(host, port)
+		client.SetPassword(pin)
 		if err := client.Connect(ctx); err != nil {
 			s.handler.OnError("connect: " + err.Error())
 			return
@@ -132,7 +135,6 @@ func (s *Session) Connect(host string, port int, pin string, width int, height i
 
 		// match the receiver's display; airplay1 keeps caller dims + clamp
 		if airplay.AirPlay1Mode {
-			airplay.AirPlay1Password = pin
 			width, height = clampAirPlay1(width, height)
 		} else {
 			info, err := s.setupAirPlay2(ctx, client, pin)
@@ -220,6 +222,19 @@ func (s *Session) Connect(host string, port int, pin string, width int, height i
 
 		s.handler.OnConnected()
 	}()
+}
+
+func (s *Session) SubmitPin(pin string) {
+	s.mu.Lock()
+	ch := s.pinCh
+	s.mu.Unlock()
+	if ch == nil {
+		return
+	}
+	select {
+	case ch <- pin:
+	default:
+	}
 }
 
 func (s *Session) SendFrame(annexBData []byte, isKeyframe bool) {

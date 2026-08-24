@@ -19,9 +19,9 @@ func SetCredentialsPath(path string) error {
 	return nil
 }
 
-/*
-upstream pairing flow: full pair-setup when caller supplies PIN, else pair-verify against saved credentials, else transient pairing. skipping the credential store makes every connect a fresh pair-setup, which Apple receivers answer with another PIN prompt
-*/
+func passwordRequiresPairing(info *airplay.ReceiverInfo) bool {
+	return info.RequiresPassword() && (info.RequiresPINPairing() || info.PrefersLegacyPairing())
+}
 func (s *Session) setupAirPlay2(ctx context.Context, client *airplay.AirPlayClient, pin string) (*airplay.ReceiverInfo, error) {
 	info, err := client.GetInfo()
 	if err != nil {
@@ -31,24 +31,17 @@ func (s *Session) setupAirPlay2(ctx context.Context, client *airplay.AirPlayClie
 	s.logf("[AIRPLAY2] features %#016x, statusFlags %#x", info.Features, info.StatusFlags)
 
 	var saved *airplay.SavedCredentials
-	if pin == "" && credStore != nil {
+	if credStore != nil {
 		saved = credStore.Lookup(info.DeviceID)
 	}
 
-	switch {
-	case pin != "":
-		if err := client.Pair(ctx, pin); err != nil {
-			return nil, s._setupFailed(client, "pairing failed: ", err)
-		}
-		s._saveCredentials(info.DeviceID, client)
-
-	case saved != nil:
+	if saved != nil && saved.HasPairingCredentials() {
 		s.logf("[AIRPLAY2] using saved credentials")
 		pub, priv := saved.Ed25519Keys()
 		client.PairingID = saved.PairingID
 		client.PairKeys = &airplay.PairKeys{Ed25519Public: pub, Ed25519Private: priv}
 		if err := client.PairVerify(ctx); err != nil {
-			s.logf("[AIRPLAY2] pair-verify with saved creds failed: %v, falling back to transient pairing", err)
+			s.logf("[AIRPLAY2] pair-verify with saved creds failed: %v, re-pairing", err)
 			// the failed pair-verify may have closed the connection
 			client.Close()
 			if err := client.Connect(ctx); err != nil {
@@ -57,15 +50,12 @@ func (s *Session) setupAirPlay2(ctx context.Context, client *airplay.AirPlayClie
 			if _, err := client.GetInfo(); err != nil {
 				return nil, s._setupFailed(client, "getinfo after reconnect: ", err)
 			}
-			if err := client.PairTransientAuto(ctx); err != nil {
-				return nil, s._requestPIN(client, err)
+			if err := s._pair(ctx, client, info, pin); err != nil {
+				return nil, err
 			}
 		}
-
-	default:
-		if err := client.PairTransientAuto(ctx); err != nil {
-			return nil, s._requestPIN(client, err)
-		}
+	} else if err := s._pair(ctx, client, info, pin); err != nil {
+		return nil, err
 	}
 	s.logf("[AIRPLAY2] pairing complete")
 
@@ -83,6 +73,69 @@ func (s *Session) setupAirPlay2(ctx context.Context, client *airplay.AirPlayClie
 	return info, nil
 }
 
+// pairs on existing connection
+func (s *Session) _pair(ctx context.Context, client *airplay.AirPlayClient, info *airplay.ReceiverInfo, pin string) error {
+	credential := func(reveal bool) (string, error) {
+		if pin != "" {
+			return pin, nil
+		}
+		if reveal {
+			if err := client.StartPINDisplay(); err != nil {
+				s.logf("[AIRPLAY2] StartPINDisplay failed: %v", err)
+			}
+		}
+		s.handler.OnPinRequired()
+		select {
+		case p := <-s.pinCh:
+			return p, nil
+		case <-ctx.Done():
+			client.Close()
+			return "", ctx.Err()
+		}
+	}
+	pairWith := func(p string) error {
+		if err := client.Pair(ctx, p); err != nil {
+			return s._setupFailed(client, "pairing failed: ", err)
+		}
+		s._saveCredentials(info.DeviceID, client)
+		return nil
+	}
+
+	switch {
+	case info.RequiresPassword() && !passwordRequiresPairing(info):
+		p, err := credential(false)
+		if err != nil {
+			return err
+		}
+		if err := client.PairTransientPassword(ctx, p); err != nil {
+			return s._setupFailed(client, "pairing failed: ", err)
+		}
+		return nil
+	case passwordRequiresPairing(info):
+		p, err := credential(false)
+		if err != nil {
+			return err
+		}
+		return pairWith(p)
+	case info.RequiresPINPairing():
+		p, err := credential(true)
+		if err != nil {
+			return err
+		}
+		return pairWith(p)
+	default:
+		if err := client.Pair(ctx, ""); err != nil {
+			s.logf("[AIRPLAY2] transient pairing failed: %v, prompting for PIN", err)
+			p, err := credential(true)
+			if err != nil {
+				return err
+			}
+			return pairWith(p)
+		}
+		return nil
+	}
+}
+
 func (s *Session) _saveCredentials(deviceID string, client *airplay.AirPlayClient) {
 	if credStore == nil {
 		return
@@ -92,17 +145,6 @@ func (s *Session) _saveCredentials(deviceID string, client *airplay.AirPlayClien
 		return
 	}
 	s.logf("[AIRPLAY2] credentials saved")
-}
-
-// upstream reconnects before pair-setup; here the UI hands the PIN to the next Connect
-func (s *Session) _requestPIN(client *airplay.AirPlayClient, cause error) error {
-	s.logf("[AIRPLAY2] transient pairing failed: %v, prompting for PIN", cause)
-	if err := client.StartPINDisplay(); err != nil {
-		s.logf("[AIRPLAY2] StartPINDisplay failed: %v", err)
-	}
-	client.Close()
-	s.handler.OnPinRequired()
-	return cause
 }
 
 func (s *Session) _setupFailed(client *airplay.AirPlayClient, prefix string, err error) error {

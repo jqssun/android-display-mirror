@@ -26,22 +26,14 @@ ln -sfn ../airplaylib airplaylib
 ln -sf ../../../patches.go internal/airplay/patches.go
 ln -sf ../../../airplay1.go internal/airplay/airplay1.go
 
-# airplay1 digest auth reads WWW-Authenticate off the 401 which rtspRequest otherwise drops
-sed -Ezi 's|if err != nil \{[[:space:]]+return nil, nil, err|if err != nil {\n\t\treturn nil, respHeaders, err|' internal/airplay/client.go
-
 # receiver hashes the ECDH secret into the stream key when pairing produced one
-
 sed -i 's|deriveStreamMasterKey(c.fpAesKey, sharedSecret(c.PairKeys), c.encrypted)|deriveStreamMasterKey(c.fpAesKey, sharedSecret(c.PairKeys), true)|' internal/airplay/fairplay.go
 sed -i 's|if c.encrypted \&\& len(sharedSecret(c.PairKeys)) > 0 {|if len(sharedSecret(c.PairKeys)) > 0 {|' internal/airplay/fairplay.go
+sed -i 's|return fmt.Errorf("SETUP response omitted eventPort")|if !modernControlSetup { dbg("[EVENT] receiver omitted eventPort, continuing without event channel"); return nil }\n\t\treturn fmt.Errorf("SETUP response omitted eventPort")|' internal/airplay/mirror.go
 
-# session gets its own SETUP before any stream is added
-sed -i 's|audioSetupBody, err2 := plist.Marshal(audioSetupPlist, plist.BinaryFormat)|if ep, err0 := c.SetupSession(audioURI, clientDeviceID, sessionUUID, timingPort); err0 != nil {audioCtrlConn.Close(); audioDataConn.Close(); return nil, fmt.Errorf("SETUP phase 0 (session): %w", err0)} else if ep > 0 {receiverEventPort = ep}\naudioSetupBody, err2 := plist.Marshal(audioSetupPlist, plist.BinaryFormat)|' internal/airplay/mirror.go
-
-# type
-sed -i 's|\[\]byte        `plist|pkBytes       `plist|' internal/airplay/client.go
-sed -i 's|int `plist|plistNum `plist|' internal/airplay/client.go
-sed -i 's|bool          `plist|plistBool     `plist|' internal/airplay/client.go
-sed -i 's|return w, h|return int(w), int(h)|' internal/airplay/client.go
+# transient pair-setup
+sed -i 's|func (c \*AirPlayClient) pairSetupTransient(ctx context.Context) error {|func (c *AirPlayClient) pairSetupTransient(ctx context.Context) error { return c.pairSetupTransientPassword(ctx, "") }\nfunc (c *AirPlayClient) pairSetupTransientPassword(ctx context.Context, password string) error {|' internal/airplay/pairing.go
+sed -i 's|return c.completeSRPExchange(ctx, "", serverSalt, serverPub)|return c.completeSRPExchange(ctx, password, serverSalt, serverPub)|' internal/airplay/pairing.go
 
 # might rewrite entire thing
 go get golang.org/x/mobile/bind 2>/dev/null || true;
