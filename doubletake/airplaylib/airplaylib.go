@@ -108,7 +108,7 @@ func (s *Session) Discover(durationMs int) {
 	}()
 }
 
-func (s *Session) Connect(host string, port int, pin string, width int, height int, fps int) {
+func (s *Session) Connect(host string, port int, width int, height int, fps int) {
 	go func() {
 		s.mu.Lock()
 		if s.cancel != nil {
@@ -123,7 +123,6 @@ func (s *Session) Connect(host string, port int, pin string, width int, height i
 		// cmd/doubletake default; 1ms library default gives Apple no jitter budget
 		airplay.SetTargetLatency(100 * time.Millisecond)
 		client := airplay.NewAirPlayClient(host, port)
-		client.SetPassword(pin)
 		if err := client.Connect(ctx); err != nil {
 			s.handler.OnError("connect: " + err.Error())
 			return
@@ -137,7 +136,7 @@ func (s *Session) Connect(host string, port int, pin string, width int, height i
 		if airplay.AirPlay1Mode {
 			width, height = clampAirPlay1(width, height)
 		} else {
-			info, err := s.setupAirPlay2(ctx, client, pin)
+			info, err := s.setupAirPlay2(ctx, client)
 			if err != nil {
 				return
 			}
@@ -156,16 +155,20 @@ func (s *Session) Connect(host string, port int, pin string, width int, height i
 		var setupErr error
 		if airplay.AirPlay1Mode {
 			mirror, setupErr = client.SetupMirrorAirPlay1(ctx)
+			// reprompt
+			for errors.Is(setupErr, airplay.ErrAirPlay1PasswordRequired) {
+				s.logf("[AIRPLAY] receiver requires password")
+				password, err := s._credential(ctx, client, false)
+				if err != nil {
+					return
+				}
+				client.SetPassword(password)
+				mirror, setupErr = client.SetupMirrorAirPlay1(ctx)
+			}
 		} else {
 			mirror, setupErr = client.SetupMirror(ctx, airplay.StreamConfig{FPS: fps})
 		}
 		if setupErr != nil {
-			if errors.Is(setupErr, airplay.ErrAirPlay1PasswordRequired) {
-				s.logf("[AIRPLAY] receiver requires password")
-				client.Close()
-				s.handler.OnPinRequired()
-				return
-			}
 			s.handler.OnError("setup_mirror: " + setupErr.Error())
 			client.Close()
 			return
@@ -222,6 +225,23 @@ func (s *Session) Connect(host string, port int, pin string, width int, height i
 
 		s.handler.OnConnected()
 	}()
+}
+
+// wait until UI gives a code
+func (s *Session) _credential(ctx context.Context, client *airplay.AirPlayClient, reveal bool) (string, error) {
+	if reveal {
+		if err := client.StartPINDisplay(); err != nil {
+			s.logf("[AIRPLAY] StartPINDisplay failed: %v", err)
+		}
+	}
+	s.handler.OnPinRequired()
+	select {
+	case p := <-s.pinCh:
+		return p, nil
+	case <-ctx.Done():
+		client.Close()
+		return "", ctx.Err()
+	}
 }
 
 func (s *Session) SubmitPin(pin string) {

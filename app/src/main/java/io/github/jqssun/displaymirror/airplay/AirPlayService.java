@@ -46,7 +46,6 @@ public class AirPlayService {
   // pending connect params, used after projection is granted
   private String pendingHost;
   private int pendingPort;
-  private String pendingPin;
   private int pendingWidth, pendingHeight, pendingFps;
 
   public static class AirPlayDevice {
@@ -222,7 +221,7 @@ public class AirPlayService {
   }
 
   // step 1: User hits connect → start AirPlay handshake (no projection yet)
-  public void connect(String host, int port, String pin) {
+  public void connect(String host, int port) {
     // tear down any previous session/attempt
     if (session != null) {
       session.disconnect();
@@ -232,7 +231,6 @@ public class AirPlayService {
 
     pendingHost = host;
     pendingPort = port;
-    pendingPin = pin;
     pendingWidth = Pref.getAirPlayWidth();
     pendingHeight = Pref.getAirPlayHeight();
     pendingFps = Pref.getAirPlayRefreshRate();
@@ -249,7 +247,7 @@ public class AirPlayService {
             + ")");
 
     _ensureSession();
-    session.connect(host, port, pin, pendingWidth, pendingHeight, pendingFps);
+    session.connect(host, port, pendingWidth, pendingHeight, pendingFps);
   }
 
   public void submitPin(String pin) {

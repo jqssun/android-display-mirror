@@ -118,7 +118,7 @@ public class AirPlayFragment extends Fragment {
           _pendingDevice = new AirPlayService.AirPlayDevice("Manual (" + ip + ")", ip, port);
           _updateStatus(
               R.drawable.ic_sync, R.string.airplay_connecting, R.string.airplay_connecting_detail);
-          AirPlayService.getInstance().connect(_pendingDevice.ip, _pendingDevice.port, "");
+          AirPlayService.getInstance().connect(_pendingDevice.ip, _pendingDevice.port);
         });
 
     airplay.setListener(
@@ -198,7 +198,7 @@ public class AirPlayFragment extends Fragment {
           _pendingDevice = dev;
           _updateStatus(
               R.drawable.ic_sync, R.string.airplay_connecting, R.string.airplay_connecting_detail);
-          airplay.connect(dev.ip, dev.port, "");
+          airplay.connect(dev.ip, dev.port);
         });
 
     // restore state if devices already discovered
