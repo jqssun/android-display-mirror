@@ -58,7 +58,7 @@ func (c *AirPlayClient) SetupMirrorAirPlay1(ctx context.Context) (*MirrorSession
 	}
 
 	dataAddr := net.JoinHostPort(c.host, strconv.Itoa(dataPort))
-	dataConn, err := net.DialTimeout("tcp", dataAddr, 5*time.Second)
+	dataConn, err := lanDialTimeout("tcp", dataAddr, 5*time.Second)
 	if err != nil {
 		return nil, fmt.Errorf("airplay1 dial %s: %w", dataAddr, err)
 	}

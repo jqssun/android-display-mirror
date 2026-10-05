@@ -25,6 +25,12 @@ sed -i 's|\*ScreenCapture|io.Reader|' internal/airplay/mirror.go
 ln -sfn ../airplaylib airplaylib
 ln -sf ../../../patches.go internal/airplay/patches.go
 ln -sf ../../../airplay1.go internal/airplay/airplay1.go
+ln -sf ../../../lansocket.go internal/airplay/lansocket.go
+
+# route receiver sockets through lansocket.go so they can bypass a VPN
+sed -i 's|d\.DialContext(ctx, "tcp", addr)|lanDialContext(ctx, \&d, "tcp", addr)|' internal/airplay/client.go
+sed -i 's|net\.DialTimeout("tcp", |lanDialTimeout("tcp", |' internal/airplay/mirror.go internal/airplay/event_channel.go
+sed -i 's|net\.ListenPacket("udp", |lanListenPacket("udp", |' internal/airplay/mirror.go
 
 # receiver hashes the ECDH secret into the stream key when pairing produced one
 sed -i 's|deriveStreamMasterKey(c.fpAesKey, sharedSecret(c.PairKeys), c.encrypted)|deriveStreamMasterKey(c.fpAesKey, sharedSecret(c.PairKeys), true)|' internal/airplay/fairplay.go

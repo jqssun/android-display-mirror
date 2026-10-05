@@ -96,6 +96,7 @@ public class AirPlayService {
         State.log("AirPlay: credential store unavailable: " + e.getMessage());
       }
     }
+    LanSockets.install();
     airplaylib.Session s =
         airplaylib.Airplaylib.newSession(
             new airplaylib.EventHandler() {
@@ -163,6 +164,12 @@ public class AirPlayService {
   public void discover() {
     devices.clear();
     State.log("AirPlay: scanning for devices...");
+    if (VpnState.isActive()) {
+      // VPN drops LAN multicast replies for our UID, system mdnsd isn't subject to it
+      State.log("AirPlay: VPN active, scanning via system mDNS");
+      _discoverNsd();
+      return;
+    }
     new Thread(
             () -> {
               try {
@@ -220,6 +227,108 @@ public class AirPlayService {
         .start();
   }
 
+  private android.net.nsd.NsdManager.DiscoveryListener nsdListener;
+
+  private void _discoverNsd() {
+    Context ctx = State.getContext();
+    if (ctx == null) return;
+    android.net.nsd.NsdManager nsd = ctx.getSystemService(android.net.nsd.NsdManager.class);
+    if (nsd == null) return;
+    _stopNsd(nsd);
+    // resolveService allows one in-flight resolve before API 34, so queue them
+    java.util.concurrent.ExecutorService resolver =
+        java.util.concurrent.Executors.newSingleThreadExecutor();
+    android.net.nsd.NsdManager.DiscoveryListener l =
+        new android.net.nsd.NsdManager.DiscoveryListener() {
+          @Override
+          public void onServiceFound(android.net.nsd.NsdServiceInfo info) {
+            resolver.execute(() -> _resolveNsd(nsd, info));
+          }
+
+          @Override
+          public void onServiceLost(android.net.nsd.NsdServiceInfo info) {}
+
+          @Override
+          public void onDiscoveryStarted(String type) {}
+
+          @Override
+          public void onDiscoveryStopped(String type) {
+            resolver.shutdown();
+          }
+
+          @Override
+          public void onStartDiscoveryFailed(String type, int code) {
+            State.log("AirPlay: system mDNS discovery failed: " + code);
+            resolver.shutdown();
+          }
+
+          @Override
+          public void onStopDiscoveryFailed(String type, int code) {}
+        };
+    nsdListener = l;
+    android.net.Network lan = VpnState.lanNetwork();
+    if (lan != null && android.os.Build.VERSION.SDK_INT >= 33) {
+      // default network is the VPN, so scope the query to the physical LAN
+      nsd.discoverServices(
+          "_airplay._tcp", android.net.nsd.NsdManager.PROTOCOL_DNS_SD, lan, Runnable::run, l);
+    } else {
+      nsd.discoverServices("_airplay._tcp", android.net.nsd.NsdManager.PROTOCOL_DNS_SD, l);
+    }
+    mainHandler.postDelayed(
+        () -> {
+          if (nsdListener == l) _stopNsd(nsd);
+        },
+        5000);
+  }
+
+  private void _stopNsd(android.net.nsd.NsdManager nsd) {
+    if (nsdListener == null) return;
+    try {
+      nsd.stopServiceDiscovery(nsdListener);
+    } catch (Exception ignored) {
+    }
+    nsdListener = null;
+  }
+
+  @SuppressWarnings("deprecation")
+  private void _resolveNsd(android.net.nsd.NsdManager nsd, android.net.nsd.NsdServiceInfo info) {
+    java.util.concurrent.CountDownLatch done = new java.util.concurrent.CountDownLatch(1);
+    nsd.resolveService(
+        info,
+        new android.net.nsd.NsdManager.ResolveListener() {
+          @Override
+          public void onResolveFailed(android.net.nsd.NsdServiceInfo i, int code) {
+            done.countDown();
+          }
+
+          @Override
+          public void onServiceResolved(android.net.nsd.NsdServiceInfo i) {
+            InetAddress host = i.getHost();
+            if (host instanceof java.net.Inet4Address) {
+              _addDevice(i.getServiceName(), host.getHostAddress(), i.getPort());
+            }
+            done.countDown();
+          }
+        });
+    try {
+      done.await(3, java.util.concurrent.TimeUnit.SECONDS);
+    } catch (InterruptedException ignored) {
+    }
+  }
+
+  private synchronized void _addDevice(String name, String ip, int port) {
+    String key = ip + ":" + port;
+    for (AirPlayDevice d : devices) {
+      if ((d.ip + ":" + d.port).equals(key)) return;
+    }
+    devices.add(new AirPlayDevice(name, ip, port));
+    State.log("AirPlay: found " + name + " at " + ip + ":" + port);
+    mainHandler.post(
+        () -> {
+          if (listener != null) listener.onDeviceFound(name, ip, port);
+        });
+  }
+
   // step 1: User hits connect → start AirPlay handshake (no projection yet)
   public void connect(String host, int port) {
     // tear down any previous session/attempt
@@ -247,6 +356,9 @@ public class AirPlayService {
             + ")");
 
     _ensureSession();
+    if (VpnState.isActive()) {
+      State.log("AirPlay: VPN active, routing receiver traffic around it via Shizuku");
+    }
     session.connect(host, port, pendingWidth, pendingHeight, pendingFps);
   }
 

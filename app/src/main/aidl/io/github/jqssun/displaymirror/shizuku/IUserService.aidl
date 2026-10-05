@@ -27,4 +27,9 @@ interface IUserService {
     boolean stopRecordingAudio() = 11;
 
     int readAudioPcm16(out byte[] buffer) = 12;
+
+    // sockets owned by the shell UID and bound to the LAN interface, so a non-bypassable VPN on the app UID doesn't swallow them; null when no interface reaches host
+    ParcelFileDescriptor lanDialTcp(String host, int port, int timeoutMs) = 13;
+
+    ParcelFileDescriptor lanListenUdp(String host, int port) = 14;
 }

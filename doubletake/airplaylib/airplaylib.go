@@ -122,6 +122,7 @@ func (s *Session) Connect(host string, port int, width int, height int, fps int)
 		airplay.DebugMode = true
 		// cmd/doubletake default; 1ms library default gives Apple no jitter budget
 		airplay.SetTargetLatency(100 * time.Millisecond)
+		setLanHost(host)
 		client := airplay.NewAirPlayClient(host, port)
 		if err := client.Connect(ctx); err != nil {
 			s.handler.OnError("connect: " + err.Error())

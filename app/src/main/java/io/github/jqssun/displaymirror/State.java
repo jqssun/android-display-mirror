@@ -255,6 +255,15 @@ public class State {
 
   public static void bindUserService() {
     try {
+      if (BuildConfig.DEBUG) {
+        // daemon service survives reinstalls with the same versionCode, so debug builds key it on install time
+        Context ctx = getContext();
+        if (ctx != null) {
+          long t =
+              ctx.getPackageManager().getPackageInfo(ctx.getPackageName(), 0).lastUpdateTime;
+          userServiceArgs.version((int) ((t / 1000) & 0x7fffffff));
+        }
+      }
       Shizuku.peekUserService(State.userServiceArgs, State.userServiceConnection);
       Shizuku.bindUserService(State.userServiceArgs, State.userServiceConnection);
     } catch (Exception e) {
