@@ -18,6 +18,7 @@
     <string name="permissions_granted_detail">All permissions granted</string>
     <string name="permissions_not_granted">Missing permissions</string>
     <string name="permissions_not_granted_detail">Certain features will not work</string>
+    <string name="local_network_required">Local network permission required</string>
 
     <!-- Settings section headers -->
     <string name="section_permissions">Permissions</string>

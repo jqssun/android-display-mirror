@@ -115,10 +115,17 @@ public class AirPlayFragment extends Fragment {
           String portStr =
               manualPort.getText() != null ? manualPort.getText().toString().trim() : "";
           int port = portStr.isEmpty() ? 7000 : Integer.parseInt(portStr);
-          _pendingDevice = new AirPlayService.AirPlayDevice("Manual (" + ip + ")", ip, port);
-          _updateStatus(
-              R.drawable.ic_sync, R.string.airplay_connecting, R.string.airplay_connecting_detail);
-          AirPlayService.getInstance().connect(_pendingDevice.ip, _pendingDevice.port);
+          ((MainActivity) requireActivity())
+              .withLocalNetwork(
+                  () -> {
+                    _pendingDevice =
+                        new AirPlayService.AirPlayDevice("Manual (" + ip + ")", ip, port);
+                    _updateStatus(
+                        R.drawable.ic_sync,
+                        R.string.airplay_connecting,
+                        R.string.airplay_connecting_detail);
+                    airplay.connect(_pendingDevice.ip, _pendingDevice.port);
+                  });
         });
 
     airplay.setListener(
@@ -169,23 +176,28 @@ public class AirPlayFragment extends Fragment {
         });
 
     scanBtn.setOnClickListener(
-        v -> {
-          scanBtn.setEnabled(false);
-          _updateStatus(
-              R.drawable.ic_sync, R.string.airplay_connecting, R.string.airplay_connecting_detail);
-          airplay.discover();
-          v.postDelayed(
-              () -> {
-                scanBtn.setEnabled(true);
-                if (airplay.getDevices().isEmpty()) {
-                  _updateStatus(
-                      R.drawable.ic_error,
-                      R.string.airplay_no_devices,
-                      R.string.airplay_no_devices_detail);
-                }
-              },
-              6000);
-        });
+        v ->
+            ((MainActivity) requireActivity())
+                .withLocalNetwork(
+                    () -> {
+                      scanBtn.setEnabled(false);
+                      _updateStatus(
+                          R.drawable.ic_sync,
+                          R.string.airplay_connecting,
+                          R.string.airplay_connecting_detail);
+                      airplay.discover();
+                      v.postDelayed(
+                          () -> {
+                            scanBtn.setEnabled(true);
+                            if (airplay.getDevices().isEmpty()) {
+                              _updateStatus(
+                                  R.drawable.ic_error,
+                                  R.string.airplay_no_devices,
+                                  R.string.airplay_no_devices_detail);
+                            }
+                          },
+                          6000);
+                    }));
 
     connectBtn.setOnClickListener(
         v -> {
@@ -195,10 +207,16 @@ public class AirPlayFragment extends Fragment {
           }
           AirPlayService.AirPlayDevice dev = _getSelectedDevice();
           if (dev == null) return;
-          _pendingDevice = dev;
-          _updateStatus(
-              R.drawable.ic_sync, R.string.airplay_connecting, R.string.airplay_connecting_detail);
-          airplay.connect(dev.ip, dev.port);
+          ((MainActivity) requireActivity())
+              .withLocalNetwork(
+                  () -> {
+                    _pendingDevice = dev;
+                    _updateStatus(
+                        R.drawable.ic_sync,
+                        R.string.airplay_connecting,
+                        R.string.airplay_connecting_detail);
+                    airplay.connect(dev.ip, dev.port);
+                  });
         });
 
     // restore state if devices already discovered

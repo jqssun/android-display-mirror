@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -170,12 +172,6 @@ public class ApkImporter {
   }
 
   private static void _extractTo(ZipInputStream zis, File out) throws IOException {
-    try (FileOutputStream fos = new FileOutputStream(out)) {
-      byte[] buf = new byte[8192];
-      int n;
-      while ((n = zis.read(buf)) != -1) {
-        fos.write(buf, 0, n);
-      }
-    }
+    Files.copy(zis, out.toPath(), StandardCopyOption.REPLACE_EXISTING);
   }
 }

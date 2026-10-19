@@ -32,5 +32,5 @@ sed -i 's|if c.encrypted \&\& len(sharedSecret(c.PairKeys)) > 0 {|if len(sharedS
 sed -i 's|return fmt.Errorf("SETUP response omitted eventPort")|if !modernControlSetup { dbg("[EVENT] receiver omitted eventPort, continuing without event channel"); return nil }\n\t\treturn fmt.Errorf("SETUP response omitted eventPort")|' internal/airplay/mirror.go
 
 # might rewrite entire thing
-go get golang.org/x/mobile/bind 2>/dev/null || true;
+go get -tool "golang.org/x/mobile/cmd/gobind@${GOMOBILE_VERSION}"
 gomobile bind -v -trimpath -ldflags="-buildid= -extldflags=-Wl,-z,max-page-size=16384" -target android -androidapi 26 -o $OUT_DIR/airplaylib.aar ./airplaylib/ # -overlay $(realpath ../overlay.json)

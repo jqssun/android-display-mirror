@@ -36,8 +36,6 @@ public final class CaptureAudio {
   private static final int CHANNELS = AudioFormat.CHANNEL_IN_STEREO;
   private static final long SUBMIX_BIND_TIMEOUT_MS = 5000;
 
-  private static boolean permissionRequested;
-
   // interleaved stereo PCM in whatever encoding the stream was opened with
   public interface PcmStream {
     int read(byte[] pcm);
@@ -57,20 +55,8 @@ public final class CaptureAudio {
   }
 
   public static boolean requestPermission() {
-    Context context = State.getContext();
-    if (context != null && hasPermission(context)) {
-      return false;
-    }
-    if (permissionRequested) {
-      return false;
-    }
     MainActivity activity = State.getCurrentActivity();
-    if (activity == null) {
-      return false;
-    }
-    permissionRequested = true;
-    activity.requestRecordAudioPermission();
-    return true;
+    return activity != null && activity.requestPermissionsOnce(Manifest.permission.RECORD_AUDIO);
   }
 
   /*

@@ -1,5 +1,6 @@
 package io.github.jqssun.displaymirror;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -28,10 +29,13 @@ import io.github.jqssun.displaymirror.airplay.AirPlayService;
 import io.github.jqssun.displaymirror.displaylink.ApkImporter;
 import io.github.jqssun.displaymirror.displaylink.MirrorDisplaylinkMonitor;
 import io.github.jqssun.displaymirror.job.AcquireShizuku;
-import io.github.jqssun.displaymirror.job.CaptureAudio;
 import io.github.jqssun.displaymirror.job.CreateVirtualDisplay;
 import io.github.jqssun.displaymirror.shizuku.ServiceUtils;
 import io.github.jqssun.displaymirror.sunshine.SunshineHost;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import org.lsposed.hiddenapibypass.HiddenApiBypass;
 import rikka.shizuku.Shizuku;
 
@@ -122,12 +126,37 @@ public class MainActivity extends AppCompatActivity {
             }
           });
 
-  private final ActivityResultLauncher<String> recordAudioLauncher =
+  private static final String[] STARTUP_PERMISSIONS =
+      Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN
+          ? new String[] {
+            Manifest.permission.RECORD_AUDIO, Manifest.permission.ACCESS_LOCAL_NETWORK
+          }
+          : new String[] {Manifest.permission.RECORD_AUDIO};
+
+  private static final Set<String> requestedPermissions = new HashSet<>();
+
+  private final ActivityResultLauncher<String[]> permissionLauncher =
+      registerForActivityResult(
+          new ActivityResultContracts.RequestMultiplePermissions(),
+          results -> {
+            results.forEach(MainActivity::_logPermission);
+            State.resumeJob();
+          });
+
+  private Runnable pendingLocalNetworkAction;
+
+  private final ActivityResultLauncher<String> localNetworkLauncher =
       registerForActivityResult(
           new ActivityResultContracts.RequestPermission(),
           granted -> {
-            State.log("audio recording permission " + (granted ? "granted" : "denied"));
-            State.resumeJob();
+            _logPermission(Manifest.permission.ACCESS_LOCAL_NETWORK, granted);
+            Runnable action = pendingLocalNetworkAction;
+            pendingLocalNetworkAction = null;
+            if (!granted) {
+              Toast.makeText(this, R.string.local_network_required, Toast.LENGTH_LONG).show();
+            } else if (action != null) {
+              action.run();
+            }
           });
 
   private final ActivityResultLauncher<Intent> importApkLauncher =
@@ -234,7 +263,7 @@ public class MainActivity extends AppCompatActivity {
     _handleLaunchIntent(getIntent());
 
     MirrorDisplaylinkMonitor.init(this);
-    CaptureAudio.requestPermission();
+    requestPermissionsOnce(STARTUP_PERMISSIONS);
 
     State.uiState.observe(this, state -> {});
   }
@@ -293,6 +322,10 @@ public class MainActivity extends AppCompatActivity {
   }
 
   public void startSunshine() {
+    withLocalNetwork(this::_startSunshine);
+  }
+
+  private void _startSunshine() {
     AcquireShizuku.notifyIfUidDropped();
     if (SunshineHost.isRunning()) {
       refresh();
@@ -307,8 +340,35 @@ public class MainActivity extends AppCompatActivity {
     }
   }
 
-  public void requestRecordAudioPermission() {
-    runOnUiThread(() -> recordAudioLauncher.launch(android.Manifest.permission.RECORD_AUDIO));
+  public boolean requestPermissionsOnce(String... perms) {
+    List<String> missing = new ArrayList<>();
+    for (String p : perms) {
+      if (checkSelfPermission(p) != PackageManager.PERMISSION_GRANTED
+          && requestedPermissions.add(p)) {
+        missing.add(p);
+      }
+    }
+    if (missing.isEmpty()) {
+      return false;
+    }
+    runOnUiThread(() -> permissionLauncher.launch(missing.toArray(new String[0])));
+    return true;
+  }
+
+  // ask until granted
+  public void withLocalNetwork(Runnable action) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.CINNAMON_BUN
+        || checkSelfPermission(Manifest.permission.ACCESS_LOCAL_NETWORK)
+            == PackageManager.PERMISSION_GRANTED) {
+      action.run();
+      return;
+    }
+    pendingLocalNetworkAction = action;
+    localNetworkLauncher.launch(Manifest.permission.ACCESS_LOCAL_NETWORK);
+  }
+
+  private static void _logPermission(String perm, boolean granted) {
+    State.log(perm + (granted ? " granted" : " denied"));
   }
 
   public void startAirPlayProjection() {

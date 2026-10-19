@@ -12,9 +12,12 @@ public class NativeDriver {
   public static void load(File libDir) {
     if (loaded) return;
     // load dependencies first, then the main lib
-    System.load(new File(libDir, "libusb_android.so").getAbsolutePath());
-    System.load(new File(libDir, "libAndroidDLM.so").getAbsolutePath());
-    System.load(new File(libDir, "libDisplayLinkManager.so").getAbsolutePath());
+    for (String name :
+        new String[] {"libusb_android.so", "libAndroidDLM.so", "libDisplayLinkManager.so"}) {
+      File lib = new File(libDir, name);
+      lib.setReadOnly();
+      System.load(lib.getAbsolutePath());
+    }
     loaded = true;
     Log.i("displaylink", "loaded DisplayLinkManager from " + libDir);
   }

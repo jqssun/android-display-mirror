@@ -123,14 +123,8 @@ public class CreateVirtualDisplay {
     int virtualDisplayWidth = virtualDisplayArgs.width;
     IDisplayManager displayManager = ServiceUtils.getDisplayManager();
     VirtualDisplayConfig config = null;
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-      config =
-          buildVirtualDisplayConfig(virtualDisplayArgs, surface, flags, virtualDisplayWidth, true);
-    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-      config =
-          buildVirtualDisplayConfig(virtualDisplayArgs, surface, flags, virtualDisplayWidth, false);
-    } else {
-      // config = null
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+      config = buildVirtualDisplayConfig(virtualDisplayArgs, surface, flags, virtualDisplayWidth);
     }
     IVirtualDisplayCallback callback = new VirtualDisplayCallback();
     // binding a MediaProjection makes the display mirror-only (shouldOnlyMirror) and unable to
@@ -196,25 +190,18 @@ public class CreateVirtualDisplay {
     return virtualDisplay;
   }
 
+  // no requested refresh rate: surfaceflinger composites display on vsyncs in phase with rate, which never line up on some panels and can leave display black
   @SuppressLint("NewApi")
   private static VirtualDisplayConfig buildVirtualDisplayConfig(
-      VirtualDisplayArgs virtualDisplayArgs,
-      Surface surface,
-      int flags,
-      int virtualDisplayWidth,
-      boolean includeRefreshRate) {
-    VirtualDisplayConfig.Builder builder =
-        new VirtualDisplayConfig.Builder(
-                virtualDisplayArgs.virtualDisplayName,
-                virtualDisplayWidth,
-                virtualDisplayArgs.height,
-                virtualDisplayArgs.dpi)
-            .setSurface(surface)
-            .setFlags(flags);
-    if (includeRefreshRate) {
-      builder.setRequestedRefreshRate(virtualDisplayArgs.refreshRate);
-    }
-    return builder.build();
+      VirtualDisplayArgs virtualDisplayArgs, Surface surface, int flags, int virtualDisplayWidth) {
+    return new VirtualDisplayConfig.Builder(
+            virtualDisplayArgs.virtualDisplayName,
+            virtualDisplayWidth,
+            virtualDisplayArgs.height,
+            virtualDisplayArgs.dpi)
+        .setSurface(surface)
+        .setFlags(flags)
+        .build();
   }
 
   // owned by other settings, always applied regardless of custom flag set
