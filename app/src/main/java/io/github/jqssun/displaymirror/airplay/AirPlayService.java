@@ -39,6 +39,9 @@ public class AirPlayService {
   private airplaylib.Session session;
   private AirPlayListener listener;
   private final List<AirPlayDevice> devices = new ArrayList<>();
+  // ip -> _raop._tcp port; some receivers only serve real AirPlay there
+  private final java.util.Map<String, Integer> raopPorts =
+      new java.util.concurrent.ConcurrentHashMap<>();
   private boolean connected;
   private AirPlayEncoder encoder;
   private AirPlayAudio audio;
@@ -210,6 +213,28 @@ public class AirPlayService {
                       public void serviceRemoved(ServiceEvent event) {}
                     });
 
+                jmdns.addServiceListener(
+                    "_raop._tcp.local.",
+                    new ServiceListener() {
+                      @Override
+                      public void serviceAdded(ServiceEvent event) {
+                        jmdns.requestServiceInfo(event.getType(), event.getName(), 3000);
+                      }
+
+                      @Override
+                      public void serviceResolved(ServiceEvent event) {
+                        int port = event.getInfo().getPort();
+                        for (InetAddress a : event.getInfo().getInetAddresses()) {
+                          if (a instanceof java.net.Inet4Address && port > 0) {
+                            raopPorts.put(a.getHostAddress(), port);
+                          }
+                        }
+                      }
+
+                      @Override
+                      public void serviceRemoved(ServiceEvent event) {}
+                    });
+
                 Thread.sleep(5000);
                 jmdns.close();
               } catch (Exception e) {
@@ -247,6 +272,10 @@ public class AirPlayService {
             + ")");
 
     _ensureSession();
+    Integer raopPort = raopPorts.get(host);
+    if (raopPort != null && raopPort != port) {
+      session.setFallbackPort(raopPort);
+    }
     session.connect(host, port, pendingWidth, pendingHeight, pendingFps);
   }
 

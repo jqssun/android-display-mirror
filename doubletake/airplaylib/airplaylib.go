@@ -50,6 +50,63 @@ type Session struct {
 
 	streamWidth  int
 	streamHeight int
+
+	fallbackPorts []int
+}
+
+// SetFallbackPort registers an alternate port (usually the receiver's _raop._tcp port) to try when the advertised AirPlay port answers /info with an empty stub
+func (s *Session) SetFallbackPort(port int) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if port <= 0 {
+		return
+	}
+	for _, p := range s.fallbackPorts {
+		if p == port {
+			return
+		}
+	}
+	s.fallbackPorts = append(s.fallbackPorts, port)
+}
+
+// some third-party receivers (e.g. Android cast apps) advertise _airplay._tcp on a stub port that returns empty 200s for everything, while the real AirPlay server lives on the _raop._tcp port
+func infoIsStub(info *airplay.ReceiverInfo) bool {
+	return info == nil || (info.Features == 0 && info.DeviceID == "" && len(info.PK) == 0)
+}
+
+// connects to host:port, moving to a fallback port when the advertised one is a stub
+func (s *Session) _connectReal(ctx context.Context, host string, port int) (*airplay.AirPlayClient, error) {
+	client := airplay.NewAirPlayClient(host, port)
+	if err := client.Connect(ctx); err != nil {
+		return nil, err
+	}
+	if airplay.AirPlay1Mode {
+		return client, nil
+	}
+	info, err := client.GetInfo()
+	if err == nil && !infoIsStub(info) {
+		return client, nil
+	}
+	s.mu.Lock()
+	candidates := append([]int{}, s.fallbackPorts...)
+	s.mu.Unlock()
+	candidates = append(candidates, 5000, 7000)
+	for _, p := range candidates {
+		if p == port {
+			continue
+		}
+		alt := airplay.NewAirPlayClient(host, p)
+		if err := alt.Connect(ctx); err != nil {
+			continue
+		}
+		if altInfo, err := alt.GetInfo(); err == nil && !infoIsStub(altInfo) {
+			s.logf("[AIRPLAY] port %d returned an empty /info, using real AirPlay service on port %d", port, p)
+			client.Close()
+			return alt, nil
+		}
+		alt.Close()
+	}
+	return client, nil
 }
 
 // encode resolution (receiver display when known), read by the Android side
@@ -122,8 +179,8 @@ func (s *Session) Connect(host string, port int, width int, height int, fps int)
 		airplay.DebugMode = true
 		// cmd/doubletake default; 1ms library default gives Apple no jitter budget
 		airplay.SetTargetLatency(100 * time.Millisecond)
-		client := airplay.NewAirPlayClient(host, port)
-		if err := client.Connect(ctx); err != nil {
+		client, err := s._connectReal(ctx, host, port)
+		if err != nil {
 			s.handler.OnError("connect: " + err.Error())
 			return
 		}
