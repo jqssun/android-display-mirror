@@ -23,10 +23,8 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.button.MaterialButton;
 import com.topjohnwu.superuser.Shell;
 import io.github.jqssun.displaymirror.airplay.AirPlayService;
-import io.github.jqssun.displaymirror.displaylink.ApkImporter;
 import io.github.jqssun.displaymirror.displaylink.MirrorDisplaylinkMonitor;
 import io.github.jqssun.displaymirror.job.AcquireShizuku;
 import io.github.jqssun.displaymirror.job.CreateVirtualDisplay;
@@ -60,8 +58,6 @@ public class MainActivity extends AppCompatActivity {
   public static final String SCREEN_DISPLAYLINK = "displaylink";
   public static final String SCREEN_SETTINGS = "settings";
   public static final String SOURCE_EXTEND_OVERVIEW = "extend_overview";
-  private static final Uri EXTEND_MARKET_URI =
-      Uri.parse("market://details?id=" + EXTEND_PACKAGE_NAME);
   private static final Uri EXTEND_PROJECT_URI =
       Uri.parse("https://github.com/jqssun/android-display-extend");
 
@@ -156,36 +152,6 @@ public class MainActivity extends AppCompatActivity {
               Toast.makeText(this, R.string.local_network_required, Toast.LENGTH_LONG).show();
             } else if (action != null) {
               action.run();
-            }
-          });
-
-  private final ActivityResultLauncher<Intent> importApkLauncher =
-      registerForActivityResult(
-          new ActivityResultContracts.StartActivityForResult(),
-          result -> {
-            if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-              Uri uri = result.getData().getData();
-              if (uri != null) {
-                try {
-                  String err = ApkImporter.importFromApk(this, uri);
-                  if (err == null) {
-                    Toast.makeText(this, R.string.import_success, Toast.LENGTH_SHORT).show();
-                    State.log("DisplayLink APK imported successfully");
-                  } else {
-                    Toast.makeText(this, getString(R.string.import_failed, err), Toast.LENGTH_LONG)
-                        .show();
-                    State.log("APK import error: " + err);
-                  }
-                } catch (Exception e) {
-                  Toast.makeText(
-                          this,
-                          getString(R.string.import_failed, e.getMessage()),
-                          Toast.LENGTH_LONG)
-                      .show();
-                  State.log("APK import exception: " + e.getMessage());
-                }
-                refresh();
-              }
             }
           });
 
@@ -439,59 +405,12 @@ public class MainActivity extends AppCompatActivity {
     State.uiState.setValue(newUiState);
   }
 
-  public void downloadDisplayLink(MaterialButton downloadBtn) {
-    downloadBtn.setEnabled(false);
-    downloadBtn.setText(R.string.downloading_displaylink);
-    String url = Pref.getDisplaylinkApkUrl();
-    new Thread(
-            () -> {
-              try {
-                String err =
-                    ApkImporter.downloadAndImport(
-                        this,
-                        url,
-                        hundredths ->
-                            runOnUiThread(
-                                () ->
-                                    downloadBtn.setText(
-                                        String.format("%.2f MB", hundredths / 100.0))));
-                runOnUiThread(
-                    () -> {
-                      downloadBtn.setEnabled(true);
-                      downloadBtn.setText(R.string.auto_import_displaylink_libs);
-                      if (err == null) {
-                        Toast.makeText(this, R.string.import_success, Toast.LENGTH_SHORT).show();
-                        State.log("DisplayLink libraries downloaded and imported successfully");
-                      } else {
-                        Toast.makeText(
-                                this, getString(R.string.import_failed, err), Toast.LENGTH_LONG)
-                            .show();
-                        State.log("download import error: " + err);
-                      }
-                      refresh();
-                    });
-              } catch (Exception e) {
-                runOnUiThread(
-                    () -> {
-                      downloadBtn.setEnabled(true);
-                      downloadBtn.setText(R.string.auto_import_displaylink_libs);
-                      Toast.makeText(
-                              this,
-                              getString(R.string.import_failed, e.getMessage()),
-                              Toast.LENGTH_LONG)
-                          .show();
-                      State.log("download exception: " + e.getMessage());
-                    });
-              }
-            })
-        .start();
-  }
-
-  public void importApk() {
-    Intent pick = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-    pick.setType("application/vnd.android.package-archive");
-    pick.addCategory(Intent.CATEGORY_OPENABLE);
-    importApkLauncher.launch(pick);
+  public void openStoreListing(String pkg, Uri fallback) {
+    Intent market = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + pkg));
+    startActivity(
+        market.resolveActivity(getPackageManager()) != null
+            ? market
+            : new Intent(Intent.ACTION_VIEW, fallback));
   }
 
   public void manageDisplayInExtend(int displayId, String sourceScreen) {
@@ -622,12 +541,7 @@ public class MainActivity extends AppCompatActivity {
   private void _startExtendIntentOrFallback(Intent intent) {
     if (intent.resolveActivity(getPackageManager()) == null) {
       Toast.makeText(this, R.string.extend_app_not_installed, Toast.LENGTH_SHORT).show();
-      Intent market = new Intent(Intent.ACTION_VIEW, EXTEND_MARKET_URI);
-      if (market.resolveActivity(getPackageManager()) != null) {
-        startActivity(market);
-      } else {
-        startActivity(new Intent(Intent.ACTION_VIEW, EXTEND_PROJECT_URI));
-      }
+      openStoreListing(EXTEND_PACKAGE_NAME, EXTEND_PROJECT_URI);
       return;
     }
     startActivity(intent);

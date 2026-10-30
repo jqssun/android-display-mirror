@@ -83,36 +83,20 @@
             android:textColor="?colorPrimary" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/download_apk_btn"
+            android:id="@+id/get_presenter_btn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
-            android:text="@string/auto_import_displaylink_libs" />
+            android:text="@string/get_displaylink_presenter" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/import_apk_btn"
+            android:id="@+id/import_presenter_btn"
             style="@style/Widget.Material3.Button.TonalButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
             android:layout_marginTop="8dp"
-            android:text="@string/manual_import_displaylink_libs" />
-
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp"
-            android:layout_marginTop="16dp"
-            android:hint="@string/displaylink_apk_url_label">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/apk_url_edit_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textUri"
-                android:textSize="14sp" />
-        </com.google.android.material.textfield.TextInputLayout>
+            android:text="@string/import_displaylink_presenter" />
 
         <!-- Output settings -->
         <TextView

@@ -2,13 +2,14 @@ package io.github.jqssun.displaymirror.displaylink;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -18,6 +19,7 @@ import io.github.jqssun.displaymirror.Pref;
 import io.github.jqssun.displaymirror.R;
 import io.github.jqssun.displaymirror.State;
 import io.github.jqssun.displaymirror.dialog.ResolutionSettingsDialog;
+import java.io.IOException;
 
 public class DisplaylinkFragment extends Fragment {
   private SharedPreferences preferences;
@@ -64,39 +66,59 @@ public class DisplaylinkFragment extends Fragment {
     State.logVersion.observe(getViewLifecycleOwner(), v -> _updateLibStatus(view));
     _updateManageDisplayButton();
 
-    MaterialButton downloadApkBtn = view.findViewById(R.id.download_apk_btn);
-    MaterialButton importApkBtn = view.findViewById(R.id.import_apk_btn);
+    MaterialButton getPresenterBtn = view.findViewById(R.id.get_presenter_btn);
+    MaterialButton importPresenterBtn = view.findViewById(R.id.import_presenter_btn);
     manageDisplayBtn.setOnClickListener(
         v ->
             ((MainActivity) requireActivity())
                 .manageDisplayInExtend(
                     DisplaylinkState.getVirtualDisplayId(), MainActivity.SCREEN_DISPLAYLINK));
 
-    downloadApkBtn.setOnClickListener(
-        v -> ((MainActivity) requireActivity()).downloadDisplayLink(downloadApkBtn));
+    getPresenterBtn.setOnClickListener(
+        v ->
+            ((MainActivity) requireActivity())
+                .openStoreListing(
+                    ApkImporter.PRESENTER_PACKAGE,
+                    Uri.parse(
+                        "https://play.google.com/store/apps/details?id="
+                            + ApkImporter.PRESENTER_PACKAGE)));
 
-    importApkBtn.setOnClickListener(v -> ((MainActivity) requireActivity()).importApk());
+    importPresenterBtn.setOnClickListener(v -> _importFromPresenter(importPresenterBtn));
 
     // resolution
     TextView currentResolutionText = view.findViewById(R.id.current_resolution_text);
     _updateResolutionText(currentResolutionText);
     MaterialButton resolutionButton = view.findViewById(R.id.resolution_button);
     resolutionButton.setOnClickListener(v -> _showResolutionDialog(currentResolutionText));
+  }
 
-    // APK URL
-    EditText apkUrlEditText = view.findViewById(R.id.apk_url_edit_text);
-    apkUrlEditText.setText(Pref.getDisplaylinkApkUrl());
-    apkUrlEditText.setOnFocusChangeListener(
-        (v, hasFocus) -> {
-          if (!hasFocus) {
-            String url = apkUrlEditText.getText().toString().trim();
-            if (url.isEmpty()) {
-              url = Pref.DEFAULT_DISPLAYLINK_APK_URL;
-              apkUrlEditText.setText(url);
-            }
-            preferences.edit().putString(Pref.KEY_DISPLAYLINK_APK_URL, url).apply();
-          }
-        });
+  private void _importFromPresenter(MaterialButton btn) {
+    btn.setEnabled(false);
+    Context ctx = requireContext().getApplicationContext();
+    new Thread(
+            () -> {
+              String err;
+              try {
+                err = ApkImporter.importFromPresenter(ctx);
+              } catch (IOException e) {
+                err = e.getMessage();
+              }
+              String result = err;
+              btn.post(
+                  () -> {
+                    btn.setEnabled(true);
+                    if (result == null) {
+                      Toast.makeText(ctx, R.string.import_success, Toast.LENGTH_SHORT).show();
+                      State.log("DisplayLink libraries imported from Presenter");
+                    } else {
+                      Toast.makeText(
+                              ctx, ctx.getString(R.string.import_failed, result), Toast.LENGTH_LONG)
+                          .show();
+                      State.log("DisplayLink import error: " + result);
+                    }
+                  });
+            })
+        .start();
   }
 
   private void _updateLibStatus(View view) {

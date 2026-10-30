@@ -41,9 +41,6 @@ public class Pref {
   public static final String KEY_DISPLAYLINK_WIDTH = "displaylink_width";
   public static final String KEY_DISPLAYLINK_HEIGHT = "displaylink_height";
   public static final String KEY_DISPLAYLINK_REFRESH_RATE = "displaylink_refresh_rate";
-  public static final String KEY_DISPLAYLINK_APK_URL = "displaylink_apk_url";
-  public static final String DEFAULT_DISPLAYLINK_APK_URL =
-      "https://www.synaptics.com/sites/default/files/exe_files/2024-12/DisplayLink%C2%AE%20USB%20Graphics%20Software%20for%20Android%204.2.0-EXE.apk";
 
   public static boolean doNotAutoStartSunshine;
 
@@ -164,10 +161,6 @@ public class Pref {
 
   public static int getDisplaylinkRefreshRate() {
     return getInt(KEY_DISPLAYLINK_REFRESH_RATE, 60);
-  }
-
-  public static String getDisplaylinkApkUrl() {
-    return getString(KEY_DISPLAYLINK_APK_URL, DEFAULT_DISPLAYLINK_APK_URL);
   }
 
   private static String getString(String key, String defaultValue) {

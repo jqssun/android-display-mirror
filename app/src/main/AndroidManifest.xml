@@ -111,5 +111,6 @@
 
     <queries>
         <package android:name="io.github.jqssun.displayextend" />
+        <package android:name="com.displaylink.presenter" />
     </queries>
 </manifest>

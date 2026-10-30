@@ -1,24 +1,27 @@
 package io.github.jqssun.displaymirror.displaylink;
 
 import android.content.Context;
-import android.net.Uri;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.Build;
+import io.github.jqssun.displaymirror.R;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+import java.util.zip.ZipFile;
 
 public class ApkImporter {
+
+  public static final String PRESENTER_PACKAGE = "com.displaylink.presenter";
 
   private static final Set<String> REQUIRED_LIBS =
       new HashSet<>(
@@ -33,10 +36,6 @@ public class ApkImporter {
     return new File(_dir(ctx), "jniLibs/" + abi);
   }
 
-  public static File assetsDir(Context ctx) {
-    return new File(_dir(ctx), "assets");
-  }
-
   public static boolean areLibsImported(Context ctx) {
     File libDir = jniLibDir(ctx);
     for (String lib : REQUIRED_LIBS) {
@@ -46,132 +45,51 @@ public class ApkImporter {
     return true;
   }
 
-  public static boolean areFirmwaresImported(Context ctx) {
-    File dir = assetsDir(ctx);
-    if (!dir.exists()) return false;
-    String[] files = dir.list();
-    if (files == null) return false;
-    for (String f : files) {
-      if (f.endsWith(".spkg")) return true;
-    }
-    return false;
-  }
-
-  public static String downloadAndImport(
-      Context ctx, String url, java.util.function.IntConsumer onProgress) throws IOException {
-    File tmp = new File(_dir(ctx), "tmp.apk");
-    _dir(ctx).mkdirs();
+  public static String importFromPresenter(Context ctx) throws IOException {
+    PackageManager pm = ctx.getPackageManager();
+    ApplicationInfo info;
     try {
-      HttpURLConnection conn = _openFollowingRedirects(url);
-      if (conn.getResponseCode() != 200) {
-        return "Download failed: HTTP " + conn.getResponseCode();
-      }
-      long downloaded = 0;
-      int lastHundredths = -1;
-      try (InputStream is = conn.getInputStream();
-          FileOutputStream fos = new FileOutputStream(tmp)) {
-        byte[] buf = new byte[8192];
-        int n;
-        while ((n = is.read(buf)) != -1) {
-          fos.write(buf, 0, n);
-          downloaded += n;
-          if (onProgress != null) {
-            int hundredths = (int) (downloaded * 100 / (1024 * 1024));
-            if (hundredths != lastHundredths) {
-              lastHundredths = hundredths;
-              onProgress.accept(hundredths);
-            }
-          }
-        }
-      }
-      return importFromFile(ctx, tmp);
-    } finally {
-      tmp.delete();
+      info = pm.getApplicationInfo(PRESENTER_PACKAGE, 0);
+    } catch (PackageManager.NameNotFoundException e) {
+      return ctx.getString(R.string.presenter_not_installed);
     }
-  }
 
-  private static HttpURLConnection _openFollowingRedirects(String url) throws IOException {
-    int maxRedirects = 10;
-    for (int i = 0; i < maxRedirects; i++) {
-      HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
-      conn.setInstanceFollowRedirects(false);
-      conn.connect();
-      int code = conn.getResponseCode();
-      if (code == 301 || code == 302 || code == 303 || code == 307 || code == 308) {
-        String location = conn.getHeaderField("Location");
-        conn.disconnect();
-        if (location == null) break;
-        url = location;
-        continue;
-      }
-      return conn;
-    }
-    throw new IOException("Too many redirects");
-  }
+    List<String> apks = new ArrayList<>(Collections.singletonList(info.sourceDir));
+    if (info.splitSourceDirs != null) apks.addAll(Arrays.asList(info.splitSourceDirs));
 
-  public static String importFromFile(Context ctx, File apk) throws IOException {
-    try (FileInputStream fis = new FileInputStream(apk)) {
-      return _importFromStream(ctx, fis);
-    }
-  }
-
-  public static String importFromApk(Context ctx, Uri uri) throws IOException {
-    InputStream is = ctx.getContentResolver().openInputStream(uri);
-    if (is == null) return "Failed to open file";
-    try (is) {
-      return _importFromStream(ctx, is);
-    }
-  }
-
-  private static String _importFromStream(Context ctx, InputStream is) throws IOException {
     File libDir = jniLibDir(ctx);
-    File fwDir = assetsDir(ctx);
     libDir.mkdirs();
-    fwDir.mkdirs();
-
     String abi = Build.SUPPORTED_ABIS[0];
     String libPrefix = "lib/" + abi + "/";
-
-    int libCount = 0;
+    Set<String> libs = new HashSet<>();
     int fwCount = 0;
 
-    try (ZipInputStream zis = new ZipInputStream(is)) {
-      ZipEntry entry;
-      while ((entry = zis.getNextEntry()) != null) {
-        String name = entry.getName();
-
-        if (name.startsWith(libPrefix) && name.endsWith(".so")) {
-          String soName = name.substring(name.lastIndexOf('/') + 1);
-          if (REQUIRED_LIBS.contains(soName)) {
-            _extractTo(zis, new File(libDir, soName));
-            libCount++;
+    for (String apk : apks) {
+      try (ZipFile zip = new ZipFile(apk)) {
+        for (ZipEntry entry : Collections.list(zip.entries())) {
+          String name = entry.getName();
+          String file = name.substring(name.lastIndexOf('/') + 1);
+          if (name.startsWith(libPrefix) && REQUIRED_LIBS.contains(file)) {
+            _extract(zip, entry, new File(libDir, file));
+            libs.add(file);
+          } else if (name.startsWith("assets/") && file.endsWith(".spkg")) {
+            _extract(zip, entry, new File(ctx.getFilesDir(), file));
+            fwCount++;
           }
-        } else if (name.startsWith("assets/") && name.endsWith(".spkg")) {
-          String fwName = name.substring(name.lastIndexOf('/') + 1);
-          _extractTo(zis, new File(fwDir, fwName));
-          fwCount++;
         }
-
-        zis.closeEntry();
       }
     }
 
-    if (libCount < REQUIRED_LIBS.size()) {
-      return "APK missing native libraries for "
-          + abi
-          + " (found "
-          + libCount
-          + "/"
-          + REQUIRED_LIBS.size()
-          + ")";
+    if (libs.size() < REQUIRED_LIBS.size()) {
+      return ctx.getString(R.string.presenter_missing_libs, abi);
     }
-    if (fwCount == 0) {
-      return "APK missing firmware files (.spkg)";
-    }
+    if (fwCount == 0) return ctx.getString(R.string.presenter_missing_firmware);
     return null;
   }
 
-  private static void _extractTo(ZipInputStream zis, File out) throws IOException {
-    Files.copy(zis, out.toPath(), StandardCopyOption.REPLACE_EXISTING);
+  private static void _extract(ZipFile zip, ZipEntry entry, File out) throws IOException {
+    try (InputStream in = zip.getInputStream(entry)) {
+      Files.copy(in, out.toPath(), StandardCopyOption.REPLACE_EXISTING);
+    }
   }
 }

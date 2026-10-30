@@ -190,14 +190,15 @@
     <string name="share_log_file">Share log file</string>
     <string name="log_export_failed">Failed to export logs</string>
 
-    <!-- APK Import -->
-    <string name="auto_import_displaylink_libs">Automatically download and import libraries</string>
-    <string name="manual_import_displaylink_libs">Manually import from an application package (APK)</string>
-    <string name="import_displaylink_libs_prompt">Import the DisplayLink Presenter Android application package (APK). This will enable USB display support for USB 2 devices.</string>
+    <!-- Presenter Import -->
+    <string name="get_displaylink_presenter">Get DisplayLink Presenter</string>
+    <string name="import_displaylink_presenter">Import from DisplayLink Presenter</string>
+    <string name="import_displaylink_libs_prompt">Install DisplayLink Presenter from Google Play, then import its libraries to enable USB display support for USB 2 devices.</string>
     <string name="import_success">Libraries imported successfully</string>
     <string name="import_failed">Import failed: %s</string>
-    <string name="downloading_displaylink">Downloading DisplayLink libraries...</string>
-    <string name="displaylink_apk_url_label">Custom DisplayLink Presenter app download URL</string>
+    <string name="presenter_not_installed">DisplayLink Presenter is not installed</string>
+    <string name="presenter_missing_libs">DisplayLink Presenter has no libraries for %s</string>
+    <string name="presenter_missing_firmware">DisplayLink Presenter has no firmware files</string>
     <string name="about_displaylink_legal_notice">This app uses publicly available drivers to support DisplayLink\u00ae devices. Users should comply with the relevant licensing terms of Synaptics when using DisplayLink\u00ae related features. This app is not affiliated with Synaptics.</string>
 
 </resources>

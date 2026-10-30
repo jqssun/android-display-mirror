@@ -30,6 +30,10 @@ public class NativeDriver {
 
   public native void destroyImageReader(long j);
 
+  public native void disable(long encoderId);
+
+  public native void enable(long encoderId);
+
   public native Surface getImageReaderSurface(long j);
 
   public native boolean isValid();
@@ -47,6 +51,8 @@ public class NativeDriver {
   public native void setMode(long j, DisplayMode displayMode, int i, int i2);
 
   public native void setProtection(long j, boolean z);
+
+  public native void setServiceStopping();
 
   public native int usbDeviceAttached(String str, int i, byte[] bArr, int i2);
 

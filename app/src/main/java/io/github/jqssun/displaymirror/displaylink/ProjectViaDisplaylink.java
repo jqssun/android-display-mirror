@@ -13,16 +13,13 @@ import com.displaylink.manager.NativeDriverListener;
 import com.displaylink.manager.display.DisplayMode;
 import io.github.jqssun.displaymirror.MainActivity;
 import io.github.jqssun.displaymirror.Pref;
+import io.github.jqssun.displaymirror.R;
 import io.github.jqssun.displaymirror.State;
 import io.github.jqssun.displaymirror.job.CreateVirtualDisplay;
 import io.github.jqssun.displaymirror.job.Job;
 import io.github.jqssun.displaymirror.job.StreamRenderer;
 import io.github.jqssun.displaymirror.job.VirtualDisplayArgs;
 import io.github.jqssun.displaymirror.job.YieldException;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 
 public class ProjectViaDisplaylink implements Job {
   private boolean usbRequested = false;
@@ -51,12 +48,10 @@ public class ProjectViaDisplaylink implements Job {
     }
 
     if (!ApkImporter.areLibsImported(context)) {
-      State.showErrorStatus(
-          "DisplayLink libraries not imported. Please import the DisplayLink APK first.");
+      State.showErrorStatus(context.getString(R.string.import_displaylink_libs_prompt));
       return;
     }
     NativeDriver.load(ApkImporter.jniLibDir(context));
-    _copyFirmwares(context);
 
     if (!_requestUsbPermission(context, usbManager, displaylinkState.device)) {
       return;
@@ -117,35 +112,6 @@ public class ProjectViaDisplaylink implements Job {
           }
           return displaylinkState.getVirtualDisplay();
         });
-  }
-
-  private void _copyFirmwares(Context context) {
-    File srcDir = ApkImporter.assetsDir(context);
-    if (!srcDir.exists()) {
-      State.log("no imported firmware directory found");
-      return;
-    }
-    File[] files = srcDir.listFiles();
-    if (files == null) return;
-    for (File src : files) {
-      if (!src.getName().endsWith(".spkg")) continue;
-      File dst = new File(context.getFilesDir(), src.getName());
-      if (dst.exists() && dst.length() > 0) {
-        State.log("firmware file already exists, skipping: " + src.getName());
-        continue;
-      }
-      try (InputStream in = new java.io.FileInputStream(src);
-          FileOutputStream out = new FileOutputStream(dst)) {
-        byte[] buf = new byte[4096];
-        int n;
-        while ((n = in.read(buf)) != -1) {
-          out.write(buf, 0, n);
-        }
-        State.log("successfully copied firmware file: " + src.getName());
-      } catch (IOException e) {
-        State.log("failed to copy firmware file: " + src.getName() + ", error: " + e.getMessage());
-      }
-    }
   }
 
   private boolean _requestUsbPermission(Context context, UsbManager usbManager, UsbDevice device)
